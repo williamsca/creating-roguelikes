@@ -24,9 +24,15 @@ var Game = {
   },
   init: function () {
     console.log("WSRL LIVE Initialization");
-    Game.DISPLAYS.main.o = new ROT.Display({width:Game.DISPLAYS.main.w, height:Game.DISPLAYS.main.h});
+    this.DISPLAYS.main.o = new ROT.Display({width:Game.DISPLAYS.main.w, height:Game.DISPLAYS.main.h});
+    this.renderMain();
   },
   getDisplay: function(displayName) {
     return Game.DISPLAYS[displayName].o;
+  },
+  renderMain: function() {
+    for (var i = 0; i < 5; i++) {
+      this.DISPLAYS.main.o.drawText(2 , 3 + i,"TADA!!!");
+    }
   }
 };
