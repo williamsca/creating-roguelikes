@@ -24,8 +24,9 @@ var Game = {
   },
   init: function () {
     console.log("WSRL LIVE Initialization");
+    Game.DISPLAYS.main.o = new ROT.Display({width:Game.DISPLAYS.main.w, height:Game.DISPLAYS.main.h});
   },
   getDisplay: function(displayName) {
-
+    return Game.DISPLAYS[displayName].o;
   }
 };
