@@ -10,7 +10,7 @@
 }
 
 #wsrl-main-display {
-  border: 1px solid red;
+  padding-top: 8px;
 }
 
 #wsrl-avatar-display {
