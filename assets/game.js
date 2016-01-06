@@ -82,6 +82,13 @@ var Game = {
     return this.DISPLAYS[displayName].o;
   },
 
+  //getDisplay
+  //getHeight
+
+  refresh: function() {
+    this.renderAll();
+  },
+
   renderAll: function() {
     this.renderAvatar();
     this.renderMain();
@@ -118,7 +125,7 @@ var Game = {
     this._curUiMode = newMode;
 
     if (this._curUiMode !== null) {
-    this._curUiMode.enter();
+      this._curUiMode.enter();
     }
     this.renderAll();
   },

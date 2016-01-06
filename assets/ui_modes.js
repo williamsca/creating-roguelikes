@@ -1,12 +1,19 @@
 Game.UIMode = {};
+Game.UIMode.DEFAULT_COLOR_FG = '#fff';
+Game.UIMode.DEFAULT_COLOR_BG = '#000';
+Game.UIMode.DEFAULT_COLOR_STR = '%c{' + Game.UIMode.DEFAULT_COLOR_FG +
+                                '}%b{' + Game.UIMode.DEFAULT_COLOR_BG + '}';
 
 //START
 Game.UIMode.gameStart = {
   enter: function() {
-    console.log("Game.UIMode.gameStart enter");
+    console.log("INITIALIZING GAME. PREPARE YO SELF.");
+    Game.message.sendMessage("Welcome to the Space Jam");
+    Game.refresh();
   },
   exit: function() {
     console.log("Game.UIMode.gameStart exit");
+    Game.refresh();
   },
   handleInput: function (){
     console.log("Game.UIMode.gameStart handleInput");
@@ -24,9 +31,11 @@ Game.UIMode.gameStart = {
 Game.UIMode.gamePersistence = {
   enter: function() {
     console.log("Game.UIMode.gamePersistence enter");
+    Game.refresh();
   },
   exit: function() {
     console.log("Game.UIMode.gamePersistence exit");
+    Game.refresh();
   },
   handleInput: function (eventType, evt){
     console.log("Game.UIMode.gamePersistence handleInput");
@@ -39,7 +48,7 @@ Game.UIMode.gamePersistence = {
       this.newGame();
     }
   },
-  renderOnMain: function(display){
+  renderOnMain: function( display ){
     display.clear();
     display.drawText(1, 3, "Press S to save the game, L to load the saved game," +
       " or N to start a new one");
@@ -52,6 +61,7 @@ Game.UIMode.gamePersistence = {
     var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
     var state_data = JSON.parse(json_state_data);
     Game.setRandomSeed(state_data._randomSeed);
+    Game.UIMode.gamePlay.setupPlay();
     console.log("post-restore: using random seed " + Game.getRandomSeed());
     Game.switchUiMode(Game.UIMode.gamePlay);
     }
@@ -61,11 +71,12 @@ Game.UIMode.gamePersistence = {
     if(this.localStorageAvailable()){
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game));
       Game.switchUiMode(Game.UIMode.gamePlay);
-  }
+    }
   },
 
   newGame: function() {
     Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform() * 100000));
+    Game.UIMode.gamePlay.setupPlay();
     Game.switchUiMode(Game.UIMode.gamePlay);
   },
   localStorageAvailable: function () {
@@ -84,17 +95,24 @@ Game.UIMode.gamePersistence = {
 
 //PLAY
 Game.UIMode.gamePlay = {
+  attr: {
+    _map: null
+  },
   enter: function() {
     console.log("Game.UIMode.gamePlay enter");
+    Game.message.clearMessages();
+    Game.refresh();
   },
   exit: function() {
     console.log("Game.UIMode.gamePlay exit");
+    Game.refresh();
   },
   handleInput: function (eventType, evt){
     console.log("Game.UIMode.gamePlay handleInput");
     console.log(eventType);
     console.dir(evt);
     var inputChar = String.fromCharCode(evt.charCode);
+    Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
     if (eventType == 'keypress' && evt.keyCode == 13) { // enter
       Game.switchUiMode(Game.UIMode.gameWin);
     } else if (eventType == 'keydown' && evt.keyCode == 27){ // esc
@@ -103,11 +121,37 @@ Game.UIMode.gamePlay = {
       Game.switchUiMode(Game.UIMode.gamePersistence);
     }
   },
-  renderOnMain: function(display){
+  renderOnMain: function(display) {
+    var fg = Game.UIMode.DEFAULT_COLOR_FG;
+    var bg = Game.UIMode.DEFAULT_COLOR_BG;
+    this.attr._map.renderOn(display);
     console.log("Game.UIMode.gamePlay renderOnMain");
     display.clear();
     display.drawText(4,4,"Press Enter to win, Esc to Lose. Yeah great game right?");
-    display.drawText(4, 5, "Press M to open the menu.");
+    //ADDED FG/BG randomly here
+    display.drawText(4, 5, "Press M to open the menu.", fg, bg);
+  },
+  setupPlay: function () {
+    console.log("NO IM HERE");
+    var mapTiles = Game.util.init2DArray(80, 24, Game.Tile.nullTile);
+    var generator = new ROT.Map.Cellular(80, 24);
+    generator.randomize(0.5);
+
+    // repeated cellular automata process
+    var totalIterations = 3;
+    for (var i = 0; i < totalIterations - 1; ++i) {
+      generator.create();
+    }
+    // run again then update map
+    generator.create(function(x, y, v) {
+      if (v === 1) {
+        mapTiles[x][y] = Game.Tile.floorTile;
+      } else {
+        mapTiles[x][y] = Game.Tile.wallTile;
+      }
+    });
+    // create map from the tiles
+    this.attr._map = new Game.map(mapTiles);
   }
 };
 
