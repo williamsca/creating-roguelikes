@@ -30,7 +30,7 @@ Game.UIMode.gamePersistence = {
   },
   handleInput: function (eventType, evt){
     console.log("Game.UIMode.gamePersistence handleInput");
-    var inputChar = String.fromCharCode(eventType.charCode);
+    var inputChar = String.fromCharCode(evt.charCode);
     if (inputChar == 'S') {
       this.saveGame();
     } else if (inputChar == 'L') {
@@ -48,23 +48,37 @@ Game.UIMode.gamePersistence = {
   },
 
   loadGame: function() {
-    var json_state_data = '{"randomSeed":12}';
-    //TODO implement recovering game state from local storage
+    if(this.localStorageAvailable()){
+    var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
     var state_data = JSON.parse(json_state_data);
-    consolue.dir(state_data);
-    Game.setRandomSeed(state_data.randomSeed);
-    console.log("post-restore: using random seed " + game.getRandomSeed());
-    Game.switchUiMode(Game, UIMode.gamePlay);
+    Game.setRandomSeed(state_data._randomSeed);
+    console.log("post-restore: using random seed " + Game.getRandomSeed());
+    Game.switchUiMode(Game.UIMode.gamePlay);
+    }
   },
 
-  saveGame: function() {
-    //TODO implement saving game state to local storage
-    Game.switchUiMode(Game.UIMode.gamePlay);
+  saveGame: function(json_state_data) {
+    if(this.localStorageAvailable()){
+      window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game));
+      Game.switchUiMode(Game.UIMode.gamePlay);
+  }
   },
 
   newGame: function() {
-    game.setRandomSeed(5 + Math.floor(Math.random() * 100000));
-    game.switchUiMode(Game.UIMode.gamePlay);
+    Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform() * 100000));
+    Game.switchUiMode(Game.UIMode.gamePlay);
+  },
+  localStorageAvailable: function () {
+    try {
+      var x = '__storage_test__';
+      window.localStorage.setItem(x,x);
+      window.localStorage.removeItem(x);
+      return true;
+    }
+    catch(e){
+      Game.Message.send("Sorry, you ain't got no local storage brah");
+      return false;
+    }
   }
 };
 
@@ -80,17 +94,20 @@ Game.UIMode.gamePlay = {
     console.log("Game.UIMode.gamePlay handleInput");
     console.log(eventType);
     console.dir(evt);
+    var inputChar = String.fromCharCode(evt.charCode);
     if (eventType == 'keypress' && evt.keyCode == 13) { // enter
       Game.switchUiMode(Game.UIMode.gameWin);
     } else if (eventType == 'keydown' && evt.keyCode == 27){ // esc
       Game.switchUiMode(Game.UIMode.gameLose);
+    } else if (inputChar == "M") {
+      Game.switchUiMode(Game.UIMode.gamePersistence);
     }
   },
   renderOnMain: function(display){
     console.log("Game.UIMode.gamePlay renderOnMain");
     display.clear();
     display.drawText(4,4,"Press Enter to win, Esc to Lose. Yeah great game right?");
-    display.drawText(4, 5, "Press = to open the menu.");
+    display.drawText(4, 5, "Press M to open the menu.");
   }
 };
 
