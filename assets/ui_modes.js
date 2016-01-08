@@ -21,24 +21,23 @@ Game.UIMode.gameStart = {
   },
   renderOnMain: function(display){
     console.log("Game.UIMode.gameStart renderOnMain");
+    var fg = Game.UIMode.DEFAULT_COLOR_FG;
+    var bg = Game.UIMode.DEFAULT_COLOR_BG;
     display.clear();
-    display.drawText(4,4,"Welcome to Grow Away to the Dot 3 (GATTD 3)");
-    display.drawText(4,6,"press any key to continue");
+    display.drawText(4,4,"Welcome to Grow Away to the Dot 3 (GATTD 3)", fg, bg);
+    display.drawText(4,6,"press any key to continue", fg, bg);
   }
 };
 
 //PERSISTENCE
 Game.UIMode.gamePersistence = {
   enter: function() {
-    console.log("Game.UIMode.gamePersistence enter");
     Game.refresh();
   },
   exit: function() {
-    console.log("Game.UIMode.gamePersistence exit");
     Game.refresh();
   },
-  handleInput: function (eventType, evt){
-    console.log("Game.UIMode.gamePersistence handleInput");
+  handleInput: function (eventType, evt) {
     var inputChar = String.fromCharCode(evt.charCode);
     if (inputChar == 'S') {
       this.saveGame();
@@ -48,8 +47,10 @@ Game.UIMode.gamePersistence = {
       this.newGame();
     }
   },
-  renderOnMain: function( display ){
+  renderOnMain: function( display ) {
     display.clear();
+    var fg = Game.UIMode.DEFAULT_COLOR_FG;
+    var bg = Game.UIMode.DEFAULT_COLOR_BG;
     display.drawText(1, 3, "Press S to save the game, L to load the saved game," +
       " or N to start a new one");
     //TODO check whether local storage has a game before offering restore
@@ -96,8 +97,15 @@ Game.UIMode.gamePersistence = {
 //PLAY
 Game.UIMode.gamePlay = {
   attr: {
-    _map: null
+    _map: null,
+    _mapWidth: 300,
+    _mapHeight: 200,
+    _cameraX: 100,
+    _cameraY: 100,
+    _avatarX: 100,
+    _avatarY: 100
   },
+  JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
     console.log("Game.UIMode.gamePlay enter");
     Game.message.clearMessages();
@@ -107,39 +115,88 @@ Game.UIMode.gamePlay = {
     console.log("Game.UIMode.gamePlay exit");
     Game.refresh();
   },
-  handleInput: function (eventType, evt){
+  handleInput: function (inputType, inputData){
     console.log("Game.UIMode.gamePlay handleInput");
-    console.log(eventType);
-    console.dir(evt);
-    var inputChar = String.fromCharCode(evt.charCode);
+    console.log(inputType);
+
+    var inputChar = String.fromCharCode(inputData.charCode);
     Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
-    if (eventType == 'keypress' && evt.keyCode == 13) { // enter
-      Game.switchUiMode(Game.UIMode.gameWin);
-    } else if (eventType == 'keydown' && evt.keyCode == 27){ // esc
-      Game.switchUiMode(Game.UIMode.gameLose);
-    } else if (inputChar == "M") {
-      Game.switchUiMode(Game.UIMode.gamePersistence);
+    Game.renderDisplayMessage();
+    if (inputType == 'keypress') {
+      if (inputData.keyIdentifier == 'Enter') {
+        Game.switchUiMode(Game.UIMode.gameWin);
+        return;
+      } else if (pressedKey == '1') {
+        this.moveAvatar(-1, 1);
+      } else if (pressedKey == '2') {
+        this.moveAvatar(0, 1);
+      } else if (pressedKey == '3') {
+        this.moveAvatar(1, 1);
+      } else if (pressedKey == '4') {
+        this.moveAvatar(-1, 0);
+      } else if (pressedKey == '5') {
+        // do nothing
+      } else if (pressedKey == '6') {
+        this.moveAvatar(1, 0);
+      } else if (pressedKey == '7') {
+        this.moveAvatar(-1, -1);
+      } else if (pressedKey == '8') {
+        this.moveAvatar(0, -1);
+      } else if (pressedKey == '9') {
+        this.moveAvatar(1, -1);
+      }
+      this.refresh();
+    } else if (inputType == 'keydown') {
+      if (inputData.keyCode == 27) { // Esc
+        Game.switchUiMode(Game.UIMode.gameLose);
+      } else if (inputData.keyCode == 187) { // '='
+        Game.switchUiMode(Game.UIMode.gamePersistence);
+      }
     }
   },
   renderOnMain: function(display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
-    this.attr._map.renderOn(display);
+    this.attr._map.renderOn(display, this.attr._cameraX, this.attr._cameraY);
     console.log("Game.UIMode.gamePlay renderOnMain");
     display.clear();
     display.drawText(4,4,"Press Enter to win, Esc to Lose. Yeah great game right?");
-    //ADDED FG/BG randomly here
     display.drawText(4, 5, "Press M to open the menu.", fg, bg);
+    this.renderAvatar(display);
   },
-  setupPlay: function () {
-    console.log("NO IM HERE");
-    var mapTiles = Game.util.init2DArray(80, 24, Game.Tile.nullTile);
-    var generator = new ROT.Map.Cellular(80, 24);
+  renderAvatar: function(display) {
+    Game.Symbol.AVATAR.draw(display, this._avatarX-this.attr._cameraX+display._options.width/2,
+                                     this._avatarY-this.attr._cameraY+display._options.height/2);
+  },
+  renderAvatarInfo: function (display) {
+    var fg = Game.UIMode.DEFAULT_COLOR_FG;
+    var bg = Game.UIMode.DEFAULT_COLOR_BG;
+    display.drawText(1, 2, "avatar x: " + this.attr._avatarX, fg, bg);
+    display.drawText(1, 3, "avatar y: " + this.attr._avatarY, fg, bg);
+  },
+  moveAvatar: function(dx, dy) {
+    this.attr._avatarX = Math.min(Math.max(0, this.attr._avatarX + dx), this.attr._mapWidth);
+    this.attr._avatarY = Math.min(Math.max(0, this.attr._avatarY + dy), this.attr._mapHeight);
+    this.setCameraToAvatar();
+  },
+  moveCamera: function(dx, dy) {
+    this.setCamera(this.attr._cameraX + dx, this.attr._cameraY + dy);
+  },
+  setCamera: function(sx, sy) {
+    this.attr._cameraX = Math.min(Math.max(0,sx),this.attr._mapWidth);
+    this.attr._cameraY = Math.min(Math.max(0,sy),this.attr._mapHeight);
+  },
+  setCameraToAvatar: function () {
+    this.setCamera(this.attr._avatarX, this.attr._avatarY);
+  },
+  setupPlay: function (restorationData) {
+    var mapTiles = Game.util.init2DArray(this.attr._mapWidth, this.attr._mapHeight, Game.Tile.nullTile);
+    var generator = new ROT.Map.Cellular(this.attr._mapWidth, this.attr._mapHeight);
     generator.randomize(0.5);
 
     // repeated cellular automata process
     var totalIterations = 3;
-    for (var i = 0; i < totalIterations - 1; ++i) {
+    for (var i = 0; i < totalIterations - 1; i++) {
       generator.create();
     }
     // run again then update map
@@ -152,6 +209,27 @@ Game.UIMode.gamePlay = {
     });
     // create map from the tiles
     this.attr._map = new Game.map(mapTiles);
+
+    // restore anything else if the data is available (not sure what this is doing)
+    if (restorationData !== undefined && restorationData.hasOwnProperty(Game.UIMode.gamePlay.JSON_KEY)) {
+      this.fromJSON(restorationData[Game.UIMode.gamePlay.JSON_KEY]);
+    }
+  },
+  toJSON: function() {
+    var json = {};
+    for (var at in this.attr) {
+      if (this.attr.hasOwnProperty(at) && at != '_map') {
+        json[at] = this.attr[at];
+      }
+    }
+    return json;
+  },
+  fromJSON: function (json) {
+    for (var at in this.attr) {
+      if (this.attr.hasOwnProperty(at) && at != '_map') {
+        this.attr[at] = json[at];
+      }
+    }
   }
 };
 

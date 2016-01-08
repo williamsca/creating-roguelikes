@@ -1,7 +1,5 @@
-console.log("hello console");
-
 window.onload = function() {
-    console.log("starting WSRL - window loaded");
+    console.log("starting Waffle of Twilight - window loaded");
     // Check if rot.js can work on this browser
     if (!ROT.isSupported()) {
         alert("The rot.js library isn't supported by your browser.");
@@ -14,15 +12,25 @@ window.onload = function() {
         document.getElementById('wsrl-main-display').appendChild(   Game.getDisplay('main').getContainer());
         document.getElementById('wsrl-message-display').appendChild(   Game.getDisplay('message').getContainer());
 
+        var bindEventToScreen = function(eventType){
+          window.addEventListener(eventType, function(evt){
+            Game.eventHandler(eventType,evt);
+          });
+        };
 
+        // Bind Keyboard input events
+        bindEventToScreen('keypress');
+        bindEventToScreen('keydown');
 
-        Game.message.sendMessage("Welcome to  WSRL");
+        Game.message.sendMessage("Welcome to  WAFFLE OF TWILIGHT");
+        Game.switchUiMode(Game.UIMode.gameStart);
     }
 };
 
 var Game = {
   _PERSISTANCE_NAMESPACE: 'wsrlgame',
 
+  _DISPLAY_SPACING: 1.1,
   DISPLAYS: {
     main: {
       w: 80, //This isnt good, please fix this oh dear god
@@ -40,11 +48,11 @@ var Game = {
       o: null
     }
   },
-  //_game: null,
+  _game: null,
   _curUiMode: null,
   _randomSeed: 0,
   init: function () {
-    //this._game = this;
+    this._game = this;
 
     this.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
 
@@ -53,19 +61,6 @@ var Game = {
         this.DISPLAYS[displayName].o = new ROT.Display({width:Game.DISPLAYS[displayName].w, height:Game.DISPLAYS[displayName].h});
       }
     }
-
-    var bindEventToScreen = function(eventType){
-      window.addEventListener(eventType, function(evt){
-        Game.eventHandler(eventType,evt);
-      });
-    };
-
-    // Bind Keyboard input events
-    bindEventToScreen('keypress');
-    bindEventToScreen('keydown');
-
-    Game.switchUiMode(Game.UIMode.gameStart);
-
   },
 
   getRandomSeed: function () {
@@ -82,7 +77,6 @@ var Game = {
     return this.DISPLAYS[displayName].o;
   },
 
-  //getDisplay
   //getHeight
 
   refresh: function() {
@@ -90,12 +84,18 @@ var Game = {
   },
 
   renderAll: function() {
-    this.renderAvatar();
+    this.renderAvatarDisplay();
     this.renderMain();
     this.renderMessage();
   },
 
-  renderAvatar: function() {
+  renderAvatarDisplay: function() {
+    this._display.avatar.o.clear();
+    if (this._curUiMode === null) {
+      return;
+    }
+
+
     if (this._curUiMode !== null && this._curUiMode.hasOwnProperty('renderOnAvatar')){
       this._curUiMode.renderOnAvatar(this.DISPLAYS.avatar.o);
     } else{
