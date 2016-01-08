@@ -19,7 +19,12 @@ Game.Symbol.prototype.getBg = function () {
 };
 
 Game.Symbol.prototype.draw = function (display, x, y) {
-    display.drawText(x,y,this.attr._char);
+    if(this == Game.Symbol.AVATAR){
+      attr = Game.UIMode.gamePlay.attr;
+      display.draw(x,y,[attr._map.getTile(attr._avatarX,attr._avatarY).getSymbol().attr._char,this.attr._char])
+    }else{
+      display.draw(x,y,this.attr._char);
+    }
 
 };
 

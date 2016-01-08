@@ -33,7 +33,7 @@ var Game = {
   _DISPLAY_SPACING: 1.1,
   DISPLAYS: {
     main: {
-      w: 80, //This isnt good, please fix this oh dear god
+      w: 80,
       h: 24,
       o: null
     },

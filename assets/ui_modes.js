@@ -210,6 +210,10 @@ Game.UIMode.gamePlay = {
     // create map from the tiles
     this.attr._map = new Game.map(mapTiles);
 
+    //Changes the display options
+    Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.options);
+  //  SHOW(Game.DISPLAYS.main.o.getContainer());
+
     // restore anything else if the data is available (not sure what this is doing)
     if (restorationData !== undefined && restorationData.hasOwnProperty(Game.UIMode.gamePlay.JSON_KEY)) {
       this.fromJSON(restorationData[Game.UIMode.gamePlay.JSON_KEY]);
