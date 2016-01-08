@@ -21,6 +21,23 @@ Game.map.prototype.getTile = function (x, y) {
   return this.attr._tiles[x][y] || Game.Tile.nullTile;
 };
 
+Game.map.prototype.getRandomLocation = function(filter_func) {
+  if (filter_func === undefined) {
+    filter_func = function(tile) { return true; };
+  }
+  var tX, tY, t;
+  do {
+    tX = Game.util.randomInt(0, this.attr._width - 1);
+    tY = Game.util.randomInt(0, this.attr._height - 1);
+    t = this.getTile(tX, tY);
+  } while (! filter_func(t));
+  return {x:tX, y:tY};
+};
+
+Game.map.prototype.getRandomWalkableLocation = function() {
+  return this.getRandomLocation(function(t) { return t.isWalkable(); });
+};
+
 Game.map.prototype.renderOn = function (display, camX, camY) {
   var dispW = display._options.width;
   var dispH = display._options.height;
@@ -29,12 +46,13 @@ Game.map.prototype.renderOn = function (display, camX, camY) {
   for (var x = 0; x < dispW; x++) {
      for (var y = 0; y < dispH; y++) {
        // Fetch the glyph for the tile and render it to the screen
-       var tile = this.getTile(x + xStart, y + yStart)
+       var tile = this.getTile(x + xStart, y + yStart);
        if (tile.getName() == 'nullTile') {
          tile = Game.Tile.wallTile;
        }
-       var test = tile.getSymbol();
-       test.draw(display, x, y);
+       tile.draw(display, x, y);
+       // var test = tile.getSymbol();
+       // test.draw(display, x, y);
      }
    }
 };

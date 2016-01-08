@@ -9,11 +9,11 @@ Game.UIMode.gameStart = {
   enter: function() {
     console.log("INITIALIZING GAME. PREPARE YO SELF.");
     Game.message.sendMessage("Welcome to the Space Jam");
-    Game.refresh();
+    //Game.refresh();
   },
   exit: function() {
     console.log("Game.UIMode.gameStart exit");
-    Game.refresh();
+    //Game.refresh();
   },
   handleInput: function (){
     console.log("Game.UIMode.gameStart handleInput");
@@ -24,8 +24,8 @@ Game.UIMode.gameStart = {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
     display.clear();
-    display.drawText(4,4,"Welcome to Grow Away to the Dot 3 (GATTD 3)", fg, bg);
-    display.drawText(4,6,"press any key to continue", fg, bg);
+    display.drawText(4,4,"Welcome to Colin & Diego's really great game.", fg, bg);
+    display.drawText(4,6,"Press any key to continue", fg, bg);
   }
 };
 
@@ -66,8 +66,9 @@ Game.UIMode.gamePersistence = {
         Game.UIMode.gamePlay.setupPlay();
         console.log("post-restore: using random seed " + Game.getRandomSeed());
         Game.switchUiMode(Game.UIMode.gamePlay);
+        Game.message.sendMessage("Your game has been loaded.");
       } catch(e) {
-        Game.message.sendMessage("There is no game to load.")
+        Game.message.sendMessage("There is no game to load.");
       }
     }
   },
@@ -75,7 +76,8 @@ Game.UIMode.gamePersistence = {
   saveGame: function(json_state_data) {
     if(this.localStorageAvailable()){
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game));
-      Game.switchUiMode(Game.UIMode.gamePlay);
+      Game.switchUiMode(Game.UIMode.gameStart);
+      Game.message.sendMessage("Your game has been saved.");
     }
   },
 
@@ -269,6 +271,6 @@ Game.UIMode.gameWin = {
   renderOnMain: function(display){
     console.log("Game.UIMode.gameWin renderOnMain");
     display.clear();
-    display.drawText(4,4,"CONGRATS, YOU PRESSED A BUTTONTTT!!!");
+    display.drawText(4,4,"CONGRATS, YOU PRESSED A BUTTON!!!");
   }
 };

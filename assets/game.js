@@ -22,7 +22,6 @@ window.onload = function() {
         bindEventToScreen('keypress');
         bindEventToScreen('keydown');
 
-        Game.message.sendMessage("Welcome to  WAFFLE OF TWILIGHT");
         Game.switchUiMode(Game.UIMode.gameStart);
     }
 };
@@ -52,9 +51,9 @@ var Game = {
   _curUiMode: null,
   _randomSeed: 0,
   init: function () {
-    this._game = this;
+    // this._game = this;
 
-    this.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
+    // this.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
 
     for (var displayName in this.DISPLAYS) {
       if (this.DISPLAYS.hasOwnProperty(displayName)) {
