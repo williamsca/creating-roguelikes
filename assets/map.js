@@ -33,7 +33,8 @@ Game.map.prototype.renderOn = function (display, camX, camY) {
        if (tile.getName() == 'nullTile') {
          tile = Game.Tile.wallTile;
        }
-       tile.getSymbol().draw(display, x, y);
+       var test = tile.getSymbol();
+       test.draw(display, x, y);
      }
    }
 };

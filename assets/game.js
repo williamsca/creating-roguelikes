@@ -90,7 +90,7 @@ var Game = {
   },
 
   renderAvatarDisplay: function() {
-    this._display.avatar.o.clear();
+    this.DISPLAYS.avatar.o.clear();
     if (this._curUiMode === null) {
       return;
     }

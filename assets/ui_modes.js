@@ -121,31 +121,31 @@ Game.UIMode.gamePlay = {
 
     var inputChar = String.fromCharCode(inputData.charCode);
     Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
-    Game.renderDisplayMessage();
+    Game.renderMessage();
     if (inputType == 'keypress') {
       if (inputData.keyIdentifier == 'Enter') {
         Game.switchUiMode(Game.UIMode.gameWin);
         return;
-      } else if (pressedKey == '1') {
+      } else if (inputChar == '1') {
         this.moveAvatar(-1, 1);
-      } else if (pressedKey == '2') {
+      } else if (inputChar == '2') {
         this.moveAvatar(0, 1);
-      } else if (pressedKey == '3') {
+      } else if (inputChar == '3') {
         this.moveAvatar(1, 1);
-      } else if (pressedKey == '4') {
+      } else if (inputChar == '4') {
         this.moveAvatar(-1, 0);
-      } else if (pressedKey == '5') {
+      } else if (inputChar == '5') {
         // do nothing
-      } else if (pressedKey == '6') {
+      } else if (inputChar == '6') {
         this.moveAvatar(1, 0);
-      } else if (pressedKey == '7') {
+      } else if (inputChar == '7') {
         this.moveAvatar(-1, -1);
-      } else if (pressedKey == '8') {
+      } else if (inputChar == '8') {
         this.moveAvatar(0, -1);
-      } else if (pressedKey == '9') {
+      } else if (inputChar == '9') {
         this.moveAvatar(1, -1);
       }
-      this.refresh();
+      Game.refresh();
     } else if (inputType == 'keydown') {
       if (inputData.keyCode == 27) { // Esc
         Game.switchUiMode(Game.UIMode.gameLose);
@@ -157,16 +157,16 @@ Game.UIMode.gamePlay = {
   renderOnMain: function(display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
+    display.clear();
     this.attr._map.renderOn(display, this.attr._cameraX, this.attr._cameraY);
     console.log("Game.UIMode.gamePlay renderOnMain");
-    display.clear();
-    display.drawText(4,4,"Press Enter to win, Esc to Lose. Yeah great game right?");
-    display.drawText(4, 5, "Press M to open the menu.", fg, bg);
+    //display.drawText(4,4,"Press Enter to win, Esc to Lose. Yeah great game right?");
+    //display.drawText(4, 5, "Press M to open the menu.", fg, bg);
     this.renderAvatar(display);
   },
   renderAvatar: function(display) {
-    Game.Symbol.AVATAR.draw(display, this._avatarX-this.attr._cameraX+display._options.width/2,
-                                     this._avatarY-this.attr._cameraY+display._options.height/2);
+    Game.Symbol.AVATAR.draw(display, this.attr._avatarX-this.attr._cameraX+display._options.width/2,
+                                     this.attr._avatarY-this.attr._cameraY+display._options.height/2);
   },
   renderAvatarInfo: function (display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
