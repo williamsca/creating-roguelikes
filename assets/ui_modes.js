@@ -58,13 +58,17 @@ Game.UIMode.gamePersistence = {
   },
 
   loadGame: function() {
-    if(this.localStorageAvailable()){
-    var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
-    var state_data = JSON.parse(json_state_data);
-    Game.setRandomSeed(state_data._randomSeed);
-    Game.UIMode.gamePlay.setupPlay();
-    console.log("post-restore: using random seed " + Game.getRandomSeed());
-    Game.switchUiMode(Game.UIMode.gamePlay);
+    if(this.localStorageAvailable()) {
+      try {
+        var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
+        var state_data = JSON.parse(json_state_data);
+        Game.setRandomSeed(state_data._randomSeed);
+        Game.UIMode.gamePlay.setupPlay();
+        console.log("post-restore: using random seed " + Game.getRandomSeed());
+        Game.switchUiMode(Game.UIMode.gamePlay);
+      } catch(e) {
+        Game.message.sendMessage("There is no game to load.")
+      }
     }
   },
 
@@ -88,7 +92,7 @@ Game.UIMode.gamePersistence = {
       return true;
     }
     catch(e){
-      Game.Message.send("Sorry, you ain't got no local storage brah");
+      Game.message.sendMessage("Sorry, you ain't got no local storage brah");
       return false;
     }
   }
