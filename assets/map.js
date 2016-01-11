@@ -11,7 +11,7 @@ Game.map.prototype.getWidth = function () {
 };
 
 Game.map.prototype.getHeight = function () {
-  return this.attr.height;
+  return this.attr._height;
 };
 
 Game.map.prototype.getTile = function (x, y) {

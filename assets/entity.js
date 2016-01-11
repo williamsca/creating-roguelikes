@@ -56,6 +56,11 @@ Game.Entity.prototype.setName = function(name) {
   this.attr._name = name;
 };
 
+Game.Entity.prototype.setPos = function(pos) {
+  this.setX(pos.x);
+  this.setY(pos.y);
+}
+
 Game.Entity.prototype.getX = function() {
   return this.attr._x;
 };

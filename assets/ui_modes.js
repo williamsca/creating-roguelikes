@@ -63,7 +63,7 @@ Game.UIMode.gamePersistence = {
         var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
         var state_data = JSON.parse(json_state_data);
         Game.setRandomSeed(state_data._randomSeed);
-        Game.UIMode.gamePlay.setupPlay();
+        Game.UIMode.gamePlay.setupPlay(state_data);
         console.log("post-restore: using random seed " + Game.getRandomSeed());
         Game.switchUiMode(Game.UIMode.gamePlay);
         Game.message.sendMessage("Your game has been loaded.");
@@ -75,7 +75,7 @@ Game.UIMode.gamePersistence = {
 
   saveGame: function(json_state_data) {
     if(this.localStorageAvailable()){
-      window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game));
+      window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game._game));
       Game.switchUiMode(Game.UIMode.gameStart);
       Game.message.sendMessage("Your game has been saved.");
     }
@@ -97,6 +97,40 @@ Game.UIMode.gamePersistence = {
       Game.message.sendMessage("Sorry, you ain't got no local storage brah");
       return false;
     }
+  },
+
+  BASE_toJSON: function(state_hash_name){
+    var state = this.attr;
+    if (state_hash_name){
+      state = this[state_hash_name];
+    }
+    var json = {};
+    for (var at in state){
+      if (state.hasOwnProperty(at)){
+        if (state[at] instanceof Object && 'toJSON' in state[at]){
+          json[at] = state[at].toJSON();
+        } else {
+          json[at] = state[at];
+        }
+      }
+    }
+    return json;
+  },
+
+  BASE_fromJSON: function(json, state_hash_name) {
+    var using_state_hash = 'attr';
+    if (state_hash_name) {
+      using_state_hash = state_hash_name;
+    }
+    for (var at in this[using_state_hash]) {
+      if(this[using_state_hash].hasOwnProperty(at)) {
+        if(this[using_state_hash][at] instanceof Object && 'fromJSON' in this[using_state_hash][at]){
+          this[using_state_hash][at].fromJSON(json[at]);
+        } else {
+          this[using_state_hash][at] = json[at];
+        }
+      }
+    }
   }
 };
 
@@ -108,8 +142,6 @@ Game.UIMode.gamePlay = {
     _mapHeight: 200,
     _cameraX: 100,
     _cameraY: 100,
-    _avatarX: 100,
-    _avatarY: 100
   },
   JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
@@ -166,24 +198,26 @@ Game.UIMode.gamePlay = {
     display.clear();
     this.attr._map.renderOn(display, this.attr._cameraX, this.attr._cameraY);
     console.log("Game.UIMode.gamePlay renderOnMain");
-    //display.drawText(4,4,"Press Enter to win, Esc to Lose. Yeah great game right?");
-    //display.drawText(4, 5, "Press M to open the menu.", fg, bg);
     this.renderAvatar(display);
   },
   renderAvatar: function(display) {
-    Game.Symbol.AVATAR.draw(display, this.attr._avatarX-this.attr._cameraX+display._options.width/2,
-                                     this.attr._avatarY-this.attr._cameraY+display._options.height/2);
+    console.log("Avatar Rendered")
+    this.attr._avatar.draw(display, this.attr._avatar.getX()-this.attr._cameraX+display._options.width / 2,
+                                     this.attr._avatar.getY()-this.attr._cameraY+display._options.height / 2);
   },
   renderAvatarInfo: function (display) {
+    console.log("Avatar Info")
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
-    display.drawText(1, 2, "avatar x: " + this.attr._avatarX, fg, bg);
-    display.drawText(1, 3, "avatar y: " + this.attr._avatarY, fg, bg);
+    display.drawText(1, 2, "avatar x: " + this.attr._avatar.getX(), fg, bg);
+    display.drawText(1, 3, "avatar y: " + this.attr._avatar.getY(), fg, bg);
+    display.drawText(1, 4, "Turns so far: " + this.attr._avatar.getTurns());
   },
-  moveAvatar: function(dx, dy) {
-    this.attr._avatarX = Math.min(Math.max(0, this.attr._avatarX + dx), this.attr._mapWidth);
-    this.attr._avatarY = Math.min(Math.max(0, this.attr._avatarY + dy), this.attr._mapHeight);
-    this.setCameraToAvatar();
+  moveAvatar: function(dx, dy){
+    if (this.attr._avatar.tryWalk(this.attr._map,dx,dy)){
+      console.dir(this.attr._avatar);
+      this.setCameraToAvatar();
+    }
   },
   moveCamera: function(dx, dy) {
     this.setCamera(this.attr._cameraX + dx, this.attr._cameraY + dy);
@@ -191,9 +225,10 @@ Game.UIMode.gamePlay = {
   setCamera: function(sx, sy) {
     this.attr._cameraX = Math.min(Math.max(0,sx),this.attr._mapWidth);
     this.attr._cameraY = Math.min(Math.max(0,sy),this.attr._mapHeight);
+    Game.refresh();
   },
   setCameraToAvatar: function () {
-    this.setCamera(this.attr._avatarX, this.attr._avatarY);
+    this.setCamera(this.attr._avatar.getX(), this.attr._avatar.getY());
   },
   setupPlay: function (restorationData) {
     var mapTiles = Game.util.init2DArray(this.attr._mapWidth, this.attr._mapHeight, Game.Tile.nullTile);
@@ -216,26 +251,22 @@ Game.UIMode.gamePlay = {
     // create map from the tiles
     this.attr._map = new Game.map(mapTiles);
 
+    this.attr._avatar = new Game.Entity(Game.EntityTemplates.Avatar);
+
     // restore anything else if the data is available (not sure what this is doing)
     if (restorationData !== undefined && restorationData.hasOwnProperty(Game.UIMode.gamePlay.JSON_KEY)) {
       this.fromJSON(restorationData[Game.UIMode.gamePlay.JSON_KEY]);
+    } else {
+      this.attr._avatar.setPos(this.attr._map.getRandomWalkableLocation());
     }
+
+    this.setCameraToAvatar();
   },
   toJSON: function() {
-    var json = {};
-    for (var at in this.attr) {
-      if (this.attr.hasOwnProperty(at) && at != '_map') {
-        json[at] = this.attr[at];
-      }
-    }
-    return json;
+  return Game.UIMode.gamePersistence.BASE_toJSON.call(this);
   },
   fromJSON: function (json) {
-    for (var at in this.attr) {
-      if (this.attr.hasOwnProperty(at) && at != '_map') {
-        this.attr[at] = json[at];
-      }
-    }
+  return Game.UIMode.gamePersistence.BASE_fromJSON.call(this,json);
   }
 };
 

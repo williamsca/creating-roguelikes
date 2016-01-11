@@ -51,7 +51,7 @@ var Game = {
   _curUiMode: null,
   _randomSeed: 0,
   init: function () {
-    // this._game = this;
+    this._game = this;
 
     for (var displayName in this.DISPLAYS) {
       if (this.DISPLAYS.hasOwnProperty(displayName)) {
@@ -93,8 +93,8 @@ var Game = {
     }
 
 
-    if (this._curUiMode !== null && this._curUiMode.hasOwnProperty('renderOnAvatar')){
-      this._curUiMode.renderOnAvatar(this.DISPLAYS.avatar.o);
+    if (this._curUiMode !== null && this._curUiMode.hasOwnProperty('renderAvatarInfo')){
+      this._curUiMode.renderAvatarInfo(this.DISPLAYS.avatar.o);
     } else{
       this.DISPLAYS.avatar.o.drawText(2,1,"avatar display");
     }
@@ -110,8 +110,10 @@ var Game = {
       Game.message.renderOn(this.DISPLAYS.message.o);
   },
 
-  toJson: function() {
-    var json = {"_randomSeed:":this._randomSeed};
+  toJSON: function() {
+    var json = {};
+    json._randomSeed = this._randomSeed;
+    json[Game.UIMode.gamePlay.JSON_KEY] = Game.UIMode.gamePlay.toJSON();
     return json;
   },
 
