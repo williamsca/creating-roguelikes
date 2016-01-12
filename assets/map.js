@@ -56,3 +56,11 @@ Game.map.prototype.renderOn = function (display, camX, camY) {
      }
    }
 };
+
+Game.map.prototype.toJSON = function () {
+
+};
+
+Game.map.prototype.fromJSON = function (json) {
+
+};
