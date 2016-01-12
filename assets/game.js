@@ -50,6 +50,9 @@ var Game = {
   _game: null,
   _curUiMode: null,
   _randomSeed: 0,
+
+  DATASTORE: {},
+
   init: function () {
     this._game = this;
 
@@ -67,6 +70,7 @@ var Game = {
   setRandomSeed: function(s) {
     this._randomSeed = s;
     console.log("using random seed " +this._randomSeed);
+    this.DATASTORE[Game.UIMode.gamePersistence.RANDOM_SEED_KEY] = this._randomSeed;
     ROT.RNG.setSeed(this._randomSeed);
   },
 
@@ -110,13 +114,13 @@ var Game = {
       Game.message.renderOn(this.DISPLAYS.message.o);
   },
 
-  toJSON: function() {
-    console.log("toJSON called")
-    var json = {};
-    json._randomSeed = this._randomSeed;
-    json[Game.UIMode.gamePlay.JSON_KEY] = Game.UIMode.gamePlay.toJSON();
-    return json;
-  },
+  // toJSON: function() {
+  //   console.log("toJSON called")
+  //   var json = {};
+  //   json._randomSeed = this._randomSeed;
+  //   json[Game.UIMode.gamePlay.JSON_KEY] = Game.UIMode.gamePlay.toJSON();
+  //   return json;
+  // },
 
   switchUiMode: function (newMode) {
     if (this._curUiMode !== null) {
