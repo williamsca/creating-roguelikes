@@ -1,7 +1,7 @@
 Game.DATASTORE.MAP = {};
 
 Game.map = function (mapTileSetName) {
-  console.log("setting up new map using"+mapTileSetName+" tile set");
+  //console.log("setting up new map using "+mapTileSetName+" tile set");
 
   this._tiles = Game.MapTileSets[mapTileSetName].getMapTiles();
 
@@ -68,7 +68,7 @@ Game.map.prototype.getEntity = function (x_or_pos,y) {
   var entId = this.attr._entitiesByLocation[useX+','+useY];
   if(entId) { return Game.DATASTORE.ENTITY[entId]; }
   return false;
-}
+};
 
 Game.map.prototype.getRandomLocation = function(filter_func) {
   if (filter_func === undefined) {
