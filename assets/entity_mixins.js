@@ -9,12 +9,19 @@ Game.EntityMixin.WalkerCorporeal = {
   tryWalk: function(map, dx, dy) {
     var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth());
     var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight());
+    if (map.getEntity(targetX, targetY)) {
+      return false;
+    }
     if (map.getTile(targetX, targetY).isWalkable()) {
       newPos = {
         x: targetX,
         y: targetY
       }
       this.setPos(newPos);
+      var myMap = this.getMap();
+      if (myMap) {
+        myMap.updateEntityLocation(this);
+      }
       if (this.hasMixin('Chronicle')) {
         this.trackTurn();
       }
