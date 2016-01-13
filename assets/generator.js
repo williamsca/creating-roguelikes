@@ -14,7 +14,7 @@ Game.Generator.prototype.learn = function (template, createKeyName) {
   }
   createKeyName = createKeyName || template.name;
   this._templates[createKeyName] = template;
-}
+};
 
 Game.Generator.prototype.create = function (createKeyName) {
   var templateToUse = this._templates[createKeyName];
