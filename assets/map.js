@@ -103,7 +103,8 @@ Game.map.prototype.renderOn = function (display, camX, camY) {
        tile.draw(display, x, y);
        var ent = this.getEntity(mapPos);
        if (ent){
-         ent.draw(display,x,y);
+         //ent.draw(display,x,y)
+         display.draw(x,y, [".", ent.attr._char]);
        }
      }
    }
