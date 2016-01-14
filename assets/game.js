@@ -65,6 +65,8 @@ var Game = {
         this.DISPLAYS[displayName].o = new ROT.Display({width:Game.DISPLAYS[displayName].w, height:Game.DISPLAYS[displayName].h});
       }
     }
+
+    this.DISPLAYS.mainOptions = JSON.parse(JSON.stringify(this.DISPLAYS.main.o.getOptions()));
   },
 
   getRandomSeed: function () {
