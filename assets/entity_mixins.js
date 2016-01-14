@@ -18,18 +18,23 @@ Game.EntityMixin.WalkerCorporeal = {
     }
 
     // TRAVEL
-    if (map.getTile(targetX, targetY).isWalkable()) {
-      newPos = {
-        x: targetX,
-        y: targetY
-      };
-      this.setPos(newPos);
-      var myMap = this.getMap();
-      if (myMap) {
-        myMap.updateEntityLocation(this);
-      }
-      this.raiseEntityEvent('tookTurn');
-      return true;
+    try{
+        if (map.getTile(targetX, targetY).isWalkable()) {
+            newPos = {
+                x: targetX,
+                y: targetY
+            };
+            this.setPos(newPos);
+            var myMap = this.getMap();
+            if (myMap) {
+                myMap.updateEntityLocation(this);
+            }
+            this.raiseEntityEvent('tookTurn');
+            return true;
+        }
+    }catch(e){
+        console.log("TRIED TO WALK ONTO EDGE");
+        return false;
     }
 
     // YOU CAN'T WALK INTO A WALL
