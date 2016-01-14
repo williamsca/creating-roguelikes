@@ -155,6 +155,8 @@ Game.UIMode.gamePlay = {
   },
   JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
+    Game.DISPLAYS.main.o.clear();
+    Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
     console.log("Game.UIMode.gamePlay enter");
     Game.message.clearMessages();
     if(this.attr._avatarId) {
@@ -163,6 +165,8 @@ Game.UIMode.gamePlay = {
     Game.refresh();
   },
   exit: function() {
+    Game.DISPLAYS.main.o.clear();
+    Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
     console.log("Game.UIMode.gamePlay exit");
     Game.refresh();
   },

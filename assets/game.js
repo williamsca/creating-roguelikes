@@ -59,12 +59,14 @@ var Game = {
 
     this.TRANSIENT_RNG = ROT.RNG.clone();
     Game.setRandomSeed(5 + Math.floor(this.TRANSIENT_RNG.getUniform()*100000));
-    
+
     for (var displayName in this.DISPLAYS) {
       if (this.DISPLAYS.hasOwnProperty(displayName)) {
         this.DISPLAYS[displayName].o = new ROT.Display({width:Game.DISPLAYS[displayName].w, height:Game.DISPLAYS[displayName].h});
       }
     }
+
+    this.DISPLAYS.mainOptions = JSON.parse(JSON.stringify(this.DISPLAYS.main.o.getOptions()));
   },
 
   getRandomSeed: function () {
