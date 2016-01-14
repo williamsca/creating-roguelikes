@@ -71,7 +71,7 @@ Game.Entity.prototype.destroy = function() {
   // remove from map
   this.getMap().extractEntity(this);
   // remove from DATASTORE
-  Game.DATASTORE.ENTITY[this.getID()] = undefined;
+  Game.DATASTORE.ENTITY[this.getId()] = undefined;
 };
 
 Game.Entity.prototype.getId = function(){

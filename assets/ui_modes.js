@@ -208,6 +208,7 @@ Game.UIMode.gamePlay = {
       } else if (inputChar == '9') {
         this.moveAvatar(1, -1);
       }
+      // move mobs?
       Game.refresh();
     } else if (inputType == 'keydown') {
       if (inputData.keyCode == 27) { // Esc
@@ -235,6 +236,9 @@ Game.UIMode.gamePlay = {
     display.drawText(1, 2, "avatar x: " + this.getAvatar().getX(), fg, bg);
     display.drawText(1, 3, "avatar y: " + this.getAvatar().getY(), fg, bg);
     display.drawText(1, 4, "Turns so far: " + this.getAvatar().getTurns());
+  },
+  moveMobs: function() {
+
   },
   moveAvatar: function(dx, dy){
     if (this.getAvatar().tryWalk(this.getMap(),dx,dy)){
