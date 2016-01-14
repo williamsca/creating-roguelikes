@@ -260,7 +260,12 @@ Game.UIMode.gamePlay = {
     this.setCamera(this.getAvatar().getX(), this.getAvatar().getY());
   },
   setupNewGame: function () {
-    this.setMap(new Game.map('caves1'));
+
+    mapType = this.getMapType();
+    console.log(mapType)
+
+
+    this.setMap(new Game.map(mapType));
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
@@ -269,6 +274,24 @@ Game.UIMode.gamePlay = {
     for (var ecount = 0; ecount < 80; ecount++) {
       this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
     }
+
+  },
+
+  getMapType: function () {
+      switch(Math.floor(Math.random()*3)){
+          case 0:
+            return "caves";
+            break;
+          case 1:
+            return "maze";
+            break;
+          case 2:
+            return "digger";
+            break;
+          case 3:
+            return "rogue";
+            break;
+      }
 
   },
   toJSON: function() {
