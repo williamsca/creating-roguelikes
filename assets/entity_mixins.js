@@ -11,8 +11,12 @@ Game.EntityMixin.WalkerCorporeal = {
     var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight());
 
     // INTERACT WITH ENTITY
-    if (map.getEntity(targetX, targetY)) {
+    if ((map.getEntity(targetX, targetY)) && map.getEntity(targetX, targetY) != Game.UIMode.gamePlay.getAvatar()) {
+      console.log(targetX);
+      console.log(targetY);
+      console.log("recipient: " + map.getEntity(targetX, targetY));
       this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
+      console.log(this);
       this.raiseEntityEvent('tookTurn');
       return true;
     }
@@ -104,7 +108,7 @@ Game.EntityMixin.HitPoints = {
     },
     init:function(template) {
       this.attr._HitPoints_attr.maxHp = template.MaxHp || 1;
-      this.attr._HitPoints_attr.curHp = template.curHp || this.attr._HitPoints_attr.maxHp;
+      // this.attr._HitPoints_attr.curHp = template.curHp || this.attr._HitPoints_attr.maxHp;
     },
     listeners: {
       'attacked': function(evtData) {
