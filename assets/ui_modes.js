@@ -111,8 +111,8 @@ Game.UIMode.gamePersistence = {
 
   newGame: function() {
     Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform() * 100000));
-    Game.UIMode.gamePlay.setupNewGame();
-    Game.switchUiMode(Game.UIMode.gamePlay);
+    //Game.UIMode.gamePlay.setupNewGame();
+    Game.switchUiMode(Game.UIMode.gameQuestions);
   },
   localStorageAvailable: function () {
     try {
@@ -145,13 +145,103 @@ Game.UIMode.gamePersistence = {
   }
 };
 
+
+
+
+//QUESTIONS
+
+Game.UIMode.gameQuestions = {
+    attr: {
+        questionNum: 0,
+        questions: [
+            {
+            q: "Which map do you want?",
+            a1: "caves",
+            a2: "maze",
+            a3: "digger",
+            a4: "rogue"
+            }
+        ],
+        answers: {}
+    },
+    enter: function() {
+    Game.message.sendMessage("Press the number\n Next to your answer");
+    //Game.refresh();
+  },
+  exit: function() {
+
+  },
+  handleInput: function (inputType, inputData){
+    var inputChar = String.fromCharCode(inputData.charCode);
+    Game.message.clearMessages();
+    var selectedAns = null;
+    switch(inputChar){
+        case "1" :
+        Game.message.sendMessage("ANSWER 1 SELECTED");
+        selectedAns = this.getQuestion().a1;
+        break;
+        case "2" :
+        Game.message.sendMessage("ANSWER 2 SELECTED");
+        selectedAns = this.getQuestion().a2;
+        break;
+        case "3" :
+        Game.message.sendMessage("ANSWER 3 SELECTED");
+        selectedAns = this.getQuestion().a3;
+        break;
+        case "4" :
+        Game.message.sendMessage("ANSWER 4 SELECTED");
+        selectedAns = this.getQuestion().a4;
+        break;
+        default :
+        Game.message.sendMessage("INVALID CHOICE");
+        return;
+    }
+
+    if(selectedAns){
+        this.processAnswer(selectedAns);
+    }
+  },
+  processAnswer: function (ans) {
+      switch(this.attr.questionNum){
+          case 0:
+          this.attr.answers.mapType = ans;
+          Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
+          Game.switchUiMode(Game.UIMode.gamePlay);
+          return;
+          default:
+          console.log("Invalid question number, should not be possible");
+      }
+  },
+  getQuestion: function (){
+    return this.attr.questions[this.attr.questionNum];
+  },
+  renderAvatarInfo: function(display) {
+      display.drawText(1,1,"INSERT LONG BACKSTORY TO WHY QUESTIONS ARE BEING ASKED [HERE]");
+  },
+
+  renderOnMain: function(display){
+    var fg = Game.UIMode.DEFAULT_COLOR_FG;
+    var bg = Game.UIMode.DEFAULT_COLOR_BG;
+    display.clear();
+    var question = this.getQuestion();
+
+    display.drawText(4,4,question.q, fg, bg);
+    display.drawText(4,10,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
+    display.drawText(4,12,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
+
+  }
+}
+
 //PLAY
 Game.UIMode.gamePlay = {
   attr: {
     _mapId: '',
     _cameraX: 100,
     _cameraY: 100,
-    _avatarId: ''
+    _avatarId: '',
+    _answers: {
+        mapType : null
+    }
   },
   JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
@@ -183,8 +273,6 @@ Game.UIMode.gamePlay = {
     this.attr._avatarId = a.getId();
   },
   handleInput: function (inputType, inputData){
-    console.log("Game.UIMode.gamePlay handleInput");
-    console.log(inputType);
 
     var inputChar = String.fromCharCode(inputData.charCode);
     Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
@@ -240,6 +328,8 @@ Game.UIMode.gamePlay = {
     display.drawText(1, 2, "avatar x: " + this.getAvatar().getX(), fg, bg);
     display.drawText(1, 3, "avatar y: " + this.getAvatar().getY(), fg, bg);
     display.drawText(1, 4, "Turns so far: " + this.getAvatar().getTurns());
+    display.drawText(1, 5, "HP: " + this.getAvatar().getCurHp());
+
   },
   moveMobs: function() {
 
@@ -263,8 +353,8 @@ Game.UIMode.gamePlay = {
     console.dir(test);
     this.setCamera(this.getAvatar().getX(), this.getAvatar().getY());
   },
-  setupNewGame: function () {
-
+  setupNewGame: function (answers) {
+    this.attr._answers = answers;
     mapType = this.getMapType();
     console.log(mapType)
 
@@ -282,20 +372,23 @@ Game.UIMode.gamePlay = {
   },
 
   getMapType: function () {
-      switch(Math.floor(Math.random()*3)){
-          case 0:
-            return "caves";
-            break;
-          case 1:
-            return "maze";
-            break;
-          case 2:
-            return "digger";
-            break;
-          case 3:
-            return "rogue";
-            break;
-      }
+      console.log("huh?");
+      return this.attr._answers.mapType;
+
+    //   switch(Math.floor(Math.random()*3)){
+    //       case 0:
+    //         return "caves";
+    //         break;
+    //       case 1:
+    //         return "maze";
+    //         break;
+    //       case 2:
+    //         return "digger";
+    //         break;
+    //       case 3:
+    //         return "rogue";
+    //         break;
+    //   }
 
   },
   toJSON: function() {
