@@ -6,8 +6,18 @@ Game.EntityMixin.PlayerMessager = {
     mixinGroup: 'PlayerMessager',
     listeners: {
       'walkForbidden': function(evtData) {
-        Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName());
-        Game.renderDisplayMessage();
+        Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName() + ", n00b.");
+        //Game.renderMessage();
+      },
+      'dealtDamage': function(evtData) {
+        Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
+      },
+      'madeKill': function(evtData) {
+        Game.message.sendMessage("You killed the " + evtData.entKilled.getName());
+      },
+      'killed': function(evtData) {
+        Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
+        //Game.renderMessage();
       }
     }
   }
@@ -23,6 +33,12 @@ Game.EntityMixin.WalkerCorporeal = {
     var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth());
     var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight());
 
+    // EDGE OF MAP
+    if ((this.getX() === targetX) && (this.getY() === targetY)) {
+      this.raiseEntityEvent('walkForbidden', {target: Game.Tile.boundaryTile});
+      return false;
+    }
+
     // INTERACT WITH ENTITY
     if ((map.getEntity(targetX, targetY)) && map.getEntity(targetX, targetY) != Game.UIMode.gamePlay.getAvatar()) {
       console.log("recipient: " + map.getEntity(targetX, targetY));
@@ -33,27 +49,21 @@ Game.EntityMixin.WalkerCorporeal = {
     }
 
     // TRAVEL
-    try{
-        if (map.getTile(targetX, targetY).isWalkable()) {
-            newPos = {
-                x: targetX,
-                y: targetY
-            };
-            this.setPos(newPos);
-            var myMap = this.getMap();
-            if (myMap) {
-                myMap.updateEntityLocation(this);
-            }
-            this.raiseEntityEvent('tookTurn');
-            return true;
-        }
-    }catch(e){
-        console.log("TRIED TO WALK ONTO EDGE");
-        return false;
+    var targetTile = map.getTile(targetX, targetY);
+    if (targetTile.isWalkable()) {
+      console.log(targetX);
+      console.log(targetY);
+      newPos = { x: targetX, y: targetY };
+      this.setPos(newPos);
+      if (this.getMap()) {
+        this.getMap().updateEntityLocation(this);
+      }
+      this.raiseEntityEvent('tookTurn');
+      return true;
+    } else {
+      this.raiseEntityEvent('walkForbidden', {target:targetTile});
+      return false;
     }
-
-    // YOU CAN'T WALK INTO A WALL
-    return false;
   }
 };
 

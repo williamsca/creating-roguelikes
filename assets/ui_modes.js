@@ -92,6 +92,7 @@ Game.UIMode.gamePersistence = {
 
         // game play
         Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
+        Game.Message.attr = state_data.MESSAGES;
         Game.switchUiMode(Game.UIMode.gamePlay);
         Game.message.sendMessage("Your game has been loaded.");
       } catch(e) {
@@ -103,6 +104,7 @@ Game.UIMode.gamePersistence = {
   saveGame: function() {
     if(this.localStorageAvailable()){
       Game.DATASTORE.GAME_PLAY = Game.UIMode.gamePlay.attr;
+      Game.DATASTORE.MESSAGES = Game.message.attr;
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
       Game.switchUiMode(Game.UIMode.gameStart);
       Game.message.sendMessage("Your game has been saved.");
@@ -149,7 +151,6 @@ Game.UIMode.gamePersistence = {
 
 
 //QUESTIONS
-
 Game.UIMode.gameQuestions = {
     attr: {
         questionNum: 0,
@@ -230,7 +231,7 @@ Game.UIMode.gameQuestions = {
     display.drawText(4,12,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
 
   }
-}
+};
 
 //PLAY
 Game.UIMode.gamePlay = {
@@ -275,7 +276,7 @@ Game.UIMode.gamePlay = {
   handleInput: function (inputType, inputData){
 
     var inputChar = String.fromCharCode(inputData.charCode);
-    Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
+    // Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
     Game.renderMessage();
     if (inputType == 'keypress') {
       if (inputData.keyIdentifier == 'Enter') {
@@ -283,24 +284,32 @@ Game.UIMode.gamePlay = {
         return;
       } else if (inputChar == '1') {
         this.moveAvatar(-1, 1);
+        Game.message.ageMessages();
       } else if (inputChar == '2') {
         this.moveAvatar(0, 1);
+        Game.message.ageMessages();
       } else if (inputChar == '3') {
         this.moveAvatar(1, 1);
+        Game.message.ageMessages();
       } else if (inputChar == '4') {
         this.moveAvatar(-1, 0);
+        Game.message.ageMessages();
       } else if (inputChar == '5') {
         // do nothing
+        Game.renderMessage();
       } else if (inputChar == '6') {
         this.moveAvatar(1, 0);
+        Game.message.ageMessages();
       } else if (inputChar == '7') {
         this.moveAvatar(-1, -1);
+        Game.message.ageMessages();
       } else if (inputChar == '8') {
         this.moveAvatar(0, -1);
+        Game.message.ageMessages();
       } else if (inputChar == '9') {
         this.moveAvatar(1, -1);
+        Game.message.ageMessages();
       }
-      // move mobs?
       Game.refresh();
     } else if (inputType == 'keydown') {
       if (inputData.keyCode == 27) { // Esc
