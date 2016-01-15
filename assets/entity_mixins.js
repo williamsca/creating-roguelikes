@@ -1,5 +1,18 @@
 Game.EntityMixin = {};
 
+Game.EntityMixin.PlayerMessager = {
+  META: {
+    mixinName: 'PlayerMessager',
+    mixinGroup: 'PlayerMessager',
+    listeners: {
+      'walkForbidden': function(evtData) {
+        Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName());
+        Game.renderDisplayMessage();
+      }
+    }
+  }
+};
+
 // WALKER
 Game.EntityMixin.WalkerCorporeal = {
   META: {
@@ -12,8 +25,6 @@ Game.EntityMixin.WalkerCorporeal = {
 
     // INTERACT WITH ENTITY
     if ((map.getEntity(targetX, targetY)) && map.getEntity(targetX, targetY) != Game.UIMode.gamePlay.getAvatar()) {
-      console.log(targetX);
-      console.log(targetY);
       console.log("recipient: " + map.getEntity(targetX, targetY));
       this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
       console.log(this);
@@ -107,8 +118,9 @@ Game.EntityMixin.HitPoints = {
       curHp: 1
     },
     init:function(template) {
-      this.attr._HitPoints_attr.maxHp = template.MaxHp || 1;
-      // this.attr._HitPoints_attr.curHp = template.curHp || this.attr._HitPoints_attr.maxHp;
+      console.log(template.MaxHp);
+      this.attr._HitPoints_attr.maxHp = template.maxHp || 1;
+      this.attr._HitPoints_attr.curHp = template.curHp || this.attr._HitPoints_attr.maxHp;
     },
     listeners: {
       'attacked': function(evtData) {

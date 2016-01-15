@@ -331,9 +331,7 @@ Game.UIMode.gamePlay = {
     display.drawText(1, 5, "HP: " + this.getAvatar().getCurHp());
 
   },
-  moveMobs: function() {
 
-  },
   moveAvatar: function(dx, dy){
     if (this.getAvatar().tryWalk(this.getMap(),dx,dy)){
       this.setCameraToAvatar();
@@ -356,7 +354,7 @@ Game.UIMode.gamePlay = {
   setupNewGame: function (answers) {
     this.attr._answers = answers;
     mapType = this.getMapType();
-    console.log(mapType)
+    console.log(mapType);
 
 
     this.setMap(new Game.map(mapType));
