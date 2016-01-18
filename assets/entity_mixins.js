@@ -34,13 +34,14 @@ Game.EntityMixin.PlayerActor = {
       currentActionDuration: 1000
     },
     init: function (template) {
-      Game.Scheduler.add(this, true, this.getBaseActionDuration());
+      Game.Scheduler.add(this, true, 1);
     },
     listeners: {
       'actionDone': function(evtData) {
         Game.Scheduler.setDuration(this.getCurrentActionDuration());
-        this.setCurrentActionDuration(this.getBaseActionDuration());
-        Game.TimeEngine.unlock();
+        this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-5, 5));
+        setTimeout(function() {Game.TimeEngine.unlock();}, 1); // a tiny delay
+        console.log('end player acting');
       }
     }
   },
@@ -65,6 +66,7 @@ Game.EntityMixin.PlayerActor = {
   act: function() {
     if (this.isActing()) { return; } // a gate to deal with JS timing issues
     this.isActing(true);
+    console.log('begin player acting');
     Game.refresh();
     Game.TimeEngine.lock();
     this.isActing(false);
@@ -78,20 +80,22 @@ Game.EntityMixin.WalkerCorporeal = {
     mixinGroup: 'Walker'
   },
   tryWalk: function(map, dx, dy) {
-    var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth());
-    var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight());
+    var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth() - 1);
+    var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight() - 1);
+    // console.log('tryWalk deltas: ' + dx + ' , ', + dy + ' ' + this.getName());
+    // console.log('tryWalk initial pos: '+this.getX()+','+this.getY()+' '+this.getName());
+    // console.log('tryWalk: '+targetX+','+targetY+' '+this.getName());
 
     // EDGE OF MAP
     if ((this.getX() === targetX) && (this.getY() === targetY)) {
-      this.raiseEntityEvent('walkForbidden', {target: Game.Tile.boundaryTile});
+      this.raiseEntityEvent('walkForbidden', {target: Game.Tile.wallTile});
       return false;
     }
 
     // INTERACT WITH ENTITY
     if ((map.getEntity(targetX, targetY)) && map.getEntity(targetX, targetY) != Game.UIMode.gamePlay.getAvatar()) {
-      console.log("recipient: " + map.getEntity(targetX, targetY));
+      console.log(this.getName() + " bumped " + map.getEntity(targetX, targetY));
       this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
-      console.log(this);
       return true;
     }
 
@@ -249,40 +253,46 @@ Game.EntityMixin.MeleeAttacker = {
 //##############################################################################
 // ENTITY ACTORS / AI
 
-Game.EntityMixin.PeacefulWanderActor = {
+Game.EntityMixin.WanderActor = {
   META: {
-    mixinName: 'PeacefulWanderActor',
+    mixinName: 'WanderActor',
     mixinGroup: 'Actor',
-    stateNamespace: '_PeacefulWanderActor_attr',
+    stateNamespace: '_WanderActor_attr',
     stateModel: {
       baseActionDuration: 1000,
       currentActionDuration: 1000
     },
     init: function (template) {
-      Game.Scheduler.add(this, true, this.getBaseActionDuration());
+      Game.Scheduler.add(this, true, Game.util.randomInt(2, this.getBaseActionDuration()));
     }
   },
   getBaseActionDuration: function() {
-    return this.attr._PeacefulWanderActor_attr.baseActionDuration;
+    return this.attr._WanderActor_attr.baseActionDuration;
   },
   setBaseActionDuration: function(n) {
-    this.attr._PeacefulWanderActor_attr.baseActionDuration = n;
+    this.attr._WanderActor_attr.baseActionDuration = n;
   },
   getCurrentActionDuration: function() {
-    return this.attr._PeacefulWanderActor_attr.currentActionDuration;
+    return this.attr._WanderActor_attr.currentActionDuration;
   },
-  setCurrentActionDuration: function() {
-    this.attr._PeacefulWanderActor_attr.currentActionDuration = n;
+  setCurrentActionDuration: function(n) {
+    this.attr._WanderActor_attr.currentActionDuration = n;
   },
-  getMoveCoord: function() {
-    // TODO
+  getMoveDeltas: function() {
+    return Game.util.positionsAdjacentTo({x:0, y:0}).random();
   },
   act: function() {
-    var moveTarget = this.getMoveCoord();
-    if (actor.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
-      this.tryWalk(this.getMap(), moveTarget.x, moveTarget.y);
+    console.log('wander for ' + this.getName());
+    Game.TimeEngine.lock();
+    var moveDeltas = this.getMoveDeltas();
+    if (this.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
+      console.log('trying to walk to ' + moveDeltas.x + ' , ' + moveDeltas.y);
+      this.tryWalk(this.getMap(), moveDeltas.x, moveDeltas.y);
     }
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
-    this.setCurrentActionDuration(this.getBaseActionDuration());
+    this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-1, 10));
+    this.raiseEntityEvent('actionDone');
+    console.log("end wander acting");
+    Game.TimeEngine.unlock();
   }
 };

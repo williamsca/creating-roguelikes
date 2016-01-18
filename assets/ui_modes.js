@@ -15,9 +15,11 @@ Game.UIMode.gameStart = {
     console.log("Game.UIMode.gameStart exit");
     //Game.refresh();
   },
-  handleInput: function (){
+  handleInput: function (inputType, inputData){
     console.log("Game.UIMode.gameStart handleInput");
-    Game.switchUiMode(Game.UIMode.gamePersistence);
+    if (inputData.charCode !== 0) { // ignore the modding keys - control, shift, etc.
+      Game.switchUiMode(Game.UIMode.gamePersistence);
+    }
   },
   renderOnMain: function(display){
     console.log("Game.UIMode.gameStart renderOnMain");
@@ -39,14 +41,21 @@ Game.UIMode.gamePersistence = {
     Game.refresh();
   },
   handleInput: function (eventType, evt) {
-    var inputChar = String.fromCharCode(evt.charCode);
-    if (inputChar == 'S') {
-      this.saveGame();
-    } else if (inputChar == 'L') {
-      this.loadGame();
-    } else if (inputChar == 'N') {
-      this.newGame();
+    if (eventType == 'keypress') {
+      var inputChar = String.fromCharCode(evt.charCode);
+      if (inputChar == 'S') {
+        this.saveGame();
+      } else if (inputChar == 'L') {
+        this.loadGame();
+      } else if (inputChar == 'N') {
+        this.newGame();
+      }
+    } else if (eventType == 'keydown') {
+      if (evt.keyCode == 27) { // 'ESC'
+        Game.switchUiMode(Game.UIMode.gamePlay);
+      }
     }
+
   },
   renderOnMain: function( display ) {
     display.clear();
@@ -60,18 +69,20 @@ Game.UIMode.gamePersistence = {
 
   loadGame: function() {
     if(this.localStorageAvailable()) {
-      try {
+      // try {
         var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
         var state_data = JSON.parse(json_state_data);
-        // console.log('state data: ');
-        // console.dir(state_data);
+
+        Game.DATASTORE = {};
+        Game.DATASTORE.MAP = {};
+        Game.DATASTORE.ENTITY = {};
+        Game.initializeTimingEngine();
 
         // game level stuff
         Game.setRandomSeed(state_data[this.RANDOM_SEED_KEY]);
 
         // map
         for( var mapId in state_data.MAP) {
-
           if (state_data.MAP.hasOwnProperty(mapId)){
             var mapAttr = JSON.parse(state_data.MAP[mapId]);
             console.log("restoring map "+mapId+" with attributes:");
@@ -81,23 +92,38 @@ Game.UIMode.gamePersistence = {
           }
         }
 
+        ROT.RNG.getUniform(); //cycle the RNG to get new data for entity generation
+
         // entities
         for (var entityId in state_data.ENTITY) {
           if(state_data.ENTITY.hasOwnProperty(entityId)) {
             var entAttr = JSON.parse(state_data.ENTITY[entityId]);
-            Game.DATASTORE.ENTITY[entityId] = Game.EntityGenerator.create(entAttr._generator_template_key);
+            var newE = Game.EntityGenerator.create(entAttr._generator_template_key, entAttr._id);
+            Game.DATASTORE.ENTITY[entityId] = newE;
             Game.DATASTORE.ENTITY[entityId].fromJSON(state_data.ENTITY[entityId]);
           }
         }
 
         // game play
         Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
-        Game.Message.attr = state_data.MESSAGES;
+        Game.message.attr = state_data.MESSAGES;
+
+        // schedule
+        Game.initializeTimingEngine();
+        for (var schedItemId in state_data.SCHEDULE) {
+          if (state_data.SCHEDULE.hasOwnProperty(schedItemId)) {
+            if (Game.DATASTORE.ENTITY.hasOwnProperty(schedItemId)) {
+              Game.Scheduler.add(Game.DATASTORE.ENTITY[schedItemId], true, state_data.SCHEDULE[schedItemId]);
+            }
+          }
+        }
+        Game.Scheduler._queue._time = state_data.SCHEDULE_TIME;
+
         Game.switchUiMode(Game.UIMode.gamePlay);
         Game.message.sendMessage("Your game has been loaded.");
-      } catch(e) {
+      /* } catch(e) {
         Game.message.sendMessage("There is no game to load.");
-      }
+      } */
     }
   },
 
@@ -105,6 +131,15 @@ Game.UIMode.gamePersistence = {
     if(this.localStorageAvailable()){
       Game.DATASTORE.GAME_PLAY = Game.UIMode.gamePlay.attr;
       Game.DATASTORE.MESSAGES = Game.message.attr;
+
+      Game.DATASTORE.SCHEDULE = {};
+      Game.DATASTORE.SCHEDULE[Game.Scheduler._current.getId()] = 1;
+      for (var i = 0; i < Game.Scheduler._queue._eventTimes.length; i++) {
+        Game.DATASTORE.SCHEDULE[Game.Scheduler._queue._events[i].getId()] = Game.Scheduler._queue._eventTimes[i] + 1;
+      }
+      Game.DATASTORE.SCHEDULE_TIME = Game.Scheduler._queue.getTime() - 1;
+
+
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
       Game.switchUiMode(Game.UIMode.gameStart);
       Game.message.sendMessage("Your game has been saved.");
@@ -112,6 +147,10 @@ Game.UIMode.gamePersistence = {
   },
 
   newGame: function() {
+    Game.DATASTORE = {};
+    Game.DATASTORE.MAP = {};
+    Game.DATASTORE.ENTITY = {};
+    Game.initializeTimingEngine();
     Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform() * 100000));
     //Game.UIMode.gamePlay.setupNewGame();
     Game.switchUiMode(Game.UIMode.gameQuestions);
@@ -146,9 +185,6 @@ Game.UIMode.gamePersistence = {
     this[using_state_hash] = JSON.parse(json);
   }
 };
-
-
-
 
 //QUESTIONS
 Game.UIMode.gameQuestions = {
@@ -246,7 +282,7 @@ Game.UIMode.gamePlay = {
   },
   JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
-    // This bit is not in his code
+    // Graphics
     Game.DISPLAYS.main.o.clear();
     Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
 
@@ -255,12 +291,13 @@ Game.UIMode.gamePlay = {
     if(this.attr._avatarId) {
       this.setCameraToAvatar();
     }
-    Game.refresh();
     Game.TimeEngine.unlock();
+    Game.refresh();
   },
   exit: function() {
     Game.DISPLAYS.main.o.clear();
     Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
+
     console.log("Game.UIMode.gamePlay exit");
     Game.refresh();
     Game.TimeEngine.lock();
@@ -357,7 +394,7 @@ Game.UIMode.gamePlay = {
     this.attr._cameraX = Math.min(Math.max(0,sx),this.getMap().getWidth());
     this.attr._cameraY = Math.min(Math.max(0,sy),this.getMap().getHeight());
     //Only the main display should change -> no need to refresh all
-    Game.renderMain();
+    //Game.renderMain();
   },
   setCameraToAvatar: function () {
     test = this.getAvatar();
@@ -377,8 +414,9 @@ Game.UIMode.gamePlay = {
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
     this.setCameraToAvatar();
 
-    for (var ecount = 0; ecount < 80; ecount++) {
-      this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
+    for (var ecount = 0; ecount < 40; ecount++) {
+      this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getRandomWalkableLocation());
+      this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getRandomWalkableLocation());
     }
 
   },

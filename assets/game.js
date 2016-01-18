@@ -1,5 +1,5 @@
 window.onload = function() {
-    console.log("starting Waffle of Twilight - window loaded");
+    console.log("starting RGD - window loaded");
     // Check if rot.js can work on this browser
     if (!ROT.isSupported()) {
         alert("The rot.js library isn't supported by your browser.");
@@ -11,16 +11,6 @@ window.onload = function() {
         document.getElementById('wsrl-avatar-display').appendChild(   Game.getDisplay('avatar').getContainer());
         document.getElementById('wsrl-main-display').appendChild(   Game.getDisplay('main').getContainer());
         document.getElementById('wsrl-message-display').appendChild(   Game.getDisplay('message').getContainer());
-
-        var bindEventToScreen = function(eventType){
-          window.addEventListener(eventType, function(evt){
-            Game.eventHandler(eventType,evt);
-          });
-        };
-
-        // Bind Keyboard input events
-        bindEventToScreen('keypress');
-        bindEventToScreen('keydown');
 
         Game.switchUiMode(Game.UIMode.gameStart);
     }
@@ -63,18 +53,38 @@ var Game = {
     this.TRANSIENT_RNG = ROT.RNG.clone();
     Game.setRandomSeed(5 + Math.floor(this.TRANSIENT_RNG.getUniform()*100000));
 
-    Game.Scheduler = new ROT.Scheduler.Action();
-    Game.TimeEngine = new ROT.Engine(Game.Scheduler);
-    Game.TimeEngine.start();
-    Game.TimeEngine.lock();
+    // this.initializeTimingEngine();
 
     for (var displayName in this.DISPLAYS) {
       if (this.DISPLAYS.hasOwnProperty(displayName)) {
         this.DISPLAYS[displayName].o = new ROT.Display({width:Game.DISPLAYS[displayName].w, height:Game.DISPLAYS[displayName].h});
       }
     }
+    this.renderAll();
+
+    var game = this;
+    var bindEventToScreen = function(event) {
+      window.addEventListener(event, function(e) {
+        // When an event is received, send it to the
+        // screen if there is one
+        if (game._curUiMode !== null) {
+          // Send the event type and data to the screen
+          game._curUiMode.handleInput(event, e);
+        }
+      });
+    };
+    // Bind keyboard input events
+    bindEventToScreen('keypress');
+    bindEventToScreen('keydown');
+    // bindEventToScreen('keyup');
 
     this.DISPLAYS.mainOptions = JSON.parse(JSON.stringify(this.DISPLAYS.main.o.getOptions()));
+  },
+
+  initializeTimingEngine: function () {
+    // NOTE: single, central timing system for now - might have to refactor this later to deal with mutliple map stuff
+    Game.Scheduler = new ROT.Scheduler.Action();
+    Game.TimeEngine = new ROT.Engine(Game.Scheduler);
   },
 
   getRandomSeed: function () {

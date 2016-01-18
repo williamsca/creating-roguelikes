@@ -2,6 +2,8 @@ Game.DATASTORE.ENTITY = {};
 
 Game.Entity = function(template) {
   template = template || {};
+  console.log("creating entity using template");
+  console.dir(template);
   Game.Symbol.call(this, template);
   if (!('attr' in this)) { this.attr = {}; }
   this.attr._name = template.name || '';
@@ -10,17 +12,18 @@ Game.Entity = function(template) {
   this.attr._generator_template_key = template.generator_template_key || '';
   this.attr._mapId = null;
 
-  this.attr._id = Game.util.randomString(32);
+  this.attr._id = template.presetId || Game.util.randomString(32);
   Game.DATASTORE.ENTITY[this.attr._id] = this;
 
-  this._mixins = template.mixins || [];
+  // mixin stuff
+  this._mixinNames = template.mixins || [];
+  this._mixins = [];
+  for (var i = 0; i < this._mixinNames.length; i++) {
+    this._mixins.push(Game.EntityMixin[this._mixinNames[i]]);
+  }
   this._mixinTracker = {};
-  // console.dir(template);
-  // console.dir(template.mixins);
-  // console.dir(this._mixins);
-  for (var i = 0; i < this._mixins.length; i++) {
-    var mixin = this._mixins[i];
-    // console.dir(mixin);
+  for (var mi = 0; mi < this._mixins.length; mi++) {
+    var mixin = this._mixins[mi];
     this._mixinTracker[mixin.META.mixinName] = true;
     this._mixinTracker[mixin.META.mixinGroup] = true;
     for (var mixinProp in mixin) {
@@ -94,9 +97,18 @@ Game.Entity.prototype.setName = function(name) {
   this.attr._name = name;
 };
 
-Game.Entity.prototype.setPos = function(pos) {
-  this.setX(pos.x);
-  this.setY(pos.y);
+Game.Entity.prototype.setPos = function(x_or_xy, y) {
+  if (typeof x_or_xy == 'object') {
+    this.attr._x = x_or_xy.x;
+    this.attr._y = x_or_xy.y;
+  } else {
+    this.attr._x = x_or_xy;
+    this.attr._y = y;
+  }
+};
+
+Game.Entity.prototype.getPos = function () {
+  return {x:this.attr._x, y:this.attr._y};
 };
 
 Game.Entity.prototype.getX = function() {
@@ -114,11 +126,6 @@ Game.Entity.prototype.setX = function(x) {
 Game.Entity.prototype.setY = function(y) {
   this.attr._y = y;
 };
-
-Game.Entity.prototype.getPos = function () {
-  return {x:this.attr._x, y:this.attr._y};
-};
-
 
 // JSON HANDLING
 Game.Entity.prototype.toJSON = function () {
