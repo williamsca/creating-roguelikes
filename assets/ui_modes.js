@@ -241,6 +241,10 @@ Game.UIMode.gamePlay = {
     _avatarId: '',
     _answers: {
         mapType : null
+    },
+    _objective: {
+        completed : false,
+        type: null
     }
   },
   JSON_KEY: 'uiMode_gamePlay',
@@ -365,14 +369,15 @@ Game.UIMode.gamePlay = {
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
     this.setCameraToAvatar();
 
-    for (var ecount = 0; ecount < 80; ecount++) {
+    for (var ecount = 0; ecount < 0; ecount++) {
       this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
     }
 
+    this.getMap().addEntity(Game.EntityGenerator.create('key'),this.getMap().getRandomWalkableLocation());
+    this.getMap().addEntity(Game.EntityGenerator.create('exit'),this.getMap().getRandomWalkableLocation());
   },
 
   getMapType: function () {
-      console.log("huh?");
       return this.attr._answers.mapType;
 
     //   switch(Math.floor(Math.random()*3)){
@@ -431,6 +436,6 @@ Game.UIMode.gameWin = {
   renderOnMain: function(display){
     console.log("Game.UIMode.gameWin renderOnMain");
     display.clear();
-    display.drawText(4,4,"CONGRATS, YOU PRESSED A BUTTON!!!");
+    display.drawText(4,4,"CONGRATS, YOU WON!!!");
   }
 };

@@ -115,11 +115,15 @@ Game.map.prototype.renderOn = function (display, camX, camY) {
        if (tile.getName() == 'nullTile') {
          tile = Game.Tile.wallTile;
        }
-       tile.draw(display, x, y);
+       //tile.draw(display, x, y);
        var ent = this.getEntity(mapPos);
        if (ent){
+        //  console.log("Rendering Entity:");
+        //  console.dir(JSON.parse(JSON.stringify(ent)));
          //ent.draw(display,x,y)
          display.draw(x,y, [".", ent.attr._char]);
+       }else{
+         tile.draw(display, x, y);
        }
      }
    }

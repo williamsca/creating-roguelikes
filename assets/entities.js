@@ -24,3 +24,17 @@ Game.EntityGenerator.learn({
   maxHp: 2,
   mixins: [Game.EntityMixin.HitPoints, Game.EntityMixin.WanderActor, Game.EntityMixin.WalkerCorporeal]
 });
+
+Game.EntityGenerator.learn({
+  name: 'exit',
+  chr: 'E',
+  fg: '#f98',
+  mixins: [Game.EntityMixin.Exit]
+});
+
+Game.EntityGenerator.learn({
+  name: 'key',
+  chr: 'K',
+  fg: '#f98',
+  mixins: [Game.EntityMixin.Key]
+});

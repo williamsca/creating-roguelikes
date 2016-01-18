@@ -10,13 +10,21 @@ Game.EntityMixin.WalkerCorporeal = {
     var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth());
     var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight());
 
+    // INTERACT WITH EXIT
+
+
+
     // INTERACT WITH ENTITY
     if ((map.getEntity(targetX, targetY)) && map.getEntity(targetX, targetY) != Game.UIMode.gamePlay.getAvatar()) {
-      console.log(targetX);
-      console.log(targetY);
-      console.log("recipient: " + map.getEntity(targetX, targetY));
+      var Recipient = map.getEntity(targetX, targetY);
+      if(Recipient.hasMixin('Exit') || Recipient.hasMixin('Key')){
+        console.log("Exit or Key")
+        Recipient.raiseEntityEvent('interact', {actor: Recipient, recipient: this});
+        setTimeout(function() { Game.refresh() }, 1 );
+        this.raiseEntityEvent('tookTurn');
+        return true;
+      }
       this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
-      console.log(this);
       this.raiseEntityEvent('tookTurn');
       return true;
     }
@@ -177,3 +185,44 @@ Game.EntityMixin.MeleeAttacker = {
     return this.attr._MeleeAttacker_attr.attackPower;
   }
 };
+
+// EXIT MIXIN
+Game.EntityMixin.Exit = {
+  META: {
+    mixinName: 'Exit',
+    mixinGroup: 'Exit',
+  listeners: {
+    'interact': function(evtData){
+      console.log('Exit interact');
+      if (Game.UIMode.gamePlay.attr._objective.completed){
+        Game.switchUiMode(Game.UIMode.gameWin);
+      }
+    }
+  }
+}
+}
+
+// KEY MIXIN
+Game.EntityMixin.Key = {
+  META: {
+    mixinName: 'Key',
+    mixinGroup: 'Key',
+  listeners: {
+    'interact': function(evtData){
+      console.log('Key interact');
+      Game.UIMode.gamePlay.attr._objective.completed = true;
+      newPos = {
+        x : evtData.actor.getX(),
+        y : evtData.actor.getY()
+      }
+      evtData.recipient.setPos(newPos);
+      var myMap = evtData.recipient.getMap();
+      if (myMap) {
+          myMap.updateEntityLocation(evtData.recipient);
+      }
+      this.destroy();
+      //Game.UIMode.gamePlay.getMap().renderOn(Game.DISPLAYS.main.o, Game.UIMode.gamePlay.attr._cameraX, this.attr._cameraY);
+      }
+    }
+  }
+}

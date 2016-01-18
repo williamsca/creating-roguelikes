@@ -85,8 +85,8 @@ Game.MapTileSets = {
 },
 
     digger: {
-    _width: 100,
-    _height: 100,
+    _width: 20,
+    _height: 20,
     getMapTiles: function () {
       var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
       var generator = new ROT.Map.Digger(this._width, this._height);
