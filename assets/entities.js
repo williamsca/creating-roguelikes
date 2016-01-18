@@ -16,3 +16,11 @@ Game.EntityGenerator.learn({
   maxHp: 1,
   mixins: [Game.EntityMixin.HitPoints]
 });
+
+Game.EntityGenerator.learn({
+  name: 'newt',
+  chr: '~',
+  fg: '#f98',
+  maxHp: 2,
+  mixins: [Game.EntityMixin.HitPoints, Game.EntityMixin.WanderActor, Game.EntityMixin.WalkerCorporeal]
+});
