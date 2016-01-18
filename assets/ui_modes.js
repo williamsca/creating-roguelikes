@@ -246,20 +246,24 @@ Game.UIMode.gamePlay = {
   },
   JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
+    // This bit is not in his code
     Game.DISPLAYS.main.o.clear();
     Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
+
     console.log("Game.UIMode.gamePlay enter");
     Game.message.clearMessages();
     if(this.attr._avatarId) {
       this.setCameraToAvatar();
     }
     Game.refresh();
+    Game.TimeEngine.unlock();
   },
   exit: function() {
     Game.DISPLAYS.main.o.clear();
     Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
     console.log("Game.UIMode.gamePlay exit");
     Game.refresh();
+    Game.TimeEngine.lock();
   },
   getMap: function() {
     return Game.DATASTORE.MAP[this.attr._mapId];
@@ -274,41 +278,33 @@ Game.UIMode.gamePlay = {
     this.attr._avatarId = a.getId();
   },
   handleInput: function (inputType, inputData){
-
-    var inputChar = String.fromCharCode(inputData.charCode);
+    var tookTurn = false;
     // Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
     Game.renderMessage();
     if (inputType == 'keypress') {
+      var inputChar = String.fromCharCode(inputData.charCode);
       if (inputData.keyIdentifier == 'Enter') {
         Game.switchUiMode(Game.UIMode.gameWin);
         return;
       } else if (inputChar == '1') {
-        this.moveAvatar(-1, 1);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(-1, 1);
       } else if (inputChar == '2') {
-        this.moveAvatar(0, 1);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(0, 1);
       } else if (inputChar == '3') {
-        this.moveAvatar(1, 1);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(1, 1);
       } else if (inputChar == '4') {
-        this.moveAvatar(-1, 0);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(-1, 0);
       } else if (inputChar == '5') {
         // do nothing
-        Game.renderMessage();
+        tookTurn = true;
       } else if (inputChar == '6') {
-        this.moveAvatar(1, 0);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(1, 0);
       } else if (inputChar == '7') {
-        this.moveAvatar(-1, -1);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(-1, -1);
       } else if (inputChar == '8') {
-        this.moveAvatar(0, -1);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(0, -1);
       } else if (inputChar == '9') {
-        this.moveAvatar(1, -1);
-        Game.message.ageMessages();
+        tookTurn = this.moveAvatar(1, -1);
       }
       Game.refresh();
     } else if (inputType == 'keydown') {
@@ -317,6 +313,12 @@ Game.UIMode.gamePlay = {
       } else if (inputData.keyCode == 187) { // '='
         Game.switchUiMode(Game.UIMode.gamePersistence);
       }
+    }
+
+    if (tookTurn) {
+      this.getAvatar().raiseEntityEvent('actionDone');
+      Game.message.ageMessages();
+      return true;
     }
   },
   renderOnMain: function(display) {
@@ -344,7 +346,9 @@ Game.UIMode.gamePlay = {
   moveAvatar: function(dx, dy){
     if (this.getAvatar().tryWalk(this.getMap(),dx,dy)){
       this.setCameraToAvatar();
+      return true;
     }
+    return false;
   },
   moveCamera: function(dx, dy) {
     this.setCamera(this.attr._cameraX + dx, this.attr._cameraY + dy);
@@ -352,7 +356,8 @@ Game.UIMode.gamePlay = {
   setCamera: function(sx, sy) {
     this.attr._cameraX = Math.min(Math.max(0,sx),this.getMap().getWidth());
     this.attr._cameraY = Math.min(Math.max(0,sy),this.getMap().getHeight());
-    Game.refresh();
+    //Only the main display should change -> no need to refresh all
+    Game.renderMain();
   },
   setCameraToAvatar: function () {
     test = this.getAvatar();

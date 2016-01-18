@@ -23,6 +23,54 @@ Game.EntityMixin.PlayerMessager = {
   }
 };
 
+Game.EntityMixin.PlayerActor = {
+  META: {
+    mixinName: 'PlayerActor',
+    mixinGroup: 'Actor',
+    stateNamespace: '_PlayerActor_attr',
+    stateModel: {
+      baseActionDuration: 1000,
+      actingState: false,
+      currentActionDuration: 1000
+    },
+    init: function (template) {
+      Game.Scheduler.add(this, true, this.getBaseActionDuration());
+    },
+    listeners: {
+      'actionDone': function(evtData) {
+        Game.Scheduler.setDuration(this.getCurrentActionDuration());
+        this.setCurrentActionDuration(this.getBaseActionDuration());
+        Game.TimeEngine.unlock();
+      }
+    }
+  },
+  getBaseActionDuration: function() {
+    return this.attr._PlayerActor_attr.baseActionDuration;
+  },
+  setBaseActionDuration: function (n) {
+    this.attr._PlayerActor_attr.baseActionDuration = n;
+  },
+  getCurrentActionDuration: function() {
+    return this.attr._PlayerActor_attr.currentActionDuration;
+  },
+  setCurrentActionDuration: function (n) {
+    this.attr._PlayerActor_attr.currentActionDuration = n;
+  },
+  isActing: function (state) {
+    if (state !== undefined) {
+      this.attr._PlayerActor_attr.actingState = state;
+    }
+    return this.attr._PlayerActor_attr.actingState;
+  },
+  act: function() {
+    if (this.isActing()) { return; } // a gate to deal with JS timing issues
+    this.isActing(true);
+    Game.refresh();
+    Game.TimeEngine.lock();
+    this.isActing(false);
+  }
+};
+
 // WALKER
 Game.EntityMixin.WalkerCorporeal = {
   META: {
@@ -44,7 +92,6 @@ Game.EntityMixin.WalkerCorporeal = {
       console.log("recipient: " + map.getEntity(targetX, targetY));
       this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
       console.log(this);
-      this.raiseEntityEvent('tookTurn');
       return true;
     }
 
@@ -58,7 +105,6 @@ Game.EntityMixin.WalkerCorporeal = {
       if (this.getMap()) {
         this.getMap().updateEntityLocation(this);
       }
-      this.raiseEntityEvent('tookTurn');
       return true;
     } else {
       this.raiseEntityEvent('walkForbidden', {target:targetTile});
@@ -79,8 +125,8 @@ Game.EntityMixin.Chronicle = {
       deathMessage: ''
     },
     listeners: {
-      'tookTurn': function(evtData) {
-        this.trackTurn();
+      'actionDone': function(evtData) {
+        this.trackTurnCount();
       },
       'madeKill': function(evtData) {
         console.log("chronicle kill");
@@ -91,7 +137,7 @@ Game.EntityMixin.Chronicle = {
       }
     }
   },
-  trackTurn: function() {
+  trackTurnCount: function() {
     this.attr._Chronicle_attr.turnCounter++;
   },
   getTurns: function() {
@@ -197,5 +243,46 @@ Game.EntityMixin.MeleeAttacker = {
   },
   getAttackPower: function() {
     return this.attr._MeleeAttacker_attr.attackPower;
+  }
+};
+
+//##############################################################################
+// ENTITY ACTORS / AI
+
+Game.EntityMixin.PeacefulWanderActor = {
+  META: {
+    mixinName: 'PeacefulWanderActor',
+    mixinGroup: 'Actor',
+    stateNamespace: '_PeacefulWanderActor_attr',
+    stateModel: {
+      baseActionDuration: 1000,
+      currentActionDuration: 1000
+    },
+    init: function (template) {
+      Game.Scheduler.add(this, true, this.getBaseActionDuration());
+    }
+  },
+  getBaseActionDuration: function() {
+    return this.attr._PeacefulWanderActor_attr.baseActionDuration;
+  },
+  setBaseActionDuration: function(n) {
+    this.attr._PeacefulWanderActor_attr.baseActionDuration = n;
+  },
+  getCurrentActionDuration: function() {
+    return this.attr._PeacefulWanderActor_attr.currentActionDuration;
+  },
+  setCurrentActionDuration: function() {
+    this.attr._PeacefulWanderActor_attr.currentActionDuration = n;
+  },
+  getMoveCoord: function() {
+    // TODO
+  },
+  act: function() {
+    var moveTarget = this.getMoveCoord();
+    if (actor.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
+      this.tryWalk(this.getMap(), moveTarget.x, moveTarget.y);
+    }
+    Game.Scheduler.setDuration(this.getCurrentActionDuration());
+    this.setCurrentActionDuration(this.getBaseActionDuration());
   }
 };
