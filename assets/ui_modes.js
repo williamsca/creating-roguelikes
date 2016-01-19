@@ -8,6 +8,7 @@ Game.UIMode.DEFAULT_COLOR_STR = '%c{' + Game.UIMode.DEFAULT_COLOR_FG +
 Game.UIMode.gameStart = {
   enter: function() {
     console.log("INITIALIZING GAME. PREPARE YO SELF.");
+    Game.message.clearMessages();
     Game.message.sendMessage("Welcome to the Space Jam");
     //Game.refresh();
   },
