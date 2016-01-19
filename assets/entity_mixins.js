@@ -41,7 +41,7 @@ Game.EntityMixin.PlayerActor = {
         Game.Scheduler.setDuration(this.getCurrentActionDuration());
         this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-5, 5));
         setTimeout(function() {Game.TimeEngine.unlock();}, 1); // a tiny delay
-        console.log('end player acting');
+        // console.log('end player acting');
       }
     }
   },
@@ -66,7 +66,7 @@ Game.EntityMixin.PlayerActor = {
   act: function() {
     if (this.isActing()) { return; } // a gate to deal with JS timing issues
     this.isActing(true);
-    console.log('begin player acting');
+    // console.log('begin player acting');
     Game.refresh();
     Game.TimeEngine.lock();
     this.isActing(false);
@@ -102,8 +102,8 @@ Game.EntityMixin.WalkerCorporeal = {
     // TRAVEL
     var targetTile = map.getTile(targetX, targetY);
     if (targetTile.isWalkable()) {
-      console.log(targetX);
-      console.log(targetY);
+    //   console.log(targetX);
+    //   console.log(targetY);
       newPos = { x: targetX, y: targetY };
       this.setPos(newPos);
       if (this.getMap()) {
@@ -282,17 +282,17 @@ Game.EntityMixin.WanderActor = {
     return Game.util.positionsAdjacentTo({x:0, y:0}).random();
   },
   act: function() {
-    console.log('wander for ' + this.getName());
+    // console.log('wander for ' + this.getName());
     Game.TimeEngine.lock();
     var moveDeltas = this.getMoveDeltas();
     if (this.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
-      console.log('trying to walk to ' + moveDeltas.x + ' , ' + moveDeltas.y);
+    //   console.log('trying to walk to ' + moveDeltas.x + ' , ' + moveDeltas.y);
       this.tryWalk(this.getMap(), moveDeltas.x, moveDeltas.y);
     }
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-1, 10));
     this.raiseEntityEvent('actionDone');
-    console.log("end wander acting");
+    // console.log("end wander acting");
     Game.TimeEngine.unlock();
   }
 };

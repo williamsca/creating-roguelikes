@@ -106,12 +106,17 @@ Game.map.prototype.getRandomWalkableLocation = function() {
 };
 
 Game.map.prototype.renderOn = function (display, camX, camY) {
-  var dispW = display._options.width;
-  var dispH = display._options.height;
-  var xStart = camX-Math.round(dispW / 2);
-  var yStart = camY-Math.round(dispH / 2);
-  for (var x = 0; x < dispW; x++) {
-     for (var y = 0; y < dispH; y++) {
+  // var dispW = display._options.width;
+  // var dispH = display._options.height;
+  // var xStart = camX-Math.round(dispW / 2);
+  // var yStart = camY-Math.round(dispH / 2);
+  // for (var x = 0; x < dispW; x++) {
+  //    for (var y = 0; y < dispH; y++) {
+  var dims = Game.util.getDisplayDim(display);
+  var xStart = camX - Math.round(dims.w/2);
+  var yStart = camY - Math.round(dims.h/2);
+  for (var x = 0; x < dims.w; x++){
+      for( var y = 0; y < dims.h; y++) {
        // Fetch the glyph for the tile and render it to the screen
        var mapPos = {x:x+xStart,y:y+yStart};
        var tile = this.getTile(mapPos);

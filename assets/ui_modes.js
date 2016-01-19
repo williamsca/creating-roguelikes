@@ -4,6 +4,11 @@ Game.UIMode.DEFAULT_COLOR_BG = '#000';
 Game.UIMode.DEFAULT_COLOR_STR = '%c{' + Game.UIMode.DEFAULT_COLOR_FG +
 '}%b{' + Game.UIMode.DEFAULT_COLOR_BG + '}';
 
+
+
+//#####################################################################
+//#####################################################################
+
 //START
 Game.UIMode.gameStart = {
     enter: function() {
@@ -19,7 +24,7 @@ Game.UIMode.gameStart = {
     handleInput: function (inputType, inputData){
         console.log("Game.UIMode.gameStart handleInput");
         if (inputData.charCode !== 0) { // ignore the modding keys - control, shift, etc.
-            Game.switchUiMode(Game.UIMode.gamePersistence);
+            Game.switchUiMode('gamePersistence');
         }
     },
     renderOnMain: function(display){
@@ -27,19 +32,26 @@ Game.UIMode.gameStart = {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
         display.clear();
-        display.drawText(4,4,"Welcome to Colin & Diego's really great game.", fg, bg);
-        display.drawText(4,6,"Press any key to continue", fg, bg);
+        display.drawText(4,4,Game.UIMode.DEFAULT_COLOR_STR+"Welcome to Colin & Diego's really great game.", fg, bg);
+        display.drawText(4,6,Game.UIMode.DEFAULT_COLOR_STR+"Press any key to continue", fg, bg);
     }
 };
+
+
+
+//#####################################################################
+//#####################################################################
 
 //PERSISTENCE
 Game.UIMode.gamePersistence = {
     RANDOM_SEED_KEY: 'gameRandomSeed',
     enter: function() {
-        Game.KeyBinding.setKeyBinding();
+        this._storedKeyBinding = Game.KeyBinding.getKeyBinding();
+        Game.KeyBinding.setKeyBinding('persist');
         Game.refresh();
     },
     exit: function() {
+        Game.KeyBinding.setKeyBinding(this._storedKeyBinding);
         Game.KeyBinding.informPlayer();
         Game.refresh();
     },
@@ -68,17 +80,23 @@ Game.UIMode.gamePersistence = {
 
             this.newGame();
         } else if (actionBinding.actionKey == 'CANCEL') {
-            Game.switchUiMode(Game.UIMode.gamePlay);
+            if (Object.keys(Game.DATASTORE.MAP).length < 1){
+                this.newGame();
+            }else{
+                Game.switchUiMode('gamePlay');
+            }
+        } else if (actionBinding.actionKey == 'HELP') {
+            Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
+            Game.addUiMode('LAYER_textReading');
         }
+
         return false;
 
     },
     renderOnMain: function( display ) {
         display.clear();
-        var fg = Game.UIMode.DEFAULT_COLOR_FG;
-        var bg = Game.UIMode.DEFAULT_COLOR_BG;
-        display.drawText(1, 3, "Press S to save the game, L to load the saved game," +
-        " or N to start a new one");
+        display.drawText(3, 3, Game.UIMode.DEFAULT_COLOR_STR+"Press S to save the game, L to load the saved game," +
+        " or N to start a new one", 70);
         //TODO check whether local storage has a game before offering restore
         //TODO check whther a game is in progress before offering restore
     },
@@ -136,8 +154,9 @@ Game.UIMode.gamePersistence = {
             }
             Game.Scheduler._queue._time = state_data.SCHEDULE_TIME;
 
-            Game.switchUiMode(Game.UIMode.gamePlay);
+            Game.switchUiMode('gamePlay');
             Game.message.sendMessage("Your game has been loaded.");
+            Game.KeyBinding.informPlayer();
             /* } catch(e) {
             Game.message.sendMessage("There is no game to load.");
         } */
@@ -160,7 +179,7 @@ saveGame: function() {
 
 
         window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
-        Game.switchUiMode(Game.UIMode.gameStart);
+        Game.switchUiMode('gameStart');
         Game.message.sendMessage("Your game has been saved.");
     }
 },
@@ -172,7 +191,7 @@ newGame: function() {
     Game.initializeTimingEngine();
     Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform() * 100000));
     //Game.UIMode.gamePlay.setupNewGame();
-    Game.switchUiMode(Game.UIMode.gameQuestions);
+    Game.switchUiMode('gameQuestions');
 },
 localStorageAvailable: function () {
     try {
@@ -203,6 +222,52 @@ BASE_fromJSON: function(json, state_hash_name) {
     this[using_state_hash] = JSON.parse(json);
 }
 };
+
+//#####################################################################
+//#####################################################################
+
+Game.UIMode.gameWin = {
+  enter: function () {
+    console.log('game winning');
+  },
+  exit: function () {
+  },
+  render: function (display) {
+    display.drawText(1,1,Game.UIMode.DEFAULT_COLOR_STR+"You WON!!!!");
+  },
+  handleInput: function (inputType,inputData) {
+    // console.log('gameStart inputType:');
+    // console.dir(inputType);
+    // console.log('gameStart inputData:');
+    // console.dir(inputData);
+    Game.Message.clear();
+  }
+};
+
+//#############################################################################
+//#############################################################################
+
+Game.UIMode.gameLose = {
+  enter: function () {
+    console.log('game losing');
+  },
+  exit: function () {
+  },
+  render: function (display) {
+    display.drawText(1,1,Game.UIMode.DEFAULT_COLOR_STR+"You lost :(");
+  },
+  handleInput: function (inputType,inputData) {
+    // console.log('gameStart inputType:');
+    // console.dir(inputType);
+    // console.log('gameStart inputData:');
+    // console.dir(inputData);
+    Game.Message.clear();
+  }
+};
+
+//#############################################################################
+//#############################################################################
+
 
 //QUESTIONS
 Game.UIMode.gameQuestions = {
@@ -261,7 +326,7 @@ Game.UIMode.gameQuestions = {
             case 0:
             this.attr.answers.mapType = ans;
             Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
-            Game.switchUiMode(Game.UIMode.gamePlay);
+            Game.switchUiMode('gamePlay');
             return;
             default:
             console.log("Invalid question number, should not be possible");
@@ -287,13 +352,16 @@ Game.UIMode.gameQuestions = {
     }
 };
 
+//#####################################################################
+//#####################################################################
+
 //PLAY
 Game.UIMode.gamePlay = {
     attr: {
         _mapId: '',
+        _avatarId: '',
         _cameraX: 100,
         _cameraY: 100,
-        _avatarId: '',
         _answers: {
             mapType : null
         }
@@ -369,7 +437,10 @@ Game.UIMode.gamePlay = {
         else if (actionBinding.actionKey == 'CHANGE_BINDINGS'){
             Game.KeyBinding.swapToNextKeyBinding();
         }else if (actionBinding.actionKey == 'PERSISTENCE') {
-            Game.switchUiMode(Game.UIMode.gamePersistence);
+            Game.switchUiMode('gamePersistence');
+        }else if (actionBinding.actionKey == 'HELP'){
+            Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
+            Game.addUiMode('LAYER_textReading');
         }
         if (tookTurn) {
             this.getAvatar().raiseEntityEvent('actionDone');
@@ -393,10 +464,10 @@ Game.UIMode.gamePlay = {
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
-        display.drawText(1, 2, "avatar x: " + this.getAvatar().getX(), fg, bg);
-        display.drawText(1, 3, "avatar y: " + this.getAvatar().getY(), fg, bg);
-        display.drawText(1, 4, "Turns so far: " + this.getAvatar().getTurns());
-        display.drawText(1, 5, "HP: " + this.getAvatar().getCurHp());
+        display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"avatar x: " + this.getAvatar().getX(), fg, bg);
+        display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"avatar y: " + this.getAvatar().getY(), fg, bg);
+        display.drawText(1, 4, Game.UIMode.DEFAULT_COLOR_STR+"Turns so far: " + this.getAvatar().getTurns());
+        display.drawText(1, 5, Game.UIMode.DEFAULT_COLOR_STR+"HP: " + this.getAvatar().getCurHp());
 
     },
 
@@ -469,38 +540,67 @@ Game.UIMode.gamePlay = {
     }
 };
 
+//#############################################################################
+//#############################################################################
 //LOSE
-Game.UIMode.gameLose = {
+Game.UIMode.LAYER_textReading = {
+    _storedKeyBinding: '',
+    _text: 'default',
+    _renderY: 0,
+    _renderScrollLimit: 0,
     enter: function() {
-        console.log("Game.UIMode.gameLose enter");
+        this._renderY = 0;
+        Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
+        this._storedKeyBinding = Game.KeyBinding.setKeyBinding();
+        Game.KeyBinding.setKeyBinding('LAYER_textReading');
+        Game.refresh();
+        Game.specialMessage("[Esc] to exit, [ and ] for scrolling");
     },
     exit: function() {
-        console.log("Game.UIMode.gameLose exit");
-    },
-    handleInput: function (){
-        console.log("Game.UIMode.gameLose handleInput");
+        Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
+        Game.KeyBinding.setKeyBinding(this._storedKeyBinding);
+        setTimeout(function(){
+        Game.refresh();
+     }, 1);
     },
     renderOnMain: function(display){
-        console.log("Game.UIMode.gameLose renderOnMain");
         display.clear();
-        display.drawText(4,4,"You lost son");
-    }
-};
+        var dims = Game.util.getDisplayDim(display);
+        var linesTaken = display.drawText(1,this._renderY,Game.UIMode.DEFAULT_COLOR_STR+this._text, dims.w-2);
+        this._renderScrollLimit = dims.h - linesTaken;
+        if(this._renderScrollLimit > 0){ this._renderScrollLimit=0;}
+    },
+    handleInput: function (inputType,inputData) {
+   // console.log(inputType);
+   // console.dir(inputData);
+   var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
+   // console.log('action binding is');
+   // console.dir(actionBinding);
+   // console.log('----------');
+   if (! actionBinding) {
+     return false;
+   }
+   if(actionBinding.actionKey == 'CANCEL'){
+       Game.removeUiMode();
+   }
 
-//WIN
-Game.UIMode.gameWin = {
-    enter: function() {
-        console.log("Game.UIMode.gameWin enter");
-    },
-    exit: function() {
-        console.log("Game.UIMode.gameWin exit");
-    },
-    handleInput: function (){
-        console.log("Game.UIMode.gameWin handleInput");
-    },
-    renderOnMain: function(display){
-        console.log("Game.UIMode.gameWin renderOnMain");
-        display.clear();
-        display.drawText(4,4,"CONGRATS, YOU PRESSED A BUTTON!!!");
-    }
+   else if (actionBinding.actionKey == 'DATA_NAV_UP') {
+       this._renderY++;
+       if (this._renderY > 0) { this._renderY = 0; }
+       Game.renderMain();
+       return true;
+     } else if (actionBinding.actionKey == 'DATA_NAV_DOWN') {
+       this._renderY--;
+       if (this._renderY < this._renderScrollLimit) { this._renderY = this._renderScrollLimit; }
+       Game.renderMain();
+       return true;
+     }
+   return false;
+ },
+ getText: function () {
+   return this._text;
+ },
+ setText: function (t) {
+   this._text = t;
+ }
 };
