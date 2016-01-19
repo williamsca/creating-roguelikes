@@ -26,14 +26,6 @@ Game.EntityGenerator.learn({
 });
 
 Game.EntityGenerator.learn({
-  name: 'newt',
-  chr: '~',
-  fg: '#f98',
-  maxHp: 2,
-  mixins: ["HitPoints", "WanderActor", "WalkerCorporeal"]
-});
-
-Game.EntityGenerator.learn({
 name: 'angry squirrel',
 chr: '&',
 fg: '#aaa',
