@@ -14,12 +14,10 @@ Game.UIMode.gameStart = {
     enter: function() {
         console.log("INITIALIZING GAME. PREPARE YO SELF.");
         Game.message.clearMessages();
-        Game.message.sendMessage("Welcome to the Space Jam");
-        //Game.refresh();
     },
     exit: function() {
         console.log("Game.UIMode.gameStart exit");
-        //Game.refresh();
+        Game.message.clearMessages();
     },
     handleInput: function (inputType, inputData){
         console.log("Game.UIMode.gameStart handleInput");
@@ -32,8 +30,8 @@ Game.UIMode.gameStart = {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
         display.clear();
-        display.drawText(4,4,Game.UIMode.DEFAULT_COLOR_STR+"Welcome to Colin & Diego's really great game.", fg, bg);
-        display.drawText(4,6,Game.UIMode.DEFAULT_COLOR_STR+"Press any key to continue", fg, bg);
+        display.drawText(4,4,Game.UIMode.DEFAULT_COLOR_STR+"Welcome to " + Game.util.getRandomTitle() + "!", fg, bg);
+        Game.message.sendMessage("Press any key to continue.");
     }
 };
 
@@ -52,8 +50,7 @@ Game.UIMode.gamePersistence = {
     },
     exit: function() {
         Game.KeyBinding.setKeyBinding(this._storedKeyBinding);
-        Game.KeyBinding.informPlayer();
-        Game.refresh();
+        //Game.KeyBinding.informPlayer(); //Not sure where to put this.
     },
     handleInput: function (inputType, inputData) {
         // console.log(inputType);
@@ -95,8 +92,8 @@ Game.UIMode.gamePersistence = {
     },
     renderOnMain: function( display ) {
         display.clear();
-        display.drawText(3, 3, Game.UIMode.DEFAULT_COLOR_STR+"Press S to save the game, L to load the saved game," +
-        " or N to start a new one", 70);
+        display.drawText(3, 3, Game.UIMode.DEFAULT_COLOR_STR+"Press 'N' to start a new game.", 70);
+        display.drawText(3, 5, Game.UIMode.DEFAULT_COLOR_STR+"Press 'L' to load the saved game, or 'S' to save the game");
         //TODO check whether local storage has a game before offering restore
         //TODO check whther a game is in progress before offering restore
     },
@@ -223,7 +220,7 @@ BASE_fromJSON: function(json, state_hash_name) {
 }
 };
 
-//#####################################################################
+//#############################--WIN--##################################
 //#####################################################################
 
 Game.UIMode.gameWin = {
@@ -244,7 +241,7 @@ Game.UIMode.gameWin = {
   }
 };
 
-//#############################################################################
+//#############################--LOSE--#########################################
 //#############################################################################
 
 Game.UIMode.gameLose = {
@@ -261,7 +258,6 @@ Game.UIMode.gameLose = {
     // console.dir(inputType);
     // console.log('gameStart inputData:');
     // console.dir(inputData);
-    Game.Message.clear();
   }
 };
 
@@ -275,64 +271,122 @@ Game.UIMode.gameQuestions = {
         questionNum: 0,
         questions: [
             {
-                q: "Which map do you want?",
-                a1: "caves",
-                a2: "maze",
-                a3: "digger",
-                a4: "rogue"
+              q: "Which map do you want?",
+              a1: "caves", a2: "maze", a3: "digger", a4: "rogue"
+            },
+            {
+              q: "A mad philosopher has kidnapped five subjects and lashed them onto a railroad track" +
+                 "The train is rapidly approaching, but there is no way it can be stopped in time." +
+                 "From your vantage point on a cliff, you notice an enormous man, so fat that pushing him" +
+                 "into the path of the train would surely stop it. What do you do?",
+              a1: "Nothing.", a2: "Push the fat man.", a3: "Jump in front of the train.",
+              a4: "Run towards the victims to get a better view."
+            },
+            {
+              q: "Which of the following do you fear the most?",
+              a1: "Confined spaces.", a2: "Darkness.", a3: "Betrayal.", a4: "Fear is for the weak."
+            },
+            {
+              q: "You're in an art gallery. You see four paintings. Which you you look at first?",
+              a1: "'The Fall of Rapunzel' by Julio Ferres", a2: "'Thirst for More' by Deirdre Dessy",
+              a3: "'Lover's Quarrel' by Lucifer Dracanus",  a4: "'Simplicity' by Him"
+            },
+            {
+              q: "When life gives you lemons. . . ",
+              a1: "Make lemonade.", a2: "Bake lemon bars.", a3: "Squirt them into the eyes of your enemies.",
+              a4: "Design a combustible lemon."
+            },
+            {
+              q: "You wake up in a field surrounded by red roses. Strangely, the roses to the West are wilted and dying, but the rest are fine." +
+                 "You can see a solitary tree on the horizon to the North. What is your first move?",
+              a1: "Investigate the wilted flowers.", a2: "Pick a fresh rose for your beloved.",
+              a3: "Go climb the tree to get a better view.", a4: "I didn't read the question."
             }
         ],
         answers: {}
     },
     enter: function() {
-        Game.message.sendMessage("Press the number\n Next to your answer");
-        //Game.refresh();
+      Game.message.ageMessages();
+      Game.message.sendMessage("Press the number next to your answer,\n" +
+                               "or press '0' for a random selection.");
+      Game.message.ageMessages();
     },
     exit: function() {
 
     },
+    // DIEGO: I did this without the new keybinding stuff, so it will need updated
     handleInput: function (inputType, inputData){
-        var inputChar = String.fromCharCode(inputData.charCode);
-        Game.message.clearMessages();
-        var selectedAns = null;
-        switch(inputChar){
-            case "1" :
-            Game.message.sendMessage("ANSWER 1 SELECTED");
-            selectedAns = this.getQuestion().a1;
-            break;
-            case "2" :
-            Game.message.sendMessage("ANSWER 2 SELECTED");
-            selectedAns = this.getQuestion().a2;
-            break;
-            case "3" :
-            Game.message.sendMessage("ANSWER 3 SELECTED");
-            selectedAns = this.getQuestion().a3;
-            break;
-            case "4" :
-            Game.message.sendMessage("ANSWER 4 SELECTED");
-            selectedAns = this.getQuestion().a4;
-            break;
-            default :
-            Game.message.sendMessage("INVALID CHOICE");
-            return;
-        }
+      if (inputType == 'keypress') { var inputChar = String.fromCharCode(inputData.charCode); }
+      var selectedAns = null;
+      // It would be cool to have clever responses depending on what answer gets chosen
+      switch (inputChar) {
+        case undefined:
+          break;
+        case "1" :
+          Game.message.sendMessage("ANSWER 1 SELECTED");
+          selectedAns = this.getQuestion().a1;
+          break;
+        case "2" :
+          Game.message.sendMessage("ANSWER 2 SELECTED");
+          selectedAns = this.getQuestion().a2;
+          break;
+        case "3" :
+          Game.message.sendMessage("ANSWER 3 SELECTED");
+          selectedAns = this.getQuestion().a3;
+          break;
+        case "4" :
+          Game.message.sendMessage("ANSWER 4 SELECTED");
+          selectedAns = this.getQuestion().a4;
+          break;
+        case "N" : // To deal with leftover 'N' keypress
+          break;
+        case "0" : // Will need to randomly generate answers at some point
+          this.attr.answers.mapType = "caves";
+          Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
+          Game.switchUiMode('gamePlay');
+          return;
+        default :
+          console.log(inputChar);
+          Game.message.sendMessage("Please select a valid answer.");
+          return;
+      }
 
-        if(selectedAns){
+      Game.message.ageMessages();
+
+        if (selectedAns) {
             this.processAnswer(selectedAns);
         }
     },
     processAnswer: function (ans) {
         switch(this.attr.questionNum){
-            case 0:
+          case 0:
             this.attr.answers.mapType = ans;
+            break;
+          case 1:
+            // TODO
+            break;
+          case 2:
+            // TODO
+            break;
+          case 3:
+            // TODO
+            break;
+          case 4:
+            // TODO
+            break;
+          case 5:
+            // TODO
             Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
             Game.switchUiMode('gamePlay');
-            return;
-            default:
-            console.log("Invalid question number, should not be possible");
+            break;
+          default:
+          console.log("Invalid question number, should not be possible");
+          return;
         }
+        this.attr.questionNum++;
+        Game.refresh();
     },
-    getQuestion: function (){
+    getQuestion: function () {
         return this.attr.questions[this.attr.questionNum];
     },
     renderAvatarInfo: function(display) {
@@ -346,8 +400,8 @@ Game.UIMode.gameQuestions = {
         var question = this.getQuestion();
 
         display.drawText(4,4,question.q, fg, bg);
-        display.drawText(4,10,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
-        display.drawText(4,12,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
+        display.drawText(4,6,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
+        display.drawText(4,8,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
 
     }
 };
@@ -436,9 +490,9 @@ Game.UIMode.gamePlay = {
         }
         else if (actionBinding.actionKey == 'CHANGE_BINDINGS'){
             Game.KeyBinding.swapToNextKeyBinding();
-        }else if (actionBinding.actionKey == 'PERSISTENCE') {
+        } else if (actionBinding.actionKey == 'PERSISTENCE') {
             Game.switchUiMode('gamePersistence');
-        }else if (actionBinding.actionKey == 'HELP'){
+        } else if (actionBinding.actionKey == 'HELP'){
             Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
             Game.addUiMode('LAYER_textReading');
         }
@@ -464,10 +518,10 @@ Game.UIMode.gamePlay = {
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
-        display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"avatar x: " + this.getAvatar().getX(), fg, bg);
-        display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"avatar y: " + this.getAvatar().getY(), fg, bg);
+        display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
+        display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
         display.drawText(1, 4, Game.UIMode.DEFAULT_COLOR_STR+"Turns so far: " + this.getAvatar().getTurns());
-        display.drawText(1, 5, Game.UIMode.DEFAULT_COLOR_STR+"HP: " + this.getAvatar().getCurHp());
+        display.drawText(1, 5, Game.UIMode.DEFAULT_COLOR_STR+"HP: " + this.getAvatar().getCurHp() + "/" + this.getAvatar().getMaxHp());
 
     },
 

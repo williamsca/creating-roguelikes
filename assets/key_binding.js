@@ -22,8 +22,7 @@ Game.KeyBinding = {
     this.informPlayer();
   },
   informPlayer: function () {
-    Game.message.sendMessage('using '+this._curBindingKey+' key bindings');
-    Game.renderMessage();
+    Game.message.sendMessage('Using '+this._curBindingKey+' key bindings');
   },
 
   calcBindingLookups:function () {

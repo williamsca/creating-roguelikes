@@ -2,8 +2,8 @@ Game.DATASTORE.ENTITY = {};
 
 Game.Entity = function(template) {
   template = template || {};
-  console.log("creating entity using template");
-  console.dir(template);
+  //console.log("creating entity using template");
+  //console.dir(template);
   Game.Symbol.call(this, template);
   if (!('attr' in this)) { this.attr = {}; }
   this.attr._name = template.name || '';
@@ -18,8 +18,8 @@ Game.Entity = function(template) {
   // mixin stuff
   this._mixinNames = template.mixins || [];
   this._mixins = [];
-  console.log("Mixin Names:");
-  console.dir(this._mixinNames);
+  //console.log("Mixin Names:");
+  //console.dir(this._mixinNames);
   for (var i = 0; i < this._mixinNames.length; i++) {
     this._mixins.push(Game.EntityMixin[this._mixinNames[i]]);
   }

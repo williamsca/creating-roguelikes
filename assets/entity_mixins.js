@@ -7,7 +7,6 @@ Game.EntityMixin.PlayerMessager = {
     listeners: {
       'walkForbidden': function(evtData) {
         Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName() + ", n00b.");
-        //Game.renderMessage();
       },
       'dealtDamage': function(evtData) {
         Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
@@ -17,7 +16,6 @@ Game.EntityMixin.PlayerMessager = {
       },
       'killed': function(evtData) {
         Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
-        //Game.renderMessage();
       }
     }
   }
@@ -178,7 +176,7 @@ Game.EntityMixin.HitPoints = {
       curHp: 1
     },
     init:function(template) {
-      console.log(template.MaxHp);
+      // console.log(template.MaxHp);
       this.attr._HitPoints_attr.maxHp = template.maxHp || 1;
       this.attr._HitPoints_attr.curHp = template.curHp || this.attr._HitPoints_attr.maxHp;
     },
