@@ -7,17 +7,25 @@ Game.EntityMixin.PlayerMessager = {
     listeners: {
       'walkForbidden': function(evtData) {
         Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName() + ", n00b.");
-        //Game.renderMessage();
+        Game.renderMessage();
       },
       'dealtDamage': function(evtData) {
         Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
+        Game.renderMessage();
       },
       'madeKill': function(evtData) {
         Game.message.sendMessage("You killed the " + evtData.entKilled.getName());
+        Game.renderMessage();
+      },
+      'damagedBy' : function (evtData){
+        Game.message.sendMessage('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
+        Game.renderMessage();
+        Game.message.ageMessages();
       },
       'killed': function(evtData) {
         Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
-        //Game.renderMessage();
+        Game.renderMessage();
+        Game.message.ageMessages();
       }
     }
   }
@@ -67,7 +75,9 @@ Game.EntityMixin.PlayerActor = {
     if (this.isActing()) { return; } // a gate to deal with JS timing issues
     this.isActing(true);
     // console.log('begin player acting');
-    Game.refresh();
+    //Game.refresh();
+    Game.renderMain();
+    Game.renderAvatarDisplay();
     Game.TimeEngine.lock();
     this.isActing(false);
   }
