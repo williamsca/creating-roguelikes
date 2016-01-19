@@ -367,12 +367,12 @@ Game.UIMode.gamePlay = {
 
     for (var ecount = 0; ecount < 80; ecount++) {
       this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
+
     }
 
   },
 
   getMapType: function () {
-      console.log("huh?");
       return this.attr._answers.mapType;
 
     //   switch(Math.floor(Math.random()*3)){

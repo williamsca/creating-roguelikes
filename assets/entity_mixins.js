@@ -15,9 +15,9 @@ Game.EntityMixin.WalkerCorporeal = {
       console.log(targetX);
       console.log(targetY);
       console.log("recipient: " + map.getEntity(targetX, targetY));
-      this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
+      this.raiseSymbolActiveEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
       console.log(this);
-      this.raiseEntityEvent('tookTurn');
+      this.raiseSymbolActiveEvent('tookTurn');
       return true;
     }
 
@@ -33,7 +33,7 @@ Game.EntityMixin.WalkerCorporeal = {
             if (myMap) {
                 myMap.updateEntityLocation(this);
             }
-            this.raiseEntityEvent('tookTurn');
+            this.raiseSymbolActiveEvent('tookTurn');
             return true;
         }
     }catch(e){
@@ -115,16 +115,16 @@ Game.EntityMixin.HitPoints = {
         console.log("HitPoints attacked");
 
         this.takeHits(evtData.attackPower);
-        this.raiseEntityEvent('damagedBy',
+        this.raiseSymbolActiveEvent('damagedBy',
           {damager: evtData.attack, damageAmount: evtData.attackPower});
-        evtData.attacker.raiseEntityEvent('dealtDamage',
+        evtData.attacker.raiseSymbolActiveEvent('dealtDamage',
           {damagee: this, damageAmount: evtData.attackPower});
 
         // DEATH
         if (this.getCurHp() <= 0) {
-          this.raiseEntityEvent('killed',
+          this.raiseSymbolActiveEvent('killed',
             {entKilled: this, killedBy: evtData.attacker});
-          evtData.attacker.raiseEntityEvent('madeKill',
+          evtData.attacker.raiseSymbolActiveEvent('madeKill',
             {entKilled: this, killedBy: evtData.attacker});
         }
       },
@@ -169,7 +169,7 @@ Game.EntityMixin.MeleeAttacker = {
     listeners: {
       'bumpEntity': function(evtData) {
         console.log('MeleeAttacker bumpEntity');
-        evtData.recipient.raiseEntityEvent('attacked', {attacker: evtData.actor, attackPower: this.getAttackPower()});
+        evtData.recipient.raiseSymbolActiveEvent('attacked', {attacker: evtData.actor, attackPower: this.getAttackPower()});
       }
     }
   },
