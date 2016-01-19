@@ -50,6 +50,10 @@ Game.EntityMixin.PlayerActor = {
         this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-5, 5));
         setTimeout(function() {Game.TimeEngine.unlock();}, 1); // a tiny delay
         // console.log('end player acting');
+      },
+    'killed': function(evtData) {
+      Game.TimeEngine.lock();
+      Game.switchUiMode("gameLose");
       }
     }
   },
@@ -259,6 +263,103 @@ Game.EntityMixin.MeleeAttacker = {
     return this.attr._MeleeAttacker_attr.attackPower;
   }
 };
+
+
+//Sight
+Game.EntityMixin.Sight = {
+  META: {
+    mixinName: 'Sight',
+    mixinGroup: 'Sense',
+    stateNamespace: '_Sight_attr',
+    stateModel: {
+      sightRadius: 3
+    },
+    init: function (template){
+      this.attr._Sight_attr.sightRadius = template.sightRadius || 3;
+    }
+  },
+  getSightRadius: function (){
+    return this.attr._Sight_attr.sightRadius;
+  },
+  setSightRadius: function (n){
+    this._attr._Sight_attr.sightRadius = n;
+  },
+
+  canSeeEntity: function (entity) {
+    if (!entity || this.getMapId() !== entity.getMapId()) {
+      return false;
+    }
+    return this.canSeeCoord(entity.getX(), entity.getY());
+  },
+
+  canSeeCoord: function(x_or_pos, y) {
+    var otherX = x_or_pos, otherY=y;
+    if (typeof x_or_pos == 'object'){
+      otherX = x_or_pos.x;
+      otherY = x_or_pos.y;
+    }
+
+    if (Math.max(Math.abs(otherX - this.getX()),Math.abs(otherY - this.getY())) > this.attr._Sight_attr.sightRadius){
+      return false;
+    }
+
+    var inFov = this.getVisibileCells();
+    return inFov[otherX+','+otherY] || false;
+  },
+
+  getVisibileCells: function () {
+    var visibleCells = {'byDistance': {}};
+    for (var i=0; i<=this.getSightRadius(); i++) {
+      visibleCells.byDistance[i] = {};
+    }
+    this.getMap().getFov().compute(
+      this.getX(), this.getY(),
+      this.getSightRadius(),
+      function(x,y,radius,visibility) {
+        visibleCells[x+','+y] = true;
+        visibleCells.byDistance[radius][x+","+y] = true;
+      }
+    );
+    return visibleCells;
+  },
+  canSeeCoord_delta: function(dx, dy){
+    return this.canSeeCoord(this.getX()+dx,this.getY()+dy);
+  }
+};
+
+
+Game.EntityMixin.MapMemory = {
+  META: {
+    mixinName: 'MapMemory',
+    mixinGroup: 'MapMemory',
+    stateNamespace: '_MapMemory_attr',
+    stateModel: {
+      mapsHash: {}
+    },
+    init: function (template){
+      this.attr._MapMemory_attr.mapsHash = template.mapsHash || {};
+    }
+  },
+
+  rememberCoords: function(coordSet, mapId) {
+    var mapKey = mapId || this.getMapId();
+    if (! this.attr._MapMemory_attr.mapsHash[mapKey] ) {
+      this.attr._MapMemory_attr.mapsHash[mapKey] = {};
+    }
+    for (var coord in coordSet) {
+      if ( coordSet.hasOwnProperty(coord) && (coord != 'byDistace')) {
+        this.attr._MapMemory_attr.mapsHash[mapKey][coord] = true;
+      }
+    }
+  },
+
+  getRememberedCoordsForMap: function(mapId) {
+    var mapKey=mapId || this.getMapId();
+    return this.attr._MapMemory_attr.mapsHash[mapKey] || {};
+  }
+
+};
+
 
 //##############################################################################
 // ENTITY ACTORS / AI

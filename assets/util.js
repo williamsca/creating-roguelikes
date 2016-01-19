@@ -52,9 +52,17 @@ Game.util = {
      return adjPos;
  },
 
-    getDisplayDim: function (display) {
+  getDisplayDim: function (display) {
         return{w:display._options.width,h:display._options.height};
+  },
+
+  cdebug: function (a) {
+    if (typeof a == 'object') {
+      console.dir(JSON.parse(JSON.stringify(a)));
+    }else {
+      console.log(a);
     }
+  }
 
 
 
