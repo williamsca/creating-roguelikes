@@ -63,7 +63,7 @@ var Game = {
     this.renderAll();
 
     var game = this;
-    var bindEventToScreen = function(event) {
+    var bindEventToUiMode = function(event) {
       window.addEventListener(event, function(e) {
         // When an event is received, send it to the
         // screen if there is one
@@ -74,8 +74,8 @@ var Game = {
       });
     };
     // Bind keyboard input events
-    bindEventToScreen('keypress');
-    bindEventToScreen('keydown');
+    bindEventToUiMode('keypress');
+    bindEventToUiMode('keydown');
     // bindEventToScreen('keyup');
 
     this.DISPLAYS.mainOptions = JSON.parse(JSON.stringify(this.DISPLAYS.main.o.getOptions()));
