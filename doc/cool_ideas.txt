@@ -1,4 +1,0 @@
-SUPER-DUPER C00L IDEAS:
-  real-time combat???
-  mini-games/puzzles (along the lines of 'sokoban')
-  mini-map
