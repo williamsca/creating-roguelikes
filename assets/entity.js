@@ -18,6 +18,8 @@ Game.Entity = function(template) {
   // mixin stuff
   this._mixinNames = template.mixins || [];
   this._mixins = [];
+  console.log("Mixin Names:");
+  console.dir(this._mixinNames);
   for (var i = 0; i < this._mixinNames.length; i++) {
     this._mixins.push(Game.EntityMixin[this._mixinNames[i]]);
   }

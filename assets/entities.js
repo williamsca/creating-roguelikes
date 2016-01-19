@@ -30,5 +30,5 @@ Game.EntityGenerator.learn({
   chr: '~',
   fg: '#f98',
   maxHp: 2,
-  mixins: [Game.EntityMixin.HitPoints, Game.EntityMixin.WanderActor, Game.EntityMixin.WalkerCorporeal]
+  mixins: ["HitPoints", "WanderActor", "WalkerCorporeal"]
 });
