@@ -1,9 +1,9 @@
 Game.message = {
   attr: {
-    freshMessages: [],
-    staleMessages: [],
-    archivedMessages: [],
-    archiveMessageCount: 200
+    freshMessages: [], // reverse queue
+    staleMessages: [], // queue
+    archivedMessages: [], // queue
+    archiveMessageLimit: 200
   },
   renderOn: function(display) {
     display.clear();
@@ -20,19 +20,21 @@ Game.message = {
     for (staleMsgIdx = 0; staleMsgIdx < this.attr.staleMessages.length && dispRow < dispRowMax; staleMsgIdx++) {
       dispRow += display.drawText(1,dispRow,'%c{#aaa}%b{#000}'+this.attr.staleMessages[staleMsgIdx]+'%c{}%b{}',79);
     }
+  },
 
+  ageMessages: function( lastStaleMessageIdx) {
     // archive oldest stale message
     if (this.attr.staleMessages.length > 0) {
       this.attr.archivedMessages.unshift(this.attr.staleMessages.pop());
     }
 
     // archive any additional stale messages that didn't get shown
-    while (this.attr.staleMessages.length > staleMsgIdx) {
+    while (this.attr.staleMessages.length > lastStaleMessageIdx) {
       this.attr.archivedMessages.unshift(this.attr.staleMessages.pop());
     }
 
     // dump messages too old for archive
-    while (this.attr.staleMessages.length > this.attr.archiveMessageCount) {
+    while (this.attr.staleMessages.length > this.attr.archiveMessageLimit) {
       this.attr.archivedMessages.pop();
     }
 
@@ -48,5 +50,14 @@ Game.message = {
   clearMessages: function() {
     this.attr.freshMessages = [];
     this.attr.staleMessages = [];
+  },
+  getArchives: function () {
+    return this.attr.archivedMessages;
+  },
+  getArchiveMessageLimit: function() {
+    return this.attr.archiveMessageLimit;
+  },
+  setArchiveMessageLimit: function (n) {
+    this.attr.archiveMessageLimit = n;
   }
 };

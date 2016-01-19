@@ -5,8 +5,8 @@ Game.EntityGenerator.learn({
   chr: '@',
   fg: '#dda',
   maxHp: 10,
-  mixins: [Game.EntityMixin.WalkerCorporeal, Game.EntityMixin.HitPoints,
-           Game.EntityMixin.Chronicle, Game.EntityMixin.MeleeAttacker]
+  mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "HitPoints",
+           "Chronicle", "MeleeAttacker"]
 });
 
 Game.EntityGenerator.learn({
@@ -14,7 +14,15 @@ Game.EntityGenerator.learn({
   chr: '%',
   fg: '#6b6',
   maxHp: 1,
-  mixins: [Game.EntityMixin.HitPoints]
+  mixins: ["HitPoints"]
+});
+
+Game.EntityGenerator.learn({
+  name: 'newt',
+  chr: '~',
+  fg: '#98',
+  maxHp: 2,
+  mixins: ["HitPoints", "WanderActor", "WalkerCorporeal"]
 });
 
 Game.EntityGenerator.learn({

@@ -8,6 +8,7 @@ Game.UIMode.DEFAULT_COLOR_STR = '%c{' + Game.UIMode.DEFAULT_COLOR_FG +
 Game.UIMode.gameStart = {
   enter: function() {
     console.log("INITIALIZING GAME. PREPARE YO SELF.");
+    Game.message.clearMessages();
     Game.message.sendMessage("Welcome to the Space Jam");
     //Game.refresh();
   },
@@ -15,9 +16,11 @@ Game.UIMode.gameStart = {
     console.log("Game.UIMode.gameStart exit");
     //Game.refresh();
   },
-  handleInput: function (){
+  handleInput: function (inputType, inputData){
     console.log("Game.UIMode.gameStart handleInput");
-    Game.switchUiMode(Game.UIMode.gamePersistence);
+    if (inputData.charCode !== 0) { // ignore the modding keys - control, shift, etc.
+      Game.switchUiMode(Game.UIMode.gamePersistence);
+    }
   },
   renderOnMain: function(display){
     console.log("Game.UIMode.gameStart renderOnMain");
@@ -39,14 +42,21 @@ Game.UIMode.gamePersistence = {
     Game.refresh();
   },
   handleInput: function (eventType, evt) {
-    var inputChar = String.fromCharCode(evt.charCode);
-    if (inputChar == 'S') {
-      this.saveGame();
-    } else if (inputChar == 'L') {
-      this.loadGame();
-    } else if (inputChar == 'N') {
-      this.newGame();
+    if (eventType == 'keypress') {
+      var inputChar = String.fromCharCode(evt.charCode);
+      if (inputChar == 'S') {
+        this.saveGame();
+      } else if (inputChar == 'L') {
+        this.loadGame();
+      } else if (inputChar == 'N') {
+        this.newGame();
+      }
+    } else if (eventType == 'keydown') {
+      if (evt.keyCode == 27) { // 'ESC'
+        Game.switchUiMode(Game.UIMode.gamePlay);
+      }
     }
+
   },
   renderOnMain: function( display ) {
     display.clear();
@@ -60,18 +70,20 @@ Game.UIMode.gamePersistence = {
 
   loadGame: function() {
     if(this.localStorageAvailable()) {
-      try {
+      // try {
         var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
         var state_data = JSON.parse(json_state_data);
-        // console.log('state data: ');
-        // console.dir(state_data);
+
+        Game.DATASTORE = {};
+        Game.DATASTORE.MAP = {};
+        Game.DATASTORE.ENTITY = {};
+        Game.initializeTimingEngine();
 
         // game level stuff
         Game.setRandomSeed(state_data[this.RANDOM_SEED_KEY]);
 
         // map
         for( var mapId in state_data.MAP) {
-
           if (state_data.MAP.hasOwnProperty(mapId)){
             var mapAttr = JSON.parse(state_data.MAP[mapId]);
             console.log("restoring map "+mapId+" with attributes:");
@@ -81,28 +93,54 @@ Game.UIMode.gamePersistence = {
           }
         }
 
+        ROT.RNG.getUniform(); //cycle the RNG to get new data for entity generation
+
         // entities
         for (var entityId in state_data.ENTITY) {
           if(state_data.ENTITY.hasOwnProperty(entityId)) {
             var entAttr = JSON.parse(state_data.ENTITY[entityId]);
-            Game.DATASTORE.ENTITY[entityId] = Game.EntityGenerator.create(entAttr._generator_template_key);
+            var newE = Game.EntityGenerator.create(entAttr._generator_template_key, entAttr._id);
+            Game.DATASTORE.ENTITY[entityId] = newE;
             Game.DATASTORE.ENTITY[entityId].fromJSON(state_data.ENTITY[entityId]);
           }
         }
 
         // game play
         Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
+        Game.message.attr = state_data.MESSAGES;
+
+        // schedule
+        Game.initializeTimingEngine();
+        for (var schedItemId in state_data.SCHEDULE) {
+          if (state_data.SCHEDULE.hasOwnProperty(schedItemId)) {
+            if (Game.DATASTORE.ENTITY.hasOwnProperty(schedItemId)) {
+              Game.Scheduler.add(Game.DATASTORE.ENTITY[schedItemId], true, state_data.SCHEDULE[schedItemId]);
+            }
+          }
+        }
+        Game.Scheduler._queue._time = state_data.SCHEDULE_TIME;
+
         Game.switchUiMode(Game.UIMode.gamePlay);
         Game.message.sendMessage("Your game has been loaded.");
-      } catch(e) {
+      /* } catch(e) {
         Game.message.sendMessage("There is no game to load.");
-      }
+      } */
     }
   },
 
   saveGame: function() {
     if(this.localStorageAvailable()){
       Game.DATASTORE.GAME_PLAY = Game.UIMode.gamePlay.attr;
+      Game.DATASTORE.MESSAGES = Game.message.attr;
+
+      Game.DATASTORE.SCHEDULE = {};
+      Game.DATASTORE.SCHEDULE[Game.Scheduler._current.getId()] = 1;
+      for (var i = 0; i < Game.Scheduler._queue._eventTimes.length; i++) {
+        Game.DATASTORE.SCHEDULE[Game.Scheduler._queue._events[i].getId()] = Game.Scheduler._queue._eventTimes[i] + 1;
+      }
+      Game.DATASTORE.SCHEDULE_TIME = Game.Scheduler._queue.getTime() - 1;
+
+
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
       Game.switchUiMode(Game.UIMode.gameStart);
       Game.message.sendMessage("Your game has been saved.");
@@ -110,6 +148,10 @@ Game.UIMode.gamePersistence = {
   },
 
   newGame: function() {
+    Game.DATASTORE = {};
+    Game.DATASTORE.MAP = {};
+    Game.DATASTORE.ENTITY = {};
+    Game.initializeTimingEngine();
     Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform() * 100000));
     //Game.UIMode.gamePlay.setupNewGame();
     Game.switchUiMode(Game.UIMode.gameQuestions);
@@ -145,11 +187,7 @@ Game.UIMode.gamePersistence = {
   }
 };
 
-
-
-
 //QUESTIONS
-
 Game.UIMode.gameQuestions = {
     attr: {
         questionNum: 0,
@@ -230,7 +268,7 @@ Game.UIMode.gameQuestions = {
     display.drawText(4,12,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
 
   }
-}
+};
 
 //PLAY
 Game.UIMode.gamePlay = {
@@ -245,20 +283,25 @@ Game.UIMode.gamePlay = {
   },
   JSON_KEY: 'uiMode_gamePlay',
   enter: function() {
+    // Graphics
     Game.DISPLAYS.main.o.clear();
     Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
+
     console.log("Game.UIMode.gamePlay enter");
     Game.message.clearMessages();
     if(this.attr._avatarId) {
       this.setCameraToAvatar();
     }
+    Game.TimeEngine.unlock();
     Game.refresh();
   },
   exit: function() {
     Game.DISPLAYS.main.o.clear();
     Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
+
     console.log("Game.UIMode.gamePlay exit");
     Game.refresh();
+    Game.TimeEngine.lock();
   },
   getMap: function() {
     return Game.DATASTORE.MAP[this.attr._mapId];
@@ -273,34 +316,34 @@ Game.UIMode.gamePlay = {
     this.attr._avatarId = a.getId();
   },
   handleInput: function (inputType, inputData){
-
-    var inputChar = String.fromCharCode(inputData.charCode);
-    Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
+    var tookTurn = false;
+    // Game.message.sendMessage("You pressed the '" + inputChar + "' key.");
     Game.renderMessage();
     if (inputType == 'keypress') {
+      var inputChar = String.fromCharCode(inputData.charCode);
       if (inputData.keyIdentifier == 'Enter') {
         Game.switchUiMode(Game.UIMode.gameWin);
         return;
       } else if (inputChar == '1') {
-        this.moveAvatar(-1, 1);
+        tookTurn = this.moveAvatar(-1, 1);
       } else if (inputChar == '2') {
-        this.moveAvatar(0, 1);
+        tookTurn = this.moveAvatar(0, 1);
       } else if (inputChar == '3') {
-        this.moveAvatar(1, 1);
+        tookTurn = this.moveAvatar(1, 1);
       } else if (inputChar == '4') {
-        this.moveAvatar(-1, 0);
+        tookTurn = this.moveAvatar(-1, 0);
       } else if (inputChar == '5') {
         // do nothing
+        tookTurn = true;
       } else if (inputChar == '6') {
-        this.moveAvatar(1, 0);
+        tookTurn = this.moveAvatar(1, 0);
       } else if (inputChar == '7') {
-        this.moveAvatar(-1, -1);
+        tookTurn = this.moveAvatar(-1, -1);
       } else if (inputChar == '8') {
-        this.moveAvatar(0, -1);
+        tookTurn = this.moveAvatar(0, -1);
       } else if (inputChar == '9') {
-        this.moveAvatar(1, -1);
+        tookTurn = this.moveAvatar(1, -1);
       }
-      // move mobs?
       Game.refresh();
     } else if (inputType == 'keydown') {
       if (inputData.keyCode == 27) { // Esc
@@ -308,6 +351,12 @@ Game.UIMode.gamePlay = {
       } else if (inputData.keyCode == 187) { // '='
         Game.switchUiMode(Game.UIMode.gamePersistence);
       }
+    }
+
+    if (tookTurn) {
+      this.getAvatar().raiseEntityEvent('actionDone');
+      Game.message.ageMessages();
+      return true;
     }
   },
   renderOnMain: function(display) {
@@ -331,13 +380,13 @@ Game.UIMode.gamePlay = {
     display.drawText(1, 5, "HP: " + this.getAvatar().getCurHp());
 
   },
-  moveMobs: function() {
 
-  },
   moveAvatar: function(dx, dy){
     if (this.getAvatar().tryWalk(this.getMap(),dx,dy)){
       this.setCameraToAvatar();
+      return true;
     }
+    return false;
   },
   moveCamera: function(dx, dy) {
     this.setCamera(this.attr._cameraX + dx, this.attr._cameraY + dy);
@@ -345,7 +394,8 @@ Game.UIMode.gamePlay = {
   setCamera: function(sx, sy) {
     this.attr._cameraX = Math.min(Math.max(0,sx),this.getMap().getWidth());
     this.attr._cameraY = Math.min(Math.max(0,sy),this.getMap().getHeight());
-    Game.refresh();
+    //Only the main display should change -> no need to refresh all
+    //Game.renderMain();
   },
   setCameraToAvatar: function () {
     test = this.getAvatar();
@@ -356,7 +406,7 @@ Game.UIMode.gamePlay = {
   setupNewGame: function (answers) {
     this.attr._answers = answers;
     mapType = this.getMapType();
-    console.log(mapType)
+    console.log(mapType);
 
 
     this.setMap(new Game.map(mapType));
@@ -365,8 +415,9 @@ Game.UIMode.gamePlay = {
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
     this.setCameraToAvatar();
 
-    for (var ecount = 0; ecount < 80; ecount++) {
-      this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
+    for (var ecount = 0; ecount < 40; ecount++) {
+      this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getRandomWalkableLocation());
+      this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getRandomWalkableLocation());
     }
 
   },
