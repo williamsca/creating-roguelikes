@@ -1,0 +1,5 @@
+TODO
+ - Fix and extend monster AI
+ - Fix entity interactions
+ - Fog appearance
+ - 

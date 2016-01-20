@@ -226,6 +226,9 @@ BASE_fromJSON: function(json, state_hash_name) {
 Game.UIMode.gameWin = {
   enter: function () {
     console.log('game winning');
+    Game.TimeEngine.lock();
+    Game.renderDisplayAvatar();
+    Game.renderDisplayMain();
   },
   exit: function () {
   },
@@ -247,6 +250,9 @@ Game.UIMode.gameWin = {
 Game.UIMode.gameLose = {
   enter: function () {
     console.log('game losing');
+    Game.TimeEngine.lock();
+    Game.renderDisplayAvatar();
+    Game.renderDisplayMain();
   },
   exit: function () {
   },
@@ -505,9 +511,14 @@ Game.UIMode.gamePlay = {
         return false;
     },
     renderOnMain: function(display) {
-        var fg = Game.UIMode.DEFAULT_COLOR_FG;
-        var bg = Game.UIMode.DEFAULT_COLOR_BG;
-        this.getMap().renderOn(display, this.attr._cameraX, this.attr._cameraY);
+        var seenCells = this.getAvatar().getVisibileCells();
+        this.getMap().renderOn(display,this.attr._cameraX, this.attr._cameraY, {
+          visibleCells:seenCells,
+          maskedCells:this.getAvatar().getRememberedCoordsForMap()
+        });
+
+        this.getAvatar().rememberCoords(seenCells);
+
         console.log("Game.UIMode.gamePlay renderOnMain");
         //this.renderAvatar(display);
     },
@@ -560,7 +571,7 @@ Game.UIMode.gamePlay = {
         this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
         this.setCameraToAvatar();
 
-        for (var ecount = 0; ecount < 10; ecount++) {
+        for (var ecount = 0; ecount < 50; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getRandomWalkableLocation());
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getRandomWalkableLocation());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getRandomWalkableLocation());
