@@ -15,7 +15,7 @@ Game.EntityMixin.PlayerMessager = {
         Game.message.sendMessage("You killed the " + evtData.entKilled.getName());
       },
       'damagedBy' : function (evtData){
-        Game.message.sendMessage('the '+evtDatadamager.getName()+' hit you for '+evtData.damageAmount);
+        Game.message.sendMessage('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
         Game.message.ageMessages();
       },
       'killed': function(evtData) {
@@ -45,9 +45,9 @@ Game.EntityMixin.PlayerActor = {
         setTimeout(function() {Game.TimeEngine.unlock();}, 1); // a tiny delay
         // console.log('end player acting');
       },
-    'killed': function(evtData) {
-      Game.TimeEngine.lock();
-      Game.switchUiMode("gameLose");
+      'killed': function(evtData) {
+        //Game.TimeEngine.lock();
+        Game.switchUiMode("gameLose");
       }
     }
   },
@@ -85,8 +85,33 @@ Game.EntityMixin.PlayerActor = {
 Game.EntityMixin.WalkerCorporeal = {
   META: {
     mixinName: 'WalkerCorporeal',
-    mixinGroup: 'Walker'
-  },
+    mixinGroup: 'Walker',
+    listeners: {
+      'adjacentMove': function(evtData) {
+        var map = this.getMap();
+        var dx = evtData.dx, dy = evtData.dy;
+        var targetX = Math.min(Math.max(0,this.getX() + dx),map.getWidth()-1);
+        var targetY = Math.min(Math.max(0,this.getY() + dy),map.getHeight()-1);
+        if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
+          this.raiseEntityEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+          return {madeAdjacentMove: true};
+        }
+        var targetTile = map.getTile(targetX, targetY);
+        if (targetTile.isWalkable()) {
+          this.setPos(targetX, targetY);
+          if (map) {
+            map.updateEntityLocation(this);
+          }
+          return {madeAdjacentMove: true};
+        } else {
+          this.raiseEntityEvent('walkForbidden', {target:targetTile});
+        }
+        return {madeAdjacentMove: false};
+      }
+    }
+  }
+};
+  /*
   tryWalk: function(map, dx, dy) {
     var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth() - 1);
     var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight() - 1);
@@ -101,7 +126,7 @@ Game.EntityMixin.WalkerCorporeal = {
     }
 
     // INTERACT WITH ENTITY
-    if ((map.getEntity(targetX, targetY)) /*&& map.getEntity(targetX, targetY) != Game.UIMode.gamePlay.getAvatar()*/) {
+    if ((map.getEntity(targetX, targetY)) {
       console.log(this.getName() + " bumped " + map.getEntity(targetX, targetY));
       this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
       return true;
@@ -123,7 +148,7 @@ Game.EntityMixin.WalkerCorporeal = {
       return false;
     }
   }
-};
+};*/
 
 // CHRONICLE
 Game.EntityMixin.Chronicle = {
@@ -196,7 +221,7 @@ Game.EntityMixin.HitPoints = {
 
         this.takeHits(evtData.attackPower);
         this.raiseEntityEvent('damagedBy',
-          {damager: evtData.attack, damageAmount: evtData.attackPower});
+          {damager: evtData.attacker, damageAmount: evtData.attackPower});
         evtData.attacker.raiseEntityEvent('dealtDamage',
           {damagee: this, damageAmount: evtData.attackPower});
 
@@ -248,7 +273,8 @@ Game.EntityMixin.MeleeAttacker = {
     },
     listeners: {
       'bumpEntity': function(evtData) {
-        console.log('MeleeAttacker bumpEntity');
+        console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
+
         evtData.recipient.raiseEntityEvent('attacked', {attacker: evtData.actor, attackPower: this.getAttackPower()});
       }
     }
@@ -391,11 +417,12 @@ Game.EntityMixin.WanderActor = {
     // console.log('wander for ' + this.getName());
     Game.TimeEngine.lock();
     var moveDeltas = this.getMoveDeltas();
-    if (this.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
+    this.raiseEntityEvent('adjacentMove', {dx:moveDeltas.x, dy:moveDeltas.y});
+    /*if (this.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
     //   console.log('trying to walk to ' + moveDeltas.x + ' , ' + moveDeltas.y);
 
       this.tryWalk(this.getMap(), moveDeltas.x, moveDeltas.y);
-    }
+    }*/
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-1, 10));
     this.raiseEntityEvent('actionDone');

@@ -251,8 +251,8 @@ Game.UIMode.gameLose = {
   enter: function () {
     console.log('game losing');
     Game.TimeEngine.lock();
-    Game.renderDisplayAvatar();
-    Game.renderDisplayMain();
+    Game.renderAvatar();
+    Game.renderMain();
   },
   exit: function () {
   },
@@ -471,10 +471,8 @@ Game.UIMode.gamePlay = {
             return false;
         }
         var tookTurn = false;
+        console.log("tookTurn: " + tookTurn);
 
-
-
-        var tookTurn = false;
         if        (actionBinding.actionKey == 'MOVE_UL') {
             tookTurn = this.moveAvatar(-1 ,-1);
         } else if (actionBinding.actionKey == 'MOVE_U') {
@@ -537,12 +535,21 @@ Game.UIMode.gamePlay = {
 
     },
 
-    moveAvatar: function(dx, dy){
+    moveAvatar: function(pdx, pdy){
+      var moveResp = this.getAvatar().raiseEntityEvent('adjacentMove', {dx:pdx, dy:pdy});
+      //console.log("madeAdjacentMove[0]:" + moveResp.madeAdjacentMove[0]);
+      if (moveResp.madeAdjacentMove && moveResp.madeAdjacentMove[0]) {
+        this.setCameraToAvatar();
+        return true;
+      }
+      return false;
+      /*
         if (this.getAvatar().tryWalk(this.getMap(),dx,dy)){
             this.setCameraToAvatar();
             return true;
         }
         return false;
+        */
     },
     moveCamera: function(dx, dy) {
         this.setCamera(this.attr._cameraX + dx, this.attr._cameraY + dy);
