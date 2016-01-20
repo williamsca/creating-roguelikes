@@ -11,12 +11,19 @@ Game.EntityMixin.PlayerMessager = {
       'dealtDamage': function(evtData) {
         Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
       },
+      'attackAvoided': function(evtData) {
+        Game.Message.send('you avoided the '+evtData.attacker.getName());
+        Game.Message.ageMessages(); // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
+      },
+      'attackMissed': function(evtData) {
+        Game.message.sendMessage('you missed the '+evtData.recipient.getName());
+      },
       'madeKill': function(evtData) {
         Game.message.sendMessage("You killed the " + evtData.entKilled.getName());
       },
       'damagedBy' : function (evtData){
         Game.message.sendMessage('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
-        Game.message.ageMessages();
+        Game.message.ageMessages(); // Maybe don't do this
       },
       'killed': function(evtData) {
         Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
@@ -90,12 +97,22 @@ Game.EntityMixin.WalkerCorporeal = {
       'adjacentMove': function(evtData) {
         var map = this.getMap();
         var dx = evtData.dx, dy = evtData.dy;
-        var targetX = Math.min(Math.max(0,this.getX() + dx),map.getWidth()-1);
-        var targetY = Math.min(Math.max(0,this.getY() + dy),map.getHeight()-1);
+        var targetX = this.getX() + dx;
+        var targetY = this.getY() + dy;
+
+        // EDGE OF MAP
+        if ((targetX < 0) || (targetX >= map.getWidth()) || (targetY < 0) || (targetY >= map.getHeight())) {
+          this.raiseEntityEvent('walkForbidden', {target: Game.Tile.wallTile});
+          return {madeAdjacentMove: false};
+        }
+
+        // OTHER ENTITY
         if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
           this.raiseEntityEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
           return {madeAdjacentMove: true};
         }
+
+        // TILE
         var targetTile = map.getTile(targetX, targetY);
         if (targetTile.isWalkable()) {
           this.setPos(targetX, targetY);
@@ -111,44 +128,6 @@ Game.EntityMixin.WalkerCorporeal = {
     }
   }
 };
-  /*
-  tryWalk: function(map, dx, dy) {
-    var targetX = Math.min(Math.max(0, this.getX() + dx), map.getWidth() - 1);
-    var targetY = Math.min(Math.max(0, this.getY() + dy), map.getHeight() - 1);
-    // console.log('tryWalk deltas: ' + dx + ' , ', + dy + ' ' + this.getName());
-    // console.log('tryWalk initial pos: '+this.getX()+','+this.getY()+' '+this.getName());
-    // console.log('tryWalk: '+targetX+','+targetY+' '+this.getName());
-
-    // EDGE OF MAP
-    if ((this.getX() === targetX) && (this.getY() === targetY)) {
-      this.raiseEntityEvent('walkForbidden', {target: Game.Tile.wallTile});
-      return false;
-    }
-
-    // INTERACT WITH ENTITY
-    if ((map.getEntity(targetX, targetY)) {
-      console.log(this.getName() + " bumped " + map.getEntity(targetX, targetY));
-      this.raiseEntityEvent('bumpEntity', {actor: this, recipient:map.getEntity(targetX, targetY)});
-      return true;
-    }
-
-    // TRAVEL
-    var targetTile = map.getTile(targetX, targetY);
-    if (targetTile.isWalkable()) {
-    //   console.log(targetX);
-    //   console.log(targetY);
-      newPos = { x: targetX, y: targetY };
-      this.setPos(newPos);
-      if (this.getMap()) {
-        this.getMap().updateEntityLocation(this);
-      }
-      return true;
-    } else {
-      this.raiseEntityEvent('walkForbidden', {target:targetTile});
-      return false;
-    }
-  }
-};*/
 
 // CHRONICLE
 Game.EntityMixin.Chronicle = {
@@ -219,11 +198,11 @@ Game.EntityMixin.HitPoints = {
       'attacked': function(evtData) {
         console.log("HitPoints attacked");
 
-        this.takeHits(evtData.attackPower);
+        this.takeHits(evtData.attackDamage);
         this.raiseEntityEvent('damagedBy',
-          {damager: evtData.attacker, damageAmount: evtData.attackPower});
+          {damager: evtData.attacker, damageAmount: evtData.attackDamage});
         evtData.attacker.raiseEntityEvent('dealtDamage',
-          {damagee: this, damageAmount: evtData.attackPower});
+          {damagee: this, damageAmount: evtData.attackDamage});
 
         // DEATH
         if (this.getCurHp() <= 0) {
@@ -266,24 +245,81 @@ Game.EntityMixin.MeleeAttacker = {
     mixinGroup: 'Attacker',
     stateNamespace: '_MeleeAttacker_attr',
     stateModel: {
-      attackPower: 1
+      attackHit: 1,
+      attackDamage: 1,
+      attackActionDuration: 1000
     },
     init: function (template) {
-      this.attr._MeleeAttacker_attr.attackPower = template.attackPower || 1;
+      this.attr._MeleeAttacker_attr.attackDamage = template.attackDamage || 1;
+      this.attr._MeleeAttacker_attr.attackActionDuration = template.attackActionDuration || 1000;
     },
     listeners: {
       'bumpEntity': function(evtData) {
         console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
-
-        evtData.recipient.raiseEntityEvent('attacked', {attacker: evtData.actor, attackPower: this.getAttackPower()});
+        var hitValResp = this.raiseEntityEvent('calcAttackHit');
+        var avoidValResp = evtData.recipient.raiseEntityEvent('calcAttackAvoid');
+        Game.util.cdebug(avoidValResp);
+        var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
+        var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
+        if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
+          var hitDamageResp = this.raiseEntityEvent('calcAttackDamage');
+          var damageMitigateResp = evtData.recipient.raiseEntityEvent('calcDamageMitigation');
+          evtData.recipient.raiseEntityEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
+        } else {
+          evtData.recipient.raiseEntityEvent('attackAvoided',{attacker:evtData.actor,recipient:evtData.recipient});
+          evtData.actor.raiseEntityEvent('attackMissed',{attacker:evtData.actor,recipient:evtData.recipient});
+        }
+        this.setCurrentActionDuration(this.attr._MeleeAttacker_attr.attackActionDuration);
       }
+    },
+    'calcAttackHit': function(evtData) {
+      // console.log('MeleeAttacker bumpEntity');
+      return {attackHit:this.getAttackHit()};
+    },
+    'calcAttackDamage': function(evtData) {
+      // console.log('MeleeAttacker bumpEntity');
+      return {attackDamage:this.getAttackDamage()};
     }
   },
-  getAttackPower: function() {
-    return this.attr._MeleeAttacker_attr.attackPower;
+  getAttackHit: function() {
+    return this.attr._MeleeAttacker_attr.attackHit;
+  },
+  getAttackDamage: function() {
+    return this.attr._MeleeAttacker_attr.attackDamage;
   }
 };
 
+Game.EntityMixin.MeleeDefender = {
+  META: {
+    mixinName: 'MeleeDefender',
+    mixinGroup: 'Defender',
+    stateNamespace: '_MeleeDefenderr_attr',
+    stateModel:  {
+      attackAvoid: 0,
+      damageMitigation: 0
+    },
+    init: function (template) {
+      this.attr._MeleeDefenderr_attr.attackAvoid = template.attackAvoid || 0;
+      this.attr._MeleeDefenderr_attr.damageMitigation = template.damageMitigation || 0;
+    },
+    listeners: {
+      'calcAttackAvoid': function(evtData) {
+        // console.log('MeleeDefender calcAttackAvoid');
+        return {attackAvoid:this.getAttackAvoid()};
+      },
+      'calcDamageMitigation': function(evtData) {
+        // console.log('MeleeAttacker bumpEntity');
+        return {damageMitigation:this.getDamageMitigation()};
+      }
+    }
+  },
+  getAttackAvoid: function () {
+    return this.attr._MeleeDefenderr_attr.attackAvoid;
+  },
+  getDamageMitigation: function () {
+    return this.attr._MeleeDefenderr_attr.damageMitigation;
+  }
+};
 
 //Sight
 Game.EntityMixin.Sight = {
@@ -296,7 +332,13 @@ Game.EntityMixin.Sight = {
     },
     init: function (template){
       this.attr._Sight_attr.sightRadius = template.sightRadius || 3;
+    },
+    listeners: {
+      'senseForEntity': function(evtData) {
+        return {entitySensed: this.canSeeEntity(evtData.senseForEntity)};
+      }
     }
+
   },
   getSightRadius: function (){
     return this.attr._Sight_attr.sightRadius;
@@ -395,6 +437,8 @@ Game.EntityMixin.WanderActor = {
     },
     init: function (template) {
       Game.Scheduler.add(this, true, Game.util.randomInt(2, this.getBaseActionDuration()));
+      this.attr._WanderActor_attr.baseActionDuration = template.wanderActionDuration || 1000;
+      this.attr._WanderActor_attr.currentActionDuration = this.attr._WanderActor_attr.baseActionDuration;
     }
   },
   getBaseActionDuration: function() {
@@ -425,6 +469,79 @@ Game.EntityMixin.WanderActor = {
     }*/
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-1, 10));
+    this.raiseEntityEvent('actionDone');
+    // console.log("end wander acting");
+    Game.TimeEngine.unlock();
+  }
+};
+
+Game.EntityMixin.WanderChaserActor = {
+  META: {
+    mixinName: 'WanderChaserActor',
+    mixinGroup: 'Actor',
+    stateNamespace: '_WanderChaserActor_attr',
+    stateModel:  {
+      baseActionDuration: 1000,
+      currentActionDuration: 1000
+    },
+    init: function (template) {
+      Game.Scheduler.add(this,true, Game.util.randomInt(2,this.getBaseActionDuration()));
+      this.attr._WanderChaserActor_attr.baseActionDuration = template.wanderChaserActionDuration || 1000;
+      this.attr._WanderChaserActor_attr.currentActionDuration = this.attr._WanderChaserActor_attr.baseActionDuration;
+    }
+  },
+  getBaseActionDuration: function () {
+    return this.attr._WanderChaserActor_attr.baseActionDuration;
+  },
+  setBaseActionDuration: function (n) {
+    this.attr._WanderChaserActor_attr.baseActionDuration = n;
+  },
+  getCurrentActionDuration: function () {
+    return this.attr._WanderChaserActor_attr.currentActionDuration;
+  },
+  setCurrentActionDuration: function (n) {
+    this.attr._WanderChaserActor_attr.currentActionDuration = n;
+  },
+  getMoveDeltas: function () {
+    var avatar = Game.getAvatar();
+    var senseResp = this.raiseEntityEvent('senseForEntity',{senseForEntity:avatar});
+    if (Game.util.compactBooleanArray_or(senseResp.entitySensed)) {
+
+      // build a path instance for the avatar
+      var source = this;
+      var map = this.getMap();
+      var path = new ROT.Path.AStar(avatar.getX(), avatar.getY(), function(x, y) {
+          // If an entity is present at the tile, can't move there.
+          var entity = map.getEntity(x, y);
+          if (entity && entity !== avatar && entity !== source) {
+              return false;
+          }
+          return map.getTile(x, y).isWalkable();
+      }, {topology: 8});
+
+      // compute the path from here to there
+      var count = 0;
+      var moveDeltas = {x:0,y:0};
+      path.compute(this.getX(), this.getY(), function(x, y) {
+          if (count == 1) {
+              moveDeltas.x = x - source.getX();
+              moveDeltas.y = y - source.getY();
+          }
+          count++;
+      });
+
+      return moveDeltas;
+    }
+    return Game.util.positionsAdjacentTo({x:0,y:0}).random();
+  },
+  act: function () {
+    Game.TimeEngine.lock();
+    // console.log("begin wander acting");
+    // console.log('wander for '+this.getName());
+    var moveDeltas = this.getMoveDeltas();
+    this.raiseEntityEvent('adjacentMove',{dx:moveDeltas.x,dy:moveDeltas.y});
+    Game.Scheduler.setDuration(this.getCurrentActionDuration());
+    this.setCurrentActionDuration(this.getBaseActionDuration()+Game.util.randomInt(-10,10));
     this.raiseEntityEvent('actionDone');
     // console.log("end wander acting");
     Game.TimeEngine.unlock();

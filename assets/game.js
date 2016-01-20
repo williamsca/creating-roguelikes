@@ -145,31 +145,34 @@ var Game = {
       this.DISPLAYS.message.o.drawText(1,1,'%c{#fff}%b{#000}'+msg,79);
   },
 
- getCurUiMode: function () {
-     var uiModeName = this._uiModeNameStack[0];
-     if (uiModeName){
-         return Game.UIMode[uiModeName];
-     }
-     return null;
- },
- switchUiMode: function (newUiModeName){
+  getAvatar: function() {
+    return Game.UIMode.gamePlay.getAvatar();
+  },
+
+  getCurUiMode: function () {
+    var uiModeName = this._uiModeNameStack[0];
+      if (uiModeName) {
+        return Game.UIMode[uiModeName];
+      }
+      return null;
+  },
+  switchUiMode: function (newUiModeName) {
      if (newUiModeName.startsWith('LAYER_')) {
        console.log('cannot switchUiMode to layer '+newUiModeName);
        return;
      }
      var curMode = this.getCurUiMode();
      if(curMode !== null){
-         curMode.exit();
+       curMode.exit();
      }
      this._uiModeNameStack[0] = newUiModeName;
      var newMode = Game.UIMode[newUiModeName];
      if (newMode){
-         newMode.enter();
+       newMode.enter();
      }
-
      this.renderAll();
- },
- addUiMode: function (newUiModeLayerName){
+   },
+   addUiMode: function (newUiModeLayerName) {
      if (! newUiModeLayerName.startsWith('LAYER_')) {
        console.log('addUiMode not possible for non-layer '+newUiModeLayerName);
        return;
@@ -180,20 +183,19 @@ var Game = {
          newMode.enter();
      }
      //this.renderAll();
- },
- removeUiMode: function() {
-     var curMode = this.getCurUiMode();
+   },
+   removeUiMode: function() {
+    var curMode = this.getCurUiMode();
      if(curMode !== null){
          curMode.exit();
      }
      this._uiModeNameStack.shift();
      this.renderAll();
- },
+   },
 
-  eventHandler: function(eventType, evt) {
-    if (this.getCurUiMode() !== null && this.getCurUiMode().hasOwnProperty('handleInput')){
-      this.getCurUiMode().handleInput(eventType, evt);
-    }
-  }
-
+   eventHandler: function(eventType, evt) {
+     if (this.getCurUiMode() !== null && this.getCurUiMode().hasOwnProperty('handleInput')){
+       this.getCurUiMode().handleInput(eventType, evt);
+     }
+   }
 };
