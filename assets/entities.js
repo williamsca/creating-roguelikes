@@ -5,9 +5,11 @@ Game.EntityGenerator.learn({
   chr: '@',
   fg: '#dda',
   maxHp: 10,
-  sightRadius: 5,
+  sightRadius: 20,
+  attackAvoid: 1,
+  attackDamage: 2,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
-           "Chronicle", "MeleeAttacker"]
+           "Chronicle", "MeleeAttacker", "MeleeDefender"]
 });
 
 Game.EntityGenerator.learn({
@@ -27,10 +29,24 @@ Game.EntityGenerator.learn({
 });
 
 Game.EntityGenerator.learn({
+  name: 'attack slug',
+  chr: '~',
+  fg: '#ff9',
+  maxHp: 4,
+  sightRadius: 4,
+  attackPower: 1,
+  wanderChaserActionDuration: 1200,
+  attackActionDuration: 300,
+  mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
+});
+
+Game.EntityGenerator.learn({
 name: 'angry squirrel',
 chr: '&',
 fg: '#aaa',
 maxHp: 3,
 attackPower: 2,
-mixins: ["HitPoints", "WanderActor", "WalkerCorporeal", "MeleeAttacker"]
+attackAvoid: 2,
+damageMitigation: 1,
+mixins: ["HitPoints", "WanderActor", "WalkerCorporeal", "MeleeAttacker", "MeleeDefender"]
 });
