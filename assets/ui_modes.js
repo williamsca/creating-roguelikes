@@ -559,9 +559,10 @@ Game.UIMode.gamePlay = {
         this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
         this.setCameraToAvatar();
 
-        for (var ecount = 0; ecount < 40; ecount++) {
+        for (var ecount = 0; ecount < 10; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getRandomWalkableLocation());
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getRandomWalkableLocation());
+            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getRandomWalkableLocation());
         }
 
     },
