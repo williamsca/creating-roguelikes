@@ -309,7 +309,7 @@ Game.UIMode.gameQuestions = {
       Game.message.ageMessages();
       Game.message.sendMessage("Press the number next to your answer,\n" +
                                "or press '0' for a random selection.");
-      Game.message.ageMessages();
+      // Game.message.ageMessages();
     },
     exit: function() {
 
@@ -496,6 +496,7 @@ Game.UIMode.gamePlay = {
             Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
             Game.addUiMode('LAYER_textReading');
         }
+        console.log(tookTurn);
         if (tookTurn) {
             this.getAvatar().raiseEntityEvent('actionDone');
             Game.message.ageMessages();

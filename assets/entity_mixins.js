@@ -10,20 +10,16 @@ Game.EntityMixin.PlayerMessager = {
       },
       'dealtDamage': function(evtData) {
         Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
-        Game.renderMessage();
       },
       'madeKill': function(evtData) {
         Game.message.sendMessage("You killed the " + evtData.entKilled.getName());
-        Game.renderMessage();
       },
       'damagedBy' : function (evtData){
         Game.message.sendMessage('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
-        Game.renderMessage();
         Game.message.ageMessages();
       },
       'killed': function(evtData) {
         Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
-        Game.message.ageMessages();
       }
     }
   }

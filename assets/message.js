@@ -47,6 +47,8 @@ Game.message = {
     while (this.attr.freshMessages.length > 0) {
       this.attr.staleMessages.unshift(this.attr.freshMessages.pop());
     }
+    
+    Game.renderMessage();
   },
   sendMessage: function(msg) {
     this.attr.freshMessages.push(msg);
