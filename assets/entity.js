@@ -93,6 +93,10 @@ Game.Entity.prototype.setMap = function(map) {
   this.attr._mapId = map.getId();
 };
 
+Game.Entity.prototype.getMapId = function() {
+  return this.attr._mapId;
+}
+
 Game.Entity.prototype.getName = function() {
   return this.attr._name;
 };
@@ -111,6 +115,13 @@ Game.Entity.prototype.setPos = function(x_or_xy, y) {
   }
 };
 
+Game.Entity.prototype.draw = function (display, x, y, isMasked) {
+    if (isMasked) {
+    display.draw(x,y,"m");
+    } else {
+    display.draw(x,y,[".",this.getChar()]);//, this.attr._fg, this.attr._bg);
+  }
+};
 Game.Entity.prototype.getPos = function () {
   return {x:this.attr._x, y:this.attr._y};
 };

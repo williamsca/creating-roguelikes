@@ -52,23 +52,31 @@ Game.util = {
      return adjPos;
    },
 
-    getDisplayDim: function (display) {
+  getDisplayDim: function (display) {
         return{w:display._options.width,h:display._options.height};
     },
 
 
-    getRandomTitle: function () {
-      // adverbs
-      var arrayR = ["Randomly", "Richly", "Recently", "Realistically", "Rotundly", "Royally", "Rigorously", "Rudely", "Rarely", "Relatively", "Ruthlessly"]
-      // adjectives or past-tense verbs
-      var arrayG = ["Glorious", "Glimmering", "Gossamer", "Gallant", "Generated", "Grown", "Green", "Guarded", "Gasping", "Glamerous"]
-      // nouns
-      var arrayD = ["Delinquents", "Dinosaurs", "Devils", "Dungeons", "Dads", "Doorknobs", "Dinner", "Denmark", "Doors", "Dwarves", "Dandelions"]
+  getRandomTitle: function () {
+    // adverbs
+    var arrayR = ["Randomly", "Richly", "Recently", "Realistically", "Rotundly", "Royally", "Rigorously", "Rudely", "Rarely", "Relatively", "Ruthlessly"]
+    // adjectives or past-tense verbs
+    var arrayG = ["Glorious", "Glimmering", "Gossamer", "Gallant", "Generated", "Grown", "Green", "Guarded", "Gasping", "Glamerous"]
+    // nouns
+    var arrayD = ["Delinquents", "Dinosaurs", "Devils", "Dungeons", "Dads", "Doorknobs", "Dinner", "Denmark", "Doors", "Dwarves", "Dandelions"]
 
-      return "'" + arrayR[Game.util.randomInt(0, arrayR.length - 1)] + " " +
-             arrayG[Game.util.randomInt(0, arrayG.length - 1)] + " " +
-             arrayD[Game.util.randomInt(0, arrayD.length - 1)] + "'";
+    return "'" + arrayR[Game.util.randomInt(0, arrayR.length - 1)] + " " +
+           arrayG[Game.util.randomInt(0, arrayG.length - 1)] + " " +
+           arrayD[Game.util.randomInt(0, arrayD.length - 1)] + "'";
+  },
+
+  cdebug: function (a) {
+    if (typeof a == 'object') {
+      console.dir(JSON.parse(JSON.stringify(a)));
+    } else {
+      console.log(a);
     }
+  }
 
 
 
