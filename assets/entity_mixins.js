@@ -15,7 +15,7 @@ Game.EntityMixin.PlayerMessager = {
         Game.message.sendMessage("You killed the " + evtData.entKilled.getName());
       },
       'damagedBy' : function (evtData){
-        Game.message.sendMessage('the '+evtDatadamager.getName()+' hit you for '+evtData.damageAmount);
+        Game.message.sendMessage('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
         Game.message.ageMessages();
       },
       'killed': function(evtData) {
@@ -297,11 +297,11 @@ Game.EntityMixin.Sight = {
       return false;
     }
 
-    var inFov = this.getVisibileCells();
+    var inFov = this.getVisibleCells();
     return inFov[otherX+','+otherY] || false;
   },
 
-  getVisibileCells: function () {
+  getVisibleCells: function () {
     var visibleCells = {'byDistance': {}};
     for (var i=0; i<=this.getSightRadius(); i++) {
       visibleCells.byDistance[i] = {};
@@ -341,7 +341,7 @@ Game.EntityMixin.MapMemory = {
       this.attr._MapMemory_attr.mapsHash[mapKey] = {};
     }
     for (var coord in coordSet) {
-      if ( coordSet.hasOwnProperty(coord) && (coord != 'byDistace')) {
+      if ( coordSet.hasOwnProperty(coord) && (coord != 'byDistance')) {
         this.attr._MapMemory_attr.mapsHash[mapKey][coord] = true;
       }
     }

@@ -22,7 +22,7 @@ Game.map = function (mapTileSetName, presetId) {
 
 Game.map.prototype.setUpFov = function () {
   var map = this;
-  this._fov = new ROT.FOV.DiscreteShadowcasting(function(x, y) {
+  this._fov = new ROT.FOV.RecursiveShadowcasting( function(x, y) {
     return !map.getTile(x,y).isOpaque();  }, {topology: 8});
 
 };
@@ -181,15 +181,17 @@ Game.map.prototype.renderOn = function (display, camX, camY, renderOptions) {
        var mapCoord = mapPos.x+','+mapPos.y;
 
         if ( ! (( checkCellsVisible && visibleCells[mapCoord]) || (checkCellsMasked && maskedCells[mapCoord]))){
+          display.draw(x,y,"m");
           continue;
         }
 
       var tile = this.getTile(mapPos);
-      if (tile.getName() == 'nullTiles') {
+      if (tile.getName() == 'nullTile') {
         tile = Game.Tile.wallTile;
       }
+
       if (showVisibleTiles && visibleCells[mapCoord]){
-        tile.draw(display,x,y);
+        tile.draw(display,x,y, false);
       }else if (showMaskedTiles && maskedCells[mapCoord]){
         tile.draw(display,x,y,true);
       }
@@ -199,42 +201,41 @@ Game.map.prototype.renderOn = function (display, camX, camY, renderOptions) {
             ent.draw(display,x,y);
           }else if (showMaskedEntities && maskedCells[mapCoord]){
             ent.draw(display,x,y,true);
-
          }
        }
      }
    }
 };
 
-Game.map.prototype.renderFovOn = function (display, camX, camY, radius){
-  var dims = Game.util.getDisplayDim(display);
-  var xStart = camX - Math.round(dims.w/2);
-  var yStart = camY - Math.round(dims.h/2);
-
-  // Track fov visibility
-  var inFov = {};
-  this._fov.compute(camX, camY, radius, function(x, y, radius, visibility) {
-    inFov[x + "," + y] = true;
-  });
-
-  for (var x = 0; x < dims.w; x++){
-    for (var y = 0; y < dims.h; y++){
-      var mapPos = {x: x+xStart, y: y+yStart};
-      if( inFov[mapPos.x+','+mapPos.y] ) {
-        var tile = this.getTile(mapPos);
-        if(tile.getName() == 'nullTile') {
-          tile = Game.Tile.wallTile;
-        }
-        tile.draw(display, x, y);
-        var ent = this.getEntity(mapPos);
-        if(ent) {
-          ent.draw(display,x,y);
-        }
-      }
-    }
-  }
-  return inFov;
-};
+// Game.map.prototype.renderFovOn = function (display, camX, camY, radius){
+//   var dims = Game.util.getDisplayDim(display);
+//   var xStart = camX - Math.round(dims.w/2);
+//   var yStart = camY - Math.round(dims.h/2);
+//
+//   // Track fov visibility
+//   var inFov = {};
+//   this._fov.compute(camX, camY, radius, function(x, y, radius, visibility) {
+//     inFov[x + "," + y] = true;
+//   });
+//
+//   for (var x = 0; x < dims.w; x++){
+//     for (var y = 0; y < dims.h; y++){
+//       var mapPos = {x: x+xStart, y: y+yStart};
+//       if( inFov[mapPos.x+','+mapPos.y] ) {
+//         var tile = this.getTile(mapPos);
+//         if(tile.getName() == 'nullTile') {
+//           tile = Game.Tile.wallTile;
+//         }
+//         tile.draw(display, x, y);
+//         var ent = this.getEntity(mapPos);
+//         if(ent) {
+//           ent.draw(display,x,y);
+//         }
+//       }
+//     }
+//   }
+//   return inFov;
+// };
 
 Game.map.prototype.toJSON = function () {
   var json = Game.UIMode.gamePersistence.BASE_toJSON.call(this);

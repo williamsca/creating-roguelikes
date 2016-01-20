@@ -21,8 +21,11 @@ Game.Symbol.prototype.getBg = function () {
 Game.Symbol.prototype.draw = function (display, x, y, isMasked) {
     if (isMasked) {
     // TODO add transparent thing!! Make it a filter not a opaque block
-    console.log("Drawing Fog");
-    display.draw(x,y,"m");
+      if (this.getName() == "wall"){
+        display.draw(x,y,"$");
+      }else{
+        display.draw(x,y,"*");
+      }
     } else {
     display.draw(x,y,this.getChar());//, this.attr._fg, this.attr._bg);
   }
