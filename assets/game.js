@@ -102,7 +102,12 @@ var Game = {
     return this.DISPLAYS[displayName].o;
   },
 
-  //getHeight
+  getDisplayHeight: function (displayId) {
+      if (this.DISPLAYS.hasOwnProperty(displayId)) {
+          return this.DISPLAYS[displayId].h;
+      }
+      return null;
+  },
 
   refresh: function() {
     this.renderAll();
@@ -121,15 +126,20 @@ var Game = {
     }
 
 
-    if (this.getCurUiMode() !== null && this.getCurUiMode().hasOwnProperty('renderAvatarInfo')){
+    if ('renderAvatarInfo' in this.getCurUiMode()){
       this.getCurUiMode().renderAvatarInfo(this.DISPLAYS.avatar.o);
     } else{
       this.DISPLAYS.avatar.o.drawText(2,1,"avatar display");
     }
   },
   renderMain: function() {
-    if (this.getCurUiMode() !== null && this.getCurUiMode().hasOwnProperty('renderOnMain')){
-      this.getCurUiMode().renderOnMain(this.DISPLAYS.main.o);
+    if (this.getCurUiMode() === null) {
+      return;
+    }
+
+
+    if ('renderOnMain' in this.getCurUiMode()){
+        this.getCurUiMode().renderOnMain(this.DISPLAYS.main.o);
     } else{
       this.DISPLAYS.main.o.drawText(2,1,"main display");
     }
@@ -185,12 +195,15 @@ var Game = {
      //this.renderAll();
    },
    removeUiMode: function() {
+    console.log("REMOVING UIMODE");
     var curMode = this.getCurUiMode();
      if(curMode !== null){
          curMode.exit();
      }
      this._uiModeNameStack.shift();
-     this.renderAll();
+
+     //Might break something..
+     //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
    },
 
    eventHandler: function(eventType, evt) {
