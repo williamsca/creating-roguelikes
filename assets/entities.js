@@ -5,7 +5,7 @@ Game.EntityGenerator.learn({
   chr: '@',
   fg: '#dda',
   maxHp: 10,
-  sightRadius: 20,
+  sightRadius: 5,
   attackAvoid: 1,
   attackDamage: 2,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",

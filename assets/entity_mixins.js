@@ -12,8 +12,8 @@ Game.EntityMixin.PlayerMessager = {
         Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
       },
       'attackAvoided': function(evtData) {
-        Game.Message.send('you avoided the '+evtData.attacker.getName());
-        Game.Message.ageMessages(); // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
+        Game.message.sendMessage('you avoided the '+evtData.attacker.getName());
+        Game.message.ageMessages(); // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
       },
       'attackMissed': function(evtData) {
         Game.message.sendMessage('you missed the '+evtData.recipient.getName());
@@ -23,11 +23,7 @@ Game.EntityMixin.PlayerMessager = {
       },
       'damagedBy' : function (evtData){
         Game.message.sendMessage('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
-<<<<<<< HEAD
-        Game.message.ageMessages();
-=======
         Game.message.ageMessages(); // Maybe don't do this
->>>>>>> f_entity_events
       },
       'killed': function(evtData) {
         Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
