@@ -23,9 +23,11 @@ Game.Symbol.prototype.draw = function (display, x, y, isMasked) {
     // TODO add transparent thing!! Make it a filter not a opaque block
       if (this.getName() == "wall"){
         display.draw(x,y,"$");
-      }else{
+    }else if (this.getName() == 'floor'){
         display.draw(x,y,"*");
-      }
+    }else {
+        display.draw(x,y,"?");
+    }
     } else {
     display.draw(x,y,this.getChar());//, this.attr._fg, this.attr._bg);
   }
@@ -33,3 +35,5 @@ Game.Symbol.prototype.draw = function (display, x, y, isMasked) {
 
 Game.Symbol.NULL_SYMBOL = new Game.Symbol();
 Game.Symbol.AVATAR = new Game.Symbol('@', '#dda');
+
+Game.Symbol.ITEM_PILE = new Game.Symbol({chr:'P', fg: "#dcc"});

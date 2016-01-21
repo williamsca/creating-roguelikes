@@ -103,11 +103,7 @@ Game.UIMode.gamePersistence = {
             // try {
             var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
             var state_data = JSON.parse(json_state_data);
-
-            Game.DATASTORE = {};
-            Game.DATASTORE.MAP = {};
-            Game.DATASTORE.ENTITY = {};
-            Game.initializeTimingEngine();
+            this._resetGameDataStructures();
 
             // game level stuff
             Game.setRandomSeed(state_data[this.RANDOM_SEED_KEY]);
@@ -132,6 +128,16 @@ Game.UIMode.gamePersistence = {
                     var newE = Game.EntityGenerator.create(entAttr._generator_template_key, entAttr._id);
                     Game.DATASTORE.ENTITY[entityId] = newE;
                     Game.DATASTORE.ENTITY[entityId].fromJSON(state_data.ENTITY[entityId]);
+                }
+            }
+
+            // items
+            for (var itemId in state_data.ITEM){
+                if (state_data.ITEM.hasOwnProperty(itemId)) {
+                    var itemAttr = JSON.parse(state_data.ITEM[itemId]);
+                    var newI = Game.ItemGenerator.create(itemAttr._generator_template_key, itemAttr._id);
+                    Game.DATASTORE.ITEM[itemId] = newI;
+                    Game.DATASTORE.ITEM[itemId].fromJson(state_data.ITEM[itemId]);
                 }
             }
 
@@ -182,14 +188,18 @@ saveGame: function() {
 },
 
 newGame: function() {
+    this._resetGameDataStructures();
+    Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform() * 100000));
+    Game.switchUiMode('gameQuestions');
+},
+_resetGameDataStructures: function() {
     Game.DATASTORE = {};
     Game.DATASTORE.MAP = {};
     Game.DATASTORE.ENTITY = {};
+    Game.DATASTORE.ITEM = {};
     Game.initializeTimingEngine();
-    Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform() * 100000));
-    //Game.UIMode.gamePlay.setupNewGame();
-    Game.switchUiMode('gameQuestions');
 },
+
 localStorageAvailable: function () {
     try {
         var x = '__storage_test__';
@@ -502,7 +512,7 @@ Game.UIMode.gamePlay = {
         }
         console.log(tookTurn);
         if (tookTurn) {
-            this.getAvatar().raiseEntityEvent('actionDone');
+            this.getAvatar().raiseSymbolActiveEvent('actionDone');
             Game.message.ageMessages();
             return true;
         }
@@ -520,7 +530,7 @@ Game.UIMode.gamePlay = {
         console.log("Game.UIMode.gamePlay renderOnMain");
         //this.renderAvatar(display);
     },
-    
+
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
@@ -532,7 +542,7 @@ Game.UIMode.gamePlay = {
     },
 
     moveAvatar: function(pdx, pdy){
-      var moveResp = this.getAvatar().raiseEntityEvent('adjacentMove', {dx:pdx, dy:pdy});
+      var moveResp = this.getAvatar().raiseSymbolActiveEvent('adjacentMove', {dx:pdx, dy:pdy});
       //console.log("madeAdjacentMove[0]:" + moveResp.madeAdjacentMove[0]);
       if (moveResp.madeAdjacentMove && moveResp.madeAdjacentMove[0]) {
         this.setCameraToAvatar();
@@ -571,16 +581,23 @@ Game.UIMode.gamePlay = {
         this.setMap(new Game.map(mapType));
         this.setAvatar(Game.EntityGenerator.create('avatar'));
 
-        this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
+        this.getMap().addEntity(this.getAvatar(),this.getMap().getWalkablePosition());
         this.setCameraToAvatar();
 
+        var itemPos = '';
         for (var ecount = 0; ecount < 10; ecount++) {
-            this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getRandomWalkableLocation());
-            // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getRandomWalkableLocation());
-            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getRandomWalkableLocation());
-            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getRandomWalkableLocation());
-        }
+            this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
 
+            itemPos = this.getMap().getWalkablePosition();
+            this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
+        }
+        this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
+
+
+    console.log("New Game Set up");
     },
 
     getMapType: function () {
