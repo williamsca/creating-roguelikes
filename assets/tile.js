@@ -35,6 +35,6 @@ Game.Tile.prototype.getName = function() {
 
  Game.Tile.nullTile = new Game.Tile({name: 'nullTile'});
  Game.Tile.floorTile = new Game.Tile({name: 'floor', chr: '.', walkable: true, transparent:true});
- Game.Tile.wallTile = new Game.Tile({name: 'wall', chr: '#'});
+ Game.Tile.wallTile = new Game.Tile({name: 'wall', chr: '#', transparent:true});
  // Added this so the message makes sense when the player reaches the end of the map
  Game.Tile.boundaryTile = new Game.Tile({name: 'edge of the map'});

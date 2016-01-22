@@ -509,7 +509,7 @@ Game.UIMode.gamePlay = {
         return false;
     },
     renderOnMain: function(display) {
-        var seenCells = this.getAvatar().getVisibileCells();
+        var seenCells = this.getAvatar().getVisibleCells();
         this.getMap().renderOn(display,this.attr._cameraX, this.attr._cameraY, {
           visibleCells:seenCells,
           maskedCells:this.getAvatar().getRememberedCoordsForMap()
@@ -520,11 +520,7 @@ Game.UIMode.gamePlay = {
         console.log("Game.UIMode.gamePlay renderOnMain");
         //this.renderAvatar(display);
     },
-    // renderAvatar: function(display) {
-    //   console.log("Avatar Rendered")
-    //   this.attr._avatar.draw(display, this.attr._avatar.getX()-this.attr._cameraX+display._options.width / 2,
-    //                                    this.attr._avatar.getY()-this.attr._cameraY+display._options.height / 2);
-    // },
+    
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;

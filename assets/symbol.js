@@ -1,9 +1,9 @@
-Game.Symbol = function (properties) {
-  properties = properties || {};
+Game.Symbol = function (template) {
+  template = template || {};
   if (! ('attr' in this)) { this.attr = {}; }
-  this.attr._char = properties.chr || ' ';
-  this.attr._fg = properties.fg || Game.UIMode.DEFAULT_COLOR_FG;
-  this.attr._bg = properties.bg || Game.UIMode.DEFAULT_COLOR_BG;
+  this.attr._char = template.chr || ' ';
+  this.attr._fg = template.fg || Game.UIMode.DEFAULT_COLOR_FG;
+  this.attr._bg = template.bg || Game.UIMode.DEFAULT_COLOR_BG;
 };
 
 Game.Symbol.prototype.getChar = function () {
@@ -21,8 +21,11 @@ Game.Symbol.prototype.getBg = function () {
 Game.Symbol.prototype.draw = function (display, x, y, isMasked) {
     if (isMasked) {
     // TODO add transparent thing!! Make it a filter not a opaque block
-    console.log("Drawing Fog");
-    display.draw(x,y,"m");
+      if (this.getName() == "wall"){
+        display.draw(x,y,"$");
+      }else{
+        display.draw(x,y,"*");
+      }
     } else {
     display.draw(x,y,this.getChar());//, this.attr._fg, this.attr._bg);
   }

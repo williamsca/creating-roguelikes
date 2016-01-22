@@ -365,11 +365,11 @@ Game.EntityMixin.Sight = {
       return false;
     }
 
-    var inFov = this.getVisibileCells();
+    var inFov = this.getVisibleCells();
     return inFov[otherX+','+otherY] || false;
   },
 
-  getVisibileCells: function () {
+  getVisibleCells: function () {
     var visibleCells = {'byDistance': {}};
     for (var i=0; i<=this.getSightRadius(); i++) {
       visibleCells.byDistance[i] = {};
@@ -409,7 +409,7 @@ Game.EntityMixin.MapMemory = {
       this.attr._MapMemory_attr.mapsHash[mapKey] = {};
     }
     for (var coord in coordSet) {
-      if ( coordSet.hasOwnProperty(coord) && (coord != 'byDistace')) {
+      if ( coordSet.hasOwnProperty(coord) && (coord != 'byDistance')) {
         this.attr._MapMemory_attr.mapsHash[mapKey][coord] = true;
       }
     }
