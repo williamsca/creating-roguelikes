@@ -127,11 +127,8 @@ var Game = {
       return;
     }
 
-
     if ('renderAvatarInfo' in this.getCurUiMode()){
       this.getCurUiMode().renderAvatarInfo(this.DISPLAYS.avatar.o);
-    } else{
-      this.DISPLAYS.avatar.o.drawText(2,1,"avatar display");
     }
   },
   renderMain: function() {
