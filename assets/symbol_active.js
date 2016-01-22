@@ -2,7 +2,7 @@ Game.SymbolActive = function(template) {
   template = template || {};
   Game.Symbol.call(this, template);
   this.attr._name = template.name || '';
-  this.attr._decription = template.decription || 'completlt uninteresting';
+  this.attr._decription = template.decription || 'completely uninteresting';
   this.attr._id = template.presetId || Game.util.uniqueId();
 
   // mixin stuff
@@ -54,6 +54,13 @@ Game.SymbolActive.prototype.getName = function() {
 
 Game.SymbolActive.prototype.setName = function(name) {
   this.attr._name = name;
+};
+
+Game.SymbolActive.prototype.getDescription = function() {
+  return this.attr._description;
+};
+Game.SymbolActive.prototype.setDescription = function(descr) {
+  this.attr._description = descr;
 };
 
 Game.SymbolActive.prototype.getDescription = function() {

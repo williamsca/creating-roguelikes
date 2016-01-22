@@ -1,5 +1,6 @@
 TODO
- - Fix and extend monster AI
- - Fix entity interactions
- - Fog appearance
+ - Fix and extend monster AI [X]
+ - Fix entity interactions   [X]
+ - Fog appearance            [ ]
+ - Attacks always miss?      [ ]
  - 

@@ -45,6 +45,8 @@ var Game = {
 
   DATASTORE: {},
 
+  DeadAvatar: null,
+
   Scheduler: null,
   TimeEngine: null,
 
@@ -166,6 +168,14 @@ var Game = {
       }
       return null;
   },
+
+  getCurUiModeName: function () {
+    var uiModeName = this._uiModeNameStack[0];
+    if (uiModeName) {
+      return uiModeName;
+    }
+    return null;
+  },
   switchUiMode: function (newUiModeName) {
      if (newUiModeName.startsWith('LAYER_')) {
        console.log('cannot switchUiMode to layer '+newUiModeName);
@@ -202,7 +212,8 @@ var Game = {
      }
      this._uiModeNameStack.shift();
 
-     //Might break something..
+     //THIS IS NECESSARY FOR TILESETS DIEGO,
+     //BUT WE CAN'T TURN IT ON UNTIL ALL THINGS IN MAIN HAVE A TILE ASSIGNED (INCLUDING TEXT!!!)
      //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
    },
 
@@ -210,5 +221,20 @@ var Game = {
      if (this.getCurUiMode() !== null && this.getCurUiMode().hasOwnProperty('handleInput')){
        this.getCurUiMode().handleInput(eventType, evt);
      }
+   },
+
+   removeUiModeAllLayers: function () {
+     var curModeName = this.getCurUiModeName();
+     while ((curModeName !== null) && curModeName.startsWith('LAYER_')) {
+       var curMode = this.getCurUiMode();
+       curMode.exit();
+       this._uiModeNameStack.shift();
+       curModeName = this.getCurUiModeName();
+     }
+     // curMode = this.getCurUiMode();
+     // if (curMode !== null) {
+     //   curMode.enter();
+     // }
+     // this.renderDisplayAll();
    }
 };

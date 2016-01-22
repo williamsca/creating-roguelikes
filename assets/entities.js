@@ -2,6 +2,7 @@ Game.EntityGenerator = new Game.Generator('entities', Game.Entity);
 
 Game.EntityGenerator.learn({
   name: 'avatar',
+  description: 'Pro T. A. Gonist',
   chr: '@',
   fg: '#dda',
   maxHp: 10,
@@ -9,12 +10,14 @@ Game.EntityGenerator.learn({
   attackAvoid: 1,
   attackDamage: 2,
   inventoryCapacity: 35,
+  maxFood: 400,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
-           "Chronicle", "MeleeAttacker", "MeleeDefender", "InventoryHolder"]
+           "Chronicle", "MeleeAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
 });
 
 Game.EntityGenerator.learn({
   name: 'moss',
+  description: '',
   chr: '%',
   fg: '#6b6',
   maxHp: 1,
@@ -23,6 +26,7 @@ Game.EntityGenerator.learn({
 
 Game.EntityGenerator.learn({
   name: 'newt',
+  description: '',
   chr: '~',
   fg: '#98',
   maxHp: 2,
@@ -31,6 +35,7 @@ Game.EntityGenerator.learn({
 
 Game.EntityGenerator.learn({
   name: 'attack slug',
+  description: '',
   chr: '~',
   fg: '#ff9',
   maxHp: 4,
@@ -43,6 +48,7 @@ Game.EntityGenerator.learn({
 
 Game.EntityGenerator.learn({
 name: 'angry squirrel',
+description: '',
 chr: '&',
 fg: '#aaa',
 maxHp: 3,

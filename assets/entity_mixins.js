@@ -26,8 +26,12 @@ Game.EntityMixin.PlayerMessager = {
         Game.message.ageMessages(); // Maybe don't do this
       },
       'killed': function(evtData) {
-        Game.message.sendMessage("You were killed by the " + evtData.killedBy.getName());
-    },
+        if (typeof evtData.killedBy == 'string') {
+          Game.message.sendMessage('you were killed by '+evtData.killedBy);
+        } else {
+          Game.message.sendMessage('you were killed by the '+evtData.killedBy.getName());
+        }
+      },
       'noItemsToPickup': function(evtData) {
         Game.message.sendMessage('there is nothing to pickup');
         Game.renderMessage();
@@ -49,16 +53,20 @@ Game.EntityMixin.PlayerMessager = {
         Game.renderMessage();
       },
       'allItemsPickedUp': function(evtData) {
-        if (evtData.numItemsPickedUp > 1) {
+        if (evtData.numItemsPickedUp > 2) {
           Game.message.sendMessage('you picked up all ' + evtData.numItemsPickedUp + ' items');
+        } else if (evtData.numItemsPickedUp == 2) {
+          Game.message.sendMessage('you picked up both items');
         } else {
-          Game.message.sendMessage('you picked up the item');
+          Game.message.sendMessage('you picked up the ' + evtData.lastItemPickedUpName);
         }
-        Game.renderMessage();
     },
     'itemsDropped' : function(evtData) {
-        Game.message.sendMessage('you dropped ' + evtData.numItemsDropped+' item' + (evtData.numItemsDropped > 1 ? 's' : ''));
-        Game.renderMessage();
+      if (evtData.numItemsDropped > 1) {
+        Game.message.sendMessage('you dropped ' + evtData.numItemsDropped + ' items');
+      } else {
+        Game.message.sendMessage('you dropped the ' + evtData.lastItemDroppedName);
+      }
     },
 
     }
@@ -81,12 +89,14 @@ Game.EntityMixin.PlayerActor = {
     listeners: {
       'actionDone': function(evtData) {
         Game.Scheduler.setDuration(this.getCurrentActionDuration());
+        this.raiseSymbolActiveEvent('getHungrier',{duration:this.getCurrentActionDuration()});
         this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-5, 5));
         setTimeout(function() {Game.TimeEngine.unlock();}, 1); // a tiny delay
         // console.log('end player acting');
       },
       'killed': function(evtData) {
         //Game.TimeEngine.lock();
+        Game.DeadAvatar = this;
         Game.switchUiMode("gameLose");
       }
     }
@@ -121,6 +131,67 @@ Game.EntityMixin.PlayerActor = {
   }
 };
 
+Game.EntityMixin.FoodConsumer = {
+  META: {
+    mixinName: 'FoodConsumer',
+    mixinGroup: 'FoodConsumer',
+    stateNamespace: '_FoodConsumer_attr',
+    stateModel:  {
+      currentFood: 2000,
+      maxFood: 2000,
+      foodConsumedPer1000Ticks: 1
+    },
+    init: function (template) {
+      this.attr._FoodConsumer_attr.maxFood = template.maxFood || 2000;
+      this.attr._FoodConsumer_attr.currentFood = template.currentFood || (this.attr._FoodConsumer_attr.maxFood*0.9);
+      this.attr._FoodConsumer_attr.foodConsumedPer1000Ticks = template.foodConsumedPer1000Ticks || 1;
+    },
+    listeners: {
+      'getHungrier': function(evtData) {
+        this.getHungrierBy(this.attr._FoodConsumer_attr.foodConsumedPer1000Ticks * evtData.duration/1000);
+      }
+    }
+  },
+  getMaxFood: function () {
+    return this.attr._FoodConsumer_attr.maxFood;
+  },
+  setMaxFood: function (n) {
+    this.attr._FoodConsumer_attr.maxFood = n;
+  },
+  getCurFood: function () {
+    return this.attr._FoodConsumer_attr.currentFood;
+  },
+  setCurFood: function (n) {
+    this.attr._FoodConsumer_attr.currentFood = n;
+  },
+  getFoodConsumedPer1000: function () {
+    return this.attr._FoodConsumer_attr.foodConsumedPer1000Ticks;
+  },
+  setFoodConsumedPer1000: function (n) {
+    this.attr._FoodConsumer_attr.foodConsumedPer1000Ticks = n;
+  },
+  eatFood: function (foodAmt) {
+    this.attr._FoodConsumer_attr.currentFood += foodAmt;
+    if (this.attr._FoodConsumer_attr.currentFood > this.attr._FoodConsumer_attr.maxFood) {this.attr._FoodConsumer_attr.currentFood = this.attr._FoodConsumer_attr.maxFood;}
+  },
+  getHungrierBy: function (foodAmt) {
+    this.attr._FoodConsumer_attr.currentFood -= foodAmt;
+    if (this.attr._FoodConsumer_attr.currentFood < 0) {
+      this.raiseSymbolActiveEvent('killed',{killedBy: 'starvation'});
+    }
+  },
+  getHungerStateDescr: function () {
+    var frac = this.attr._FoodConsumer_attr.currentFood/this.attr._FoodConsumer_attr.maxFood;
+    if (frac < 0.1) { return '%c{#ff2}%b{#f00}*STARVING*'; }
+    if (frac < 0.25) { return '%c{#f00}%b{#dd0}starving'; }
+    if (frac < 0.45) { return '%c{#fb0}%b{#540}hungry'; }
+    if (frac < 0.65) { return '%c{#dd0}%b{#000}peckish'; }
+    if (frac < 0.95) { return '%c{#090}%b{#000}full'; }
+    return '%c{#090}%b{#350}*stuffed*';
+  }
+};
+
+
 // WALKER
 Game.EntityMixin.WalkerCorporeal = {
   META: {
@@ -141,25 +212,25 @@ Game.EntityMixin.WalkerCorporeal = {
 
         // OTHER ENTITY
         if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
-          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
-          return {madeAdjacentMove: true};
-        }
-
-        // TILE
-        var targetTile = map.getTile(targetX, targetY);
-        if (targetTile.isWalkable()) {
-          this.setPos(targetX, targetY);
-          if (map) {
-            map.updateEntityLocation(this);
-          }
-          return {madeAdjacentMove: true};
-        } else {
-          this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
-        }
-        return {madeAdjacentMove: false};
+        this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+        return {madeAdjacentMove: true};
       }
+
+      // TILE
+      var targetTile = map.getTile(targetX, targetY);
+      if (targetTile.isWalkable()) {
+        this.setPos(targetX, targetY);
+        if (map) {
+          map.updateEntityLocation(this);
+        }
+        return {madeAdjacentMove: true};
+      } else {
+        this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
+      }
+      return {madeAdjacentMove: false};
     }
   }
+}
 };
 
 // CHRONICLE
@@ -171,7 +242,8 @@ Game.EntityMixin.Chronicle = {
     stateModel: {
       turnCounter: 0,
       killLog: {},
-      deathMessage: ''
+      deathMessage: '',
+      killCount: 0
     },
     listeners: {
       'actionDone': function(evtData) {
@@ -182,7 +254,11 @@ Game.EntityMixin.Chronicle = {
         this.addKill(evtData.entKilled);
       },
       'killed': function(evtData) {
-        this.attr._Chronicle_attr.deathMessage = 'killed by ' + evtData.killedBy.getName();
+        if (typeof evtData.killedBy == 'string') {
+          this.attr._Chronicle_attr.deathMessage = 'killed by '+evtData.killedBy;
+        } else {
+          this.attr._Chronicle_attr.deathMessage = 'killed by '+evtData.killedBy.getName();
+        }
       }
     }
   },
@@ -198,6 +274,12 @@ Game.EntityMixin.Chronicle = {
   getKills: function() {
     return this.attr._Chronicle_attr.killLog;
   },
+  getKillsOf: function (entityName) {
+    return this.attr._Chronicle_attr.killLog[entityName] || 0;
+  },
+  getTotalKills: function() {
+    return this.attr._Chronicle_attr.killCount;
+  },
   clearKills: function() {
     this.attr._Chronicle_attr.killLog = {};
   },
@@ -209,6 +291,7 @@ Game.EntityMixin.Chronicle = {
     } else {
       this.attr._Chronicle_attr.killLog[entName] = 1;
     }
+    this.attr._Chronicle_attr.killCount++;
   }
 };
 
@@ -531,10 +614,12 @@ Game.EntityMixin.InventoryHolder = {
     var addResult = this._getContainer().addItems(itemsToAdd);
     pickupResult.numItemsPickedUp = addResult.numItemsAdded;
     pickupResult.numItemsNotPickedUp = addResult.numItemsNotAdded;
+    var lastItemFromMap = '';
     for (var j = 0; j < pickupResult.numItemsPickedUp; j++) {
-      this.getMap().extractItemAt(itemsToAdd[j],this.getPos());
+      lastItemFromMap = this.getMap().extractItemAt(itemsToAdd[j],this.getPos());
     }
 
+    pickupResult.lastItemPickedUpName = lastItemFromMap.getName();
     if (pickupResult.numItemsNotPickedUp > 0){
         this.raiseSymbolActiveEvent('someItemsPickedUp', pickupResult);
     }else {
@@ -550,12 +635,15 @@ Game.EntityMixin.InventoryHolder = {
         this.raiseSymbolActiveEvent('inventoryEmpty');
         return dropResult;
     }
+    var lastItemDropped = '';
     for (var i = 0; i < itemsToDrop.length; i++) {
       if (itemsToDrop[i]) {
+        lastItemDropped = itemsToDrop[i];
         this.getMap().addItem(itemsToDrop[i],this.getPos());
         dropResult.numItemsDropped++;
       }
     }
+    dropResult.lastItemDroppedName = lastItemDropped.getName();
     this.raiseSymbolActiveEvent('itemsDropped', dropResult);
     return dropResult;
   }
