@@ -1,6 +1,18 @@
 TODO
- - Fix and extend monster AI [X]
- - Fix entity interactions   [X]
- - Fog appearance            [ ]
- - Attacks always miss?      [ ]
- - 
+- Fix and extend monster AI     [X]
+- Fix entity interactions       [X]
+- Fog appearance                [X]
+- Fix avatar panel              [X]
+- text wrapping                 [X]
+- graphics revert to ascii      [X]
+- Can't eat food                [X]
+
+- Attacks always miss?          []
+- Food is present but invisible []
+- impossible load message?      []
+- after saving, the game should
+   return to the welcome page and
+   display a message            []
+- pressing '0' in questions
+  should really be random       []
+- questions should have effects []

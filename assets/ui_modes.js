@@ -137,7 +137,7 @@ Game.UIMode.gamePersistence = {
                     var itemAttr = JSON.parse(state_data.ITEM[itemId]);
                     var newI = Game.ItemGenerator.create(itemAttr._generator_template_key, itemAttr._id);
                     Game.DATASTORE.ITEM[itemId] = newI;
-                    Game.DATASTORE.ITEM[itemId].fromJson(state_data.ITEM[itemId]);
+                    Game.DATASTORE.ITEM[itemId].fromJSON(state_data.ITEM[itemId]);
                 }
             }
 
@@ -291,10 +291,10 @@ Game.UIMode.gameQuestions = {
               a1: "caves", a2: "maze", a3: "digger", a4: "rogue"
             },
             {
-              q: "A mad philosopher has kidnapped five subjects and lashed them onto a railroad track" +
-                 "The train is rapidly approaching, but there is no way it can be stopped in time." +
-                 "From your vantage point on a cliff, you notice an enormous man, so fat that pushing him" +
-                 "into the path of the train would surely stop it. What do you do?",
+              q: "A mad philosopher has kidnapped five subjects and lashed them onto a \nrailroad track. " +
+                 "The train is rapidly approaching, but there is no way \nit can be stopped in time. " +
+                 "From your vantage point on a cliff, you notice \nan enormous man, so fat that pushing him " +
+                 "into the path of the train \nwould surely stop it. What do you do?",
               a1: "Nothing.", a2: "Push the fat man.", a3: "Jump in front of the train.",
               a4: "Run towards the victims to get a better view."
             },
@@ -303,7 +303,7 @@ Game.UIMode.gameQuestions = {
               a1: "Confined spaces.", a2: "Darkness.", a3: "Betrayal.", a4: "Fear is for the weak."
             },
             {
-              q: "You're in an art gallery. You see four paintings. Which you you look at first?",
+              q: "You're in an art gallery. You see four paintings. \nWhich you you look at first?",
               a1: "'The Fall of Rapunzel' by Julio Ferres", a2: "'Thirst for More' by Deirdre Dessy",
               a3: "'Lover's Quarrel' by Lucifer Dracanus",  a4: "'Simplicity' by Him"
             },
@@ -313,8 +313,8 @@ Game.UIMode.gameQuestions = {
               a4: "Design a combustible lemon."
             },
             {
-              q: "You wake up in a field surrounded by red roses. Strangely, the roses to the West are wilted and dying, but the rest are fine." +
-                 "You can see a solitary tree on the horizon to the North. What is your first move?",
+              q: "You wake up in a field surrounded by red roses. \nStrangely, the roses to the West are wilted and dying, \nbut the rest are fine. " +
+                 "You can see a solitary tree on \nthe horizon to the North. What is your first move?",
               a1: "Investigate the wilted flowers.", a2: "Pick a fresh rose for your beloved.",
               a3: "Go climb the tree to get a better view.", a4: "I didn't read the question."
             }
@@ -406,7 +406,9 @@ Game.UIMode.gameQuestions = {
         return this.attr.questions[this.attr.questionNum];
     },
     renderAvatarInfo: function(display) {
-        display.drawText(1,1,"INSERT LONG BACKSTORY TO WHY QUESTIONS ARE BEING ASKED [HERE]");
+      if (this.attr.questionNum == 0) {
+        display.drawText(1,1,"You wake up in an unfamiliar room. A kindly man, who appears to be some kind of doctor, leans over and asks a series of questions.");
+      }
     },
 
     renderOnMain: function(display){
@@ -415,9 +417,9 @@ Game.UIMode.gameQuestions = {
         display.clear();
         var question = this.getQuestion();
 
-        display.drawText(4,4,question.q, fg, bg);
-        display.drawText(4,6,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
-        display.drawText(4,8,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
+        display.drawText(4,2,question.q, fg, bg);
+        display.drawText(4,8,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
+        display.drawText(4,10,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
 
     }
 };
@@ -531,7 +533,6 @@ Game.UIMode.gamePlay = {
             Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
             Game.addUiMode('LAYER_textReading');
         }
-        console.log(tookTurn);
         if (tookTurn) {
             this.getAvatar().raiseSymbolActiveEvent('actionDone');
             Game.message.ageMessages();
@@ -558,12 +559,12 @@ Game.UIMode.gamePlay = {
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
+        display.drawText(1, 1, Game.UIMode.DEFAULT_COLOR_STR + "AVATAR STATUS", fg, bg);
         display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
         display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
-        display.drawText(1, 4, Game.UIMode.DEFAULT_COLOR_STR+"Turns so far: " + this.getAvatar().getTurns());
         // feels like this should be encapsulated somewhere else, but I don't really know where - perhaps in the PlayerActor mixin?
         var av = this.getAvatar();
-        var y = 0;
+        var y = 5;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"ATTACK");
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy: "+av.getAttackHit());
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power: "+av.getAttackDamage());
@@ -628,10 +629,10 @@ Game.UIMode.gamePlay = {
             // this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             // //this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             // this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
-            // this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
 
-            itemPos = this.getMap().getWalkablePosition();
-            this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
+            //itemPos = this.getMap().getWalkablePosition();
+            //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
 
             itemPos = this.getMap().getWalkablePosition();
@@ -639,7 +640,6 @@ Game.UIMode.gamePlay = {
             this.getMap().addItem(Game.ItemGenerator.create('apple'),itemPos);
 
         }
-        this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
 
         //for (var a = 0; a < 30; a++) {
         //    Game.getAvatar().addInventoryItems([Game.ItemGenerator.create('rock')]);
@@ -776,7 +776,7 @@ Game.UIMode.LAYER_itemListing.prototype._runFilterOnItemIdList = function () {
 };
 
 Game.UIMode.LAYER_itemListing.prototype.enter = function () {
-    Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
+  //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
 
   this._storedKeyBinding = Game.KeyBinding.getKeyBinding();
   Game.KeyBinding.setKeyBinding(this._keyBindingName);
@@ -878,14 +878,14 @@ Game.UIMode.LAYER_itemListing.prototype.getCaptionText = function() {
   return captionText;
 };
 
-Game.UIMode.LAYER_itemListing.prototype.renderOnMain = function (display) {
+Game.UIMode.LAYER_itemListing.prototype.renderAvatarInfo = function (display) {
   var selectionLetters = 'abcdefghijklmnopqrstuvwxyz';
 
   // Render the caption in the top row
   display.drawText(0, 0, Game.UIMode.DEFAULT_COLOR_STR + this.getCaptionText());
 
   if (this._displayItems.length < 1) {
-     display.drawText(0, 2, Game.UIMode.DEFAULT_COLOR_STR + 'nothing for '+ this.getCaptionText().toLowerCase());
+     display.drawText(0, 2, Game.UIMode.DEFAULT_COLOR_STR + this.getCaptionText().toLowerCase() + " is empty");
      return;
   }
 
@@ -1005,6 +1005,7 @@ Game.UIMode.LAYER_inventoryListing = new Game.UIMode.LAYER_itemListing({
 });
 Game.UIMode.LAYER_inventoryListing.doSetup = function () {
   this.setup({itemIdList: Game.getAvatar().getInventoryItemIds()});
+  console.log("inventory");
 };
 
 Game.UIMode.LAYER_inventoryListing.handleInput = function (inputType,inputData) {
@@ -1093,8 +1094,9 @@ Game.UIMode.LAYER_inventoryEat = new Game.UIMode.LAYER_itemListing({
   },
   processingFunction: function (selectedItemIds) {
     if (selectedItemIds[0]) {
+      console.dir(selectedItemIds[0]);
       var foodItem = Game.getAvatar().extractInventoryItems([selectedItemIds[0]])[0];
-      //        Game.util.cdebug(foodItem);
+      Game.util.cdebug(foodItem);
       Game.getAvatar().eatFood(foodItem.getFoodValue());
       return true;
     }

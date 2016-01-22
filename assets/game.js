@@ -136,11 +136,8 @@ var Game = {
       return;
     }
 
-
     if ('renderOnMain' in this.getCurUiMode()){
         this.getCurUiMode().renderOnMain(this.DISPLAYS.main.o);
-    } else{
-      this.DISPLAYS.main.o.drawText(2,1,"main display");
     }
   },
   renderMessage: function() {

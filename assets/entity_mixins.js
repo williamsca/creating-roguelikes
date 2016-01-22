@@ -6,7 +6,7 @@ Game.EntityMixin.PlayerMessager = {
     mixinGroup: 'PlayerMessager',
     listeners: {
       'walkForbidden': function(evtData) {
-        Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName() + ", n00b.");
+        Game.message.sendMessage("You can\'t walk into the " + evtData.target.getName());
       },
       'dealtDamage': function(evtData) {
         Game.message.sendMessage("You hit the " + evtData.damagee.getName() + " for " + evtData.damageAmount);
@@ -212,7 +212,7 @@ Game.EntityMixin.WalkerCorporeal = {
 
         // OTHER ENTITY
         if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
-        this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
         return {madeAdjacentMove: true};
       }
 
@@ -372,11 +372,15 @@ Game.EntityMixin.MeleeAttacker = {
     listeners: {
       'bumpEntity': function(evtData) {
         console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
+        // BUG HERE - calcAttackHit is NOT being called!
         var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         Game.util.cdebug(avoidValResp);
+        Game.util.cdebug(hitValResp);
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
+        console.dir(hitVal);
+        console.dir(avoidVal);
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
@@ -389,7 +393,8 @@ Game.EntityMixin.MeleeAttacker = {
       }
     },
     'calcAttackHit': function(evtData) {
-      // console.log('MeleeAttacker bumpEntity');
+      console.log('calc attack hit');
+      console.dir(this.getAttackHit());
       return {attackHit:this.getAttackHit()};
     },
     'calcAttackDamage': function(evtData) {
@@ -409,18 +414,17 @@ Game.EntityMixin.MeleeDefender = {
   META: {
     mixinName: 'MeleeDefender',
     mixinGroup: 'Defender',
-    stateNamespace: '_MeleeDefenderr_attr',
+    stateNamespace: '_MeleeDefender_attr',
     stateModel:  {
       attackAvoid: 0,
       damageMitigation: 0
     },
     init: function (template) {
-      this.attr._MeleeDefenderr_attr.attackAvoid = template.attackAvoid || 0;
-      this.attr._MeleeDefenderr_attr.damageMitigation = template.damageMitigation || 0;
+      this.attr._MeleeDefender_attr.attackAvoid = template.attackAvoid || 0;
+      this.attr._MeleeDefender_attr.damageMitigation = template.damageMitigation || 0;
     },
     listeners: {
       'calcAttackAvoid': function(evtData) {
-        // console.log('MeleeDefender calcAttackAvoid');
         return {attackAvoid:this.getAttackAvoid()};
       },
       'calcDamageMitigation': function(evtData) {
@@ -430,10 +434,10 @@ Game.EntityMixin.MeleeDefender = {
     }
   },
   getAttackAvoid: function () {
-    return this.attr._MeleeDefenderr_attr.attackAvoid;
+    return this.attr._MeleeDefender_attr.attackAvoid;
   },
   getDamageMitigation: function () {
-    return this.attr._MeleeDefenderr_attr.damageMitigation;
+    return this.attr._MeleeDefender_attr.damageMitigation;
   }
 };
 
@@ -583,10 +587,7 @@ Game.EntityMixin.InventoryHolder = {
     return this._getContainer().getItemIds();
   },
   extractInventoryItems: function (ids_or_idxs) {
-    // NOTE: early dev stuff here! simple placeholder functionality....
-    var ret = [this.attr._InventoryHolder_attr.itemId];
-    this.attr._InventoryHolder_attr.itemId = '';
-    return ret;
+    return this._getContainer().extractItems(ids_or_idxs);
   },
   pickupItems: function (ids_or_idxs) {
     var itemsToAdd = [];
