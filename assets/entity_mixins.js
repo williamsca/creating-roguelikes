@@ -373,7 +373,8 @@ Game.EntityMixin.MeleeAttacker = {
       'bumpEntity': function(evtData) {
         console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
         // BUG HERE - calcAttackHit is NOT being called!
-        var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
+        var hitValResp = {attackHit: this.getAttackHit()};
+        //var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         Game.util.cdebug(avoidValResp);
         Game.util.cdebug(hitValResp);
