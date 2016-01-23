@@ -12,21 +12,21 @@ Game.UIMode.DEFAULT_COLOR_STR = '%c{' + Game.UIMode.DEFAULT_COLOR_FG +
 //START
 Game.UIMode.gameStart = {
     enter: function() {
-        console.log("INITIALIZING GAME. PREPARE YO SELF.");
+        // console.log("INITIALIZING GAME. PREPARE YO SELF.");
         Game.message.clearMessages();
     },
     exit: function() {
-        console.log("Game.UIMode.gameStart exit");
+        // console.log("Game.UIMode.gameStart exit");
         Game.message.clearMessages();
     },
     handleInput: function (inputType, inputData){
-        console.log("Game.UIMode.gameStart handleInput");
+        // console.log("Game.UIMode.gameStart handleInput");
         if (inputData.charCode !== 0) { // ignore the modding keys - control, shift, etc.
             Game.switchUiMode('gamePersistence');
         }
     },
     renderOnMain: function(display){
-        console.log("Game.UIMode.gameStart renderOnMain");
+        // console.log("Game.UIMode.gameStart renderOnMain");
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
         display.clear();
@@ -59,22 +59,17 @@ Game.UIMode.gamePersistence = {
         // console.log('action binding is');
         // console.dir(actionBinding);
         // console.log('----------');
-        console.dir(actionBinding);
+        // console.dir(actionBinding);
         if (! actionBinding) {
             return false;
         }
 
 
         if (actionBinding.actionKey == 'PERSISTENCE_SAVE') {
-            console.log("S");
             this.saveGame();
         } else if (actionBinding.actionKey == 'PERSISTENCE_LOAD') {
-            console.log("L");
-
             this.loadGame();
         } else if (actionBinding.actionKey == 'PERSISTENCE_NEW') {
-            console.log("N");
-
             this.newGame();
         } else if (actionBinding.actionKey == 'CANCEL') {
             if (Object.keys(Game.DATASTORE.MAP).length < 1){
@@ -325,7 +320,6 @@ Game.UIMode.gameQuestions = {
       Game.message.ageMessages();
       Game.message.sendMessage("Press the number next to your answer,\n" +
                                "or press '0' for a random selection.");
-      // Game.message.ageMessages();
     },
     exit: function() {
 
@@ -444,7 +438,7 @@ Game.UIMode.gamePlay = {
         Game.DISPLAYS.main.o.clear();
         Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
 
-        console.log("Game.UIMode.gamePlay enter");
+        // console.log("Game.UIMode.gamePlay enter");
         Game.message.clearMessages();
         if(this.attr._avatarId) {
             this.setCameraToAvatar();
@@ -483,7 +477,6 @@ Game.UIMode.gamePlay = {
             return false;
         }
         var tookTurn = false;
-        console.log("tookTurn: " + tookTurn);
 
         if        (actionBinding.actionKey == 'MOVE_UL') {
             tookTurn = this.moveAvatar(-1 ,-1);
@@ -495,6 +488,7 @@ Game.UIMode.gamePlay = {
             tookTurn = this.moveAvatar(-1  ,0);
         } else if (actionBinding.actionKey == 'MOVE_WAIT') {
             tookTurn = true;
+            Game.message.sendMessage("You waited a turn.")
         } else if (actionBinding.actionKey == 'MOVE_R') {
             tookTurn = this.moveAvatar(1  , 0);
         } else if (actionBinding.actionKey == 'MOVE_DL') {
@@ -535,7 +529,6 @@ Game.UIMode.gamePlay = {
         }
         if (tookTurn) {
             this.getAvatar().raiseSymbolActiveEvent('actionDone');
-            Game.message.ageMessages();
             return true;
         }
         return false;
@@ -551,7 +544,7 @@ Game.UIMode.gamePlay = {
 
         this.getAvatar().rememberCoords(seenCells);
 
-        console.log("Game.UIMode.gamePlay renderOnMain");
+        // console.log("Game.UIMode.gamePlay renderOnMain");
         //this.renderAvatar(display);
 
     },
@@ -608,8 +601,6 @@ Game.UIMode.gamePlay = {
     },
     setCameraToAvatar: function () {
         test = this.getAvatar();
-        console.log(this.attr._avatarId);
-        console.dir(test);
         this.setCamera(this.getAvatar().getX(), this.getAvatar().getY());
     },
     setupNewGame: function (answers) {
@@ -629,7 +620,7 @@ Game.UIMode.gamePlay = {
             // this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
-            //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
 
             //itemPos = this.getMap().getWalkablePosition();
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
@@ -647,7 +638,6 @@ Game.UIMode.gamePlay = {
     },
 
     getMapType: function () {
-        console.log("huh?");
         return this.attr._answers.mapType;
 
         //   switch(Math.floor(Math.random()*3)){
@@ -783,7 +773,7 @@ Game.UIMode.LAYER_itemListing.prototype.enter = function () {
     this.doSetup();
   }
   Game.refresh();
-  //Game.specialMessage("[Esc] to exit, [ and ] for scrolling");
+  Game.specialMessage("[Esc] to exit, [ and ] for scrolling");
 };
 Game.UIMode.LAYER_itemListing.prototype.exit = function () {
     //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);

@@ -55,5 +55,5 @@ maxHp: 3,
 attackPower: 1,
 attackAvoid: 2,
 damageMitigation: 1,
-mixins: ["HitPoints", "WanderActor", "WalkerCorporeal", "MeleeAttacker", "MeleeDefender"]
+mixins: ["HitPoints", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker", "MeleeDefender"]
 });
