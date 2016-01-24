@@ -120,6 +120,7 @@ Game.KeyBinding = {
     if (inputType === 'keypress') {
         bindingKey = String.fromCharCode(inputData.charCode);
     }
+
     return this._currentBindingLookup[inputType][metaKey][bindingKey] || false;
   },
 
@@ -197,6 +198,10 @@ Game.KeyBinding = {
     MOVE_DR   : {action_group:'base_movement' ,guid:Game.util.uniqueId() ,ordering:3 ,short:'move' ,long :'move diagonally down and to the right',
       numpad: {label:'3' ,inputMatch:ROT.VK_NUMPAD3 ,inputType:'keydown' ,inputMetaShift:false ,inputMetaCtrl:false} ,
       waxd  : {label:'c' ,inputMatch:ROT.VK_C       ,inputType:'keydown' ,inputMetaShift:false ,inputMetaCtrl:false}
+    },
+    FIRE  : {action_group:'attack', guid:Game.util.uniqueId(), ordering:5, short:'fire', long: 'launch an attack in one direction',
+    numpad: {label:'f' ,inputMatch:ROT.VK_F ,inputType:'keydown' ,inputMetaShift:false ,inputMetaCtrl:false} ,
+    waxd  : {label:'f' ,inputMatch:ROT.VK_F ,inputType:'keydown' ,inputMetaShift:false ,inputMetaCtrl:false}
     },
 
     INVENTORY : {action_group:'inventory' ,guid:Game.util.uniqueId() ,ordering:5.0 ,short:'inventory'  ,long :'show items in inventory' ,

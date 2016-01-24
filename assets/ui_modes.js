@@ -498,7 +498,8 @@ Game.UIMode.gamePlay = {
         } else if (actionBinding.actionKey == 'MOVE_DR') {
             tookTurn = this.moveAvatar(1  , 1);
 
-
+        } else if (actionBinding.actionKey == 'FIRE') {
+            Game.addUiMode('LAYER_fireProjectile');
         } else if (actionBinding.actionKey == 'INVENTORY') {
             Game.addUiMode('LAYER_inventoryListing');
         } else if (actionBinding.actionKey == 'PICKUP') {
@@ -519,14 +520,15 @@ Game.UIMode.gamePlay = {
           Game.addUiMode('LAYER_inventoryEat');
         } else if (actionBinding.actionKey == 'EXAMINE') {
             Game.addUiMode('Layer_inventoryExamine');
-        } else if (actionBinding.actionKey == 'CHANGE_BINDINGS'){
+        } else if (actionBinding.actionKey == 'CHANGE_BINDINGS') {
             Game.KeyBinding.swapToNextKeyBinding();
         } else if (actionBinding.actionKey == 'PERSISTENCE') {
             Game.switchUiMode('gamePersistence');
-        } else if (actionBinding.actionKey == 'HELP'){
+        } else if (actionBinding.actionKey == 'HELP') {
             Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
             Game.addUiMode('LAYER_textReading');
         }
+
         if (tookTurn) {
             this.getAvatar().raiseSymbolActiveEvent('actionDone');
             return true;
@@ -617,10 +619,10 @@ Game.UIMode.gamePlay = {
 
         var itemPos = '';
         for (var ecount = 0; ecount < 80; ecount++) {
-            // this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
-            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
-            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
 
             //itemPos = this.getMap().getWalkablePosition();
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
@@ -664,9 +666,78 @@ Game.UIMode.gamePlay = {
     }
 };
 
+// I'M FIRIN' MAH LAZER
+Game.UIMode.LAYER_fireProjectile = {
+    enter: function() {
+      Game.message.sendMessage("Choose a direction to fire or press 'esc' to put away your bow.");
+      // Game.refresh();
+    },
+    exit: function() {
+      Game.refresh();
+    },
+    handleInput: function (inputType, inputData) {
+      /* var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
+      if ((! actionBinding) || (actionBinding.actionKey == 'CANCEL')) {
+        Game.removeUiMode();
+        return false;
+      }
+      */
+
+    /* if        (actionBinding.actionKey == 'MOVE_UL') {
+      enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:-1});
+    } else if (actionBinding.actionKey == 'MOVE_U') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:-1});
+    } else if (actionBinding.actionKey == 'MOVE_UR') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:-1});
+    } else if (actionBinding.actionKey == 'MOVE_L') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:0});
+    } else if (actionBinding.actionKey == 'MOVE_WAIT') {
+      // something special?
+    } else if (actionBinding.actionKey == 'MOVE_R') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:0});
+    } else if (actionBinding.actionKey == 'MOVE_DL') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:1});
+    } else if (actionBinding.actionKey == 'MOVE_D') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:1});
+    } else if (actionBinding.actionKey == 'MOVE_DR') {
+      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:1});
+    } */
+    if (inputType == 'keypress') { var inputChar = String.fromCharCode(inputData.charCode); }
+    if        (inputChar == '7') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:-1});
+    } else if (inputChar == '8') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:-1});
+    } else if (inputChar == '9') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:-1});
+    } else if (inputChar == '4') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:0});
+    } else if (inputChar == 'MOVE_WAIT') {
+      // something special?
+    } else if (inputChar == '6') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:0});
+    } else if (inputChar == '1') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:1});
+    } else if (inputChar == '2') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:1});
+    } else if (inputChar == '3') {
+      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:1});
+    } else if (inputData.keyCdoe == '27') {
+      Game.removeUiMode();
+    }
+
+    if (enemyHit) {
+      Game.getAvatar().raiseSymbolActiveEvent('actionDone');
+      Game.removeUiMode();
+      return true;
+    }
+    Game.message.sendMessage("You ready your bow.");
+    return false;
+    }
+};
+
 //#############################################################################
 //#############################################################################
-//LOSE
+//Text Reading
 Game.UIMode.LAYER_textReading = {
     _storedKeyBinding: '',
     _text: 'default',
@@ -683,9 +754,9 @@ Game.UIMode.LAYER_textReading = {
     exit: function() {
         //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
         Game.KeyBinding.setKeyBinding(this._storedKeyBinding);
-        setTimeout(function(){
-        Game.refresh();
-     }, 1);
+        setTimeout(function() {
+          Game.refresh();
+        }, 1);
     },
     renderOnMain: function(display){
         display.clear();

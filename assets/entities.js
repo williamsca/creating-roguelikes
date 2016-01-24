@@ -5,14 +5,14 @@ Game.EntityGenerator.learn({
   description: 'Pro T. A. Gonist',
   chr: '@',
   fg: '#dda',
-  maxHp: 10,
+  maxHp: 100,
   sightRadius: 20,
   attackAvoid: 1,
   attackDamage: 2,
   inventoryCapacity: 35,
   maxFood: 400,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
-           "Chronicle", "MeleeAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
+           "Chronicle", "MeleeAttacker", "RangedAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
 });
 
 Game.EntityGenerator.learn({

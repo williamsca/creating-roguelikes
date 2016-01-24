@@ -316,8 +316,6 @@ Game.EntityMixin.HitPoints = {
     },
     listeners: {
       'attacked': function(evtData) {
-        // console.log("HitPoints attacked");
-
         this.takeHits(evtData.attackDamage);
         this.raiseSymbolActiveEvent('damagedBy',
           {damager: evtData.attacker, damageAmount: evtData.attackDamage});
@@ -358,6 +356,8 @@ Game.EntityMixin.HitPoints = {
   }
 };
 
+//-----------------------COMBAT---------------------------------------
+
 // MELEE COMBAT
 Game.EntityMixin.MeleeAttacker = {
   META: {
@@ -375,7 +375,7 @@ Game.EntityMixin.MeleeAttacker = {
     },
     listeners: {
       'bumpEntity': function(evtData) {
-        // console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
+        console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
         var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
@@ -435,6 +435,49 @@ Game.EntityMixin.MeleeDefender = {
   },
   getDamageMitigation: function () {
     return this.attr._MeleeDefender_attr.damageMitigation;
+  }
+};
+
+Game.EntityMixin.RangedAttacker = {
+  META: {
+    mixinName: 'RangedAttacker',
+    mixinGroup: 'Attacker',
+    stateNamespace: '_RangedAttacker_attr',
+    stateModel: {
+      // attackHit: 1,
+      // attackDamage: 1,
+      // attackActionDuration: 1000,
+      attackRange: 5
+    },
+    init: function (template) {
+      //this.attr._RangedAttacker_attr.attackHit = template.attackHit || 1;
+      //this.attr._RangedAttacker_attr.attackActionDuration = template.attackActionDuration || 1000;
+      this.attr._RangedAttacker_attr.attackRange = template.attackRange || 5;
+    },
+    listeners: {
+      // Presently can fire through walls...
+      'fireProjectile': function(evtData) {
+        // check for entities within attackRange of the avatar
+        var map = this.getMap();
+        for (var i = 1; i <= this.getAttackRange(); ++i) {
+          var x = this.getX() + evtData.xDir * i;
+          var y = this.getY() + evtData.yDir * i;
+          if (map.getEntity(x, y)) {
+            var entityPresent = map.getEntity(x, y);
+            break;
+          }
+        }
+
+        if (entityPresent) {
+          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent});
+          return {enemyHit: true};
+        }
+        return {enemyHit: false};
+      }
+    }
+  },
+  getAttackRange: function () {
+    return this.attr._RangedAttacker_attr.attackRange;
   }
 };
 
@@ -505,7 +548,6 @@ Game.EntityMixin.Sight = {
     return this.canSeeCoord(this.getX()+dx,this.getY()+dy);
   }
 };
-
 
 Game.EntityMixin.MapMemory = {
   META: {

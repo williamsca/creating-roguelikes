@@ -6,8 +6,8 @@ TODO
 - text wrapping                 [X]
 - graphics revert to ascii      [X]
 - Can't eat food                [X]
+- Attacks always miss?          [X]
 
-- Attacks always miss?          []
 - Food is present but invisible []
 - impossible load message?      []
 - after saving, the game should
