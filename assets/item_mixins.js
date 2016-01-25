@@ -25,6 +25,17 @@ Game.ItemMixin.Food = {
   }
 };
 
+Game.ItemMixin.Key = {
+    META: {
+        mixinName: 'Key',
+        minxinGroup: 'Objective',
+        stateNamespace: '_Container_attr',
+        stateMode: {
+            key : true
+        }
+    }
+};
+
 Game.ItemMixin.Container = {
   META: {
     mixinName: 'Container',

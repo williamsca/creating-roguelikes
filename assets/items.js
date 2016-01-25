@@ -17,3 +17,11 @@ Game.ItemGenerator.learn({
   foodValue: 100,
   mixins: ['Food']
 });
+
+Game.ItemGenerator.learn({
+  name: 'key',
+  description: 'This seems like it can get you out of here!',
+  chr: '?',
+  fg:'#f32',
+  mixins: ['Key']
+});

@@ -1,5 +1,23 @@
 Game.EntityMixin = {};
 
+Game.EntityMixin.objectiveHandler = {
+    META: {
+    mixinName: 'PlayerMessager',
+    mixinGroup: 'PlayerMessager',
+    listeners: {
+        'keyMoved' : function(evtData) {
+            Game.UIMode.gamePlay.attr._objective = evtData;
+        }
+    }
+}
+};
+
+Game.EntityMixin.Stairs = {
+    META: {
+        mixinName: 'Stairs',
+        mixinGroup: 'Objective'
+    }
+}
 Game.EntityMixin.PlayerMessager = {
   META: {
     mixinName: 'PlayerMessager',
@@ -212,9 +230,19 @@ Game.EntityMixin.WalkerCorporeal = {
 
         // OTHER ENTITY
         if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
-          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+            if(map.getEntity(targetX, targetY).hasMixin('Stairs')){
+                Game.UIMode.gamePlay.checkObjective();
+                if(Game.UIMode.gamePlay.attr._objective){
+                    Game.switchUiMode('gameWin');
+                }else{
+                    this.raiseSymbolActiveEvent('walkForbidden', {target:map.getEntity(targetX,targetY)});
+                    return {madeAdjacentMove: false};
+                }
+            }else{
+                this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+            }
         return {madeAdjacentMove: true};
-      }
+    }
 
       // TILE
       var targetTile = map.getTile(targetX, targetY);
@@ -525,6 +553,7 @@ Game.EntityMixin.MapMemory = {
   },
 
   rememberCoords: function(coordSet, mapId) {
+    if(Game.UIMode.gamePlay.attr._answers.misc != "noMapMemory"){
     var mapKey = mapId || this.getMapId();
     if (! this.attr._MapMemory_attr.mapsHash[mapKey] ) {
       this.attr._MapMemory_attr.mapsHash[mapKey] = {};
@@ -533,6 +562,7 @@ Game.EntityMixin.MapMemory = {
       if ( coordSet.hasOwnProperty(coord) && (coord != 'byDistance')) {
         this.attr._MapMemory_attr.mapsHash[mapKey][coord] = true;
       }
+  }
     }
   },
 
@@ -610,6 +640,9 @@ Game.EntityMixin.InventoryHolder = {
 
     for (var i = 0; i < fromPile.length; i++) {
       if ((ids_or_idxs.indexOf(i) > -1) || (ids_or_idxs.indexOf(fromPile[i].getId()) > -1)) {
+        if( fromPile[i].hasMixin('Key')){
+            this.raiseSymbolActiveEvent('keyMoved', true);
+        }
           itemsToAdd.push(fromPile[i]);
       }
     }
@@ -640,6 +673,9 @@ Game.EntityMixin.InventoryHolder = {
     var lastItemDropped = '';
     for (var i = 0; i < itemsToDrop.length; i++) {
       if (itemsToDrop[i]) {
+        if(itemsToDrop[i].hasMixin('Key')){
+            this.raiseSymbolActiveEvent('keyMoved', false);
+        }
         lastItemDropped = itemsToDrop[i];
         this.getMap().addItem(itemsToDrop[i],this.getPos());
         dropResult.numItemsDropped++;

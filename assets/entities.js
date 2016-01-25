@@ -12,7 +12,7 @@ Game.EntityGenerator.learn({
   inventoryCapacity: 35,
   maxFood: 400,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
-           "Chronicle", "MeleeAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
+           "Chronicle", "MeleeAttacker","objectiveHandler", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
 });
 
 Game.EntityGenerator.learn({
@@ -22,6 +22,14 @@ Game.EntityGenerator.learn({
   fg: '#6b6',
   maxHp: 1,
   mixins: ["HitPoints"]
+});
+
+Game.EntityGenerator.learn({
+  name: 'stairs',
+  description: '',
+  chr: 'S',
+  fg: '#6b6',
+  mixins: ["Stairs"]
 });
 
 Game.EntityGenerator.learn({
