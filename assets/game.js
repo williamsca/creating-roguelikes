@@ -205,10 +205,7 @@ var Game = {
          curMode.exit();
      }
      this._uiModeNameStack.shift();
-
-     //THIS IS NECESSARY FOR TILESETS DIEGO,
-     //BUT WE CAN'T TURN IT ON UNTIL ALL THINGS IN MAIN HAVE A TILE ASSIGNED (INCLUDING TEXT!!!)
-     //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
+     Game.refresh();
    },
 
    eventHandler: function(eventType, evt) {

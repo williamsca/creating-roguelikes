@@ -597,7 +597,7 @@ Game.EntityMixin.InventoryHolder = {
         if (template.containerId) {
             this.attr._InventoryHolder_attr.containerId = template.containerId;
         } else {
-            var container = Game.ItemGenerator.create('_invetoryContainer');
+            var container = Game.ItemGenerator.create('_inventoryContainer');
             container.setCapacity(this.attr._InventoryHolder_attr.inventoryCapacity);
             this.attr._InventoryHolder_attr.containerId = container.getId();
         }

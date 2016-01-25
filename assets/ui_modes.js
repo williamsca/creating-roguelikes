@@ -414,7 +414,6 @@ Game.UIMode.gameQuestions = {
         display.drawText(4,2,question.q, fg, bg);
         display.drawText(4,8,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
         display.drawText(4,10,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
-
     }
 };
 
@@ -633,9 +632,9 @@ Game.UIMode.gamePlay = {
 
         }
 
-        //for (var a = 0; a < 30; a++) {
-        //    Game.getAvatar().addInventoryItems([Game.ItemGenerator.create('rock')]);
-        //}
+        for (var a = 0; a < 30; a++) {
+            Game.getAvatar().addInventoryItems([Game.ItemGenerator.create('rock')]);
+        }
 
     },
 
@@ -673,64 +672,52 @@ Game.UIMode.LAYER_fireProjectile = {
       // Game.refresh();
     },
     exit: function() {
+      //console.log("aging messages");
+      //Game.message.ageMessages();
       Game.refresh();
     },
+  
     handleInput: function (inputType, inputData) {
-      /* var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
-      if ((! actionBinding) || (actionBinding.actionKey == 'CANCEL')) {
+      var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
+      if (!actionBinding) { // gate here to catch weird 'f' keypress
+        Game.message.ageMessages();
+        console.log("aging messages");
+        Game.message.sendMessage("You ready your bow.");
+        return false;
+      }
+      if ((actionBinding.actionKey == 'CANCEL')) {
         Game.removeUiMode();
         return false;
       }
-      */
 
-    /* if        (actionBinding.actionKey == 'MOVE_UL') {
-      enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:-1});
+      var shootResp = false;
+      if      (actionBinding.actionKey == 'MOVE_UL') {
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:-1});
     } else if (actionBinding.actionKey == 'MOVE_U') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:-1});
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:-1});
     } else if (actionBinding.actionKey == 'MOVE_UR') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:-1});
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:-1});
     } else if (actionBinding.actionKey == 'MOVE_L') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:0});
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:0});
     } else if (actionBinding.actionKey == 'MOVE_WAIT') {
       // something special?
     } else if (actionBinding.actionKey == 'MOVE_R') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:0});
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:0});
     } else if (actionBinding.actionKey == 'MOVE_DL') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:1});
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:1});
     } else if (actionBinding.actionKey == 'MOVE_D') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:1});
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:1});
     } else if (actionBinding.actionKey == 'MOVE_DR') {
-      enemyHit = this.raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:1});
-    } */
-    if (inputType == 'keypress') { var inputChar = String.fromCharCode(inputData.charCode); }
-    if        (inputChar == '7') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:-1});
-    } else if (inputChar == '8') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:-1});
-    } else if (inputChar == '9') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:-1});
-    } else if (inputChar == '4') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:0});
-    } else if (inputChar == 'MOVE_WAIT') {
-      // something special?
-    } else if (inputChar == '6') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:0});
-    } else if (inputChar == '1') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:-1, yDir:1});
-    } else if (inputChar == '2') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:0, yDir:1});
-    } else if (inputChar == '3') {
-      var enemyHit = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:1});
-    } else if (inputData.keyCdoe == '27') {
-      Game.removeUiMode();
+      shootResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('fireProjectile', {xDir:1, yDir:1});
     }
 
-    if (enemyHit) {
+    if (shootResp.enemyHit && shootResp.enemyHit[0]) {
       Game.getAvatar().raiseSymbolActiveEvent('actionDone');
-      Game.removeUiMode();
+      Game.removeUiMode(); //sure we want this?
+      console.log("enemy hit?");
       return true;
     }
-    Game.message.sendMessage("You ready your bow.");
+    Game.message.sendMessage("There is nothing to shoot at.");
     return false;
     }
 };
@@ -752,7 +739,9 @@ Game.UIMode.LAYER_textReading = {
         Game.specialMessage("[Esc] to exit, [ and ] for scrolling");
     },
     exit: function() {
-        //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
+        Game.DISPLAYS.main.o.clear();
+        Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
+
         Game.KeyBinding.setKeyBinding(this._storedKeyBinding);
         setTimeout(function() {
           Game.refresh();
@@ -836,8 +825,6 @@ Game.UIMode.LAYER_itemListing.prototype._runFilterOnItemIdList = function () {
 };
 
 Game.UIMode.LAYER_itemListing.prototype.enter = function () {
-  //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.mainOptions);
-
   this._storedKeyBinding = Game.KeyBinding.getKeyBinding();
   Game.KeyBinding.setKeyBinding(this._keyBindingName);
   if ('doSetup' in this) {
@@ -847,8 +834,6 @@ Game.UIMode.LAYER_itemListing.prototype.enter = function () {
   Game.specialMessage("[Esc] to exit, [ and ] for scrolling");
 };
 Game.UIMode.LAYER_itemListing.prototype.exit = function () {
-    //Game.DISPLAYS.main.o.setOptions(Game.DISPLAYS.tsOptions);
-
   Game.KeyBinding.setKeyBinding(this._storedKeyBinding);
   setTimeout(function(){
      Game.refresh();
@@ -934,7 +919,6 @@ Game.UIMode.LAYER_itemListing.prototype.getCaptionText = function() {
   } else {
     captionText = this._caption;
   }
-  // display.drawText(0, 0, Game.UIMode.DEFAULT_COLOR_STR + captionText);
   return captionText;
 };
 
@@ -970,7 +954,7 @@ Game.UIMode.LAYER_itemListing.prototype.renderAvatarInfo = function (display) {
       var item_symbol = this._displayItems[i].getRepresentation()+Game.UIMode.DEFAULT_COLOR_STR;
       display.drawText(0, 1 + row, Game.UIMode.DEFAULT_COLOR_STR + selectionLetter + ' ' + selectionState + ' ' + item_symbol + ' ' +this._displayItems[i].getName());
       row++;
-      this.numItemsShown++;
+      this._numItemsShown++;
     }
   }
   if ((this._displayItemsStartIndex + this._displayItems.length) < this._itemIdList.length) {
@@ -1002,7 +986,7 @@ Game.UIMode.LAYER_itemListing.prototype.handleInput = function (inputType,inputD
   var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
   if (! actionBinding) {
     if ((inputType === 'keydown') && this._canSelectItem && inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
-      // Check if ti maps to a valid item by subtracting 'a' from the character
+      // Check if it maps to a valid item by subtracting 'a' from the character
       // to know what letter of the alphabet we used.
       var index = inputData.keyCode - ROT.VK_A;
       if (index > this._numItemsShown) {

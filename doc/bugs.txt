@@ -7,6 +7,11 @@ TODO
 - graphics revert to ascii      [X]
 - Can't eat food                [X]
 - Attacks always miss?          [X]
+- Can only selected first item
+  in inventory                  [X]
+- help screen messes up
+  Graphics                      [X]
+
 
 - Food is present but invisible []
 - impossible load message?      []
