@@ -728,11 +728,11 @@ Game.UIMode.gamePlay = {
         this.setCameraToAvatar();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 80; ecount++) {
+        for (var ecount = 0; ecount < 30; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
-            //this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
-            //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
 
             //itemPos = this.getMap().getWalkablePosition();
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
