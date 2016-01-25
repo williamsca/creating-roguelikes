@@ -297,7 +297,7 @@ Game.UIMode.gameQuestions = {
             },
             {
               q: "Which of the following do you fear the most?",
-              a1: "Confined spaces.", a2: "Darkness.", a3: "Betrayal.", a4: "Fear is for the weak."
+              a1: "Confined spaces.", a2: "Darkness.", a3: "The past.", a4: "Fear is for the weak."
             },
             {
               q: "You're in an art gallery. You see four paintings. \nWhich you you look at first?",
@@ -843,6 +843,7 @@ Game.UIMode.LAYER_fireProjectile = {
       return true;
     }
     Game.message.sendMessage("There is nothing to shoot at.");
+    Game.removeUiMode();
     return false;
     }
 };

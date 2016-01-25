@@ -8,3 +8,9 @@ Inspirations:
 1. Risk of Rain (random skill power-ups)
 2. NetHack ('search' command)
 3. Crypt of the NecroDancer (intuitive control scheme)
+
+Beach tileset: You are a cactus on the beach with a random name (Carl, Bob, etc).
+You are fighting other plants. Variable win condition. You can swim, but submerging
+yourself in water causes your cactus body to break apart slowly. Good luck, Carl/Bob!
+
+Forest tileset: 
