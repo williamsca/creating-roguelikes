@@ -13,7 +13,6 @@ Game.EntityGenerator.learn({
   maxFood: 400,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
            "Chronicle", "MeleeAttacker", "objectiveHandler", "RangedAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
-
 });
 
 Game.EntityGenerator.learn({

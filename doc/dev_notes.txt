@@ -4,9 +4,25 @@ Eventual Feature List:
 
 
 Next Milestone(s):
-  entities-everywhere
 
 Current work plan:
-  Combat
-  Active monsters
-  key-bidings(?)
+- fix tilesets (Diego)
+- traps destroy walls (or add water) (Diego)
+- beach tileset has swimming feature (Diego)
+- special scenarios from a combination of current questions (Diego)
+- sight (Diego)
+- weapons maintenance (limited arrows/weapons rust/limited bombs) (Diego)
+  monsters drop arrows/bombs, whetstone used to sharpen broadsword/rapier
+
+- rapier/combat extensions (Colin)
+  bow needs to take two turns
+- food kills too quickly, needs balancing (Colin)
+- set different monster names (Colin)
+  monsters drop? or remove entirely?
+- music (Colin)
+- touch up monster AI (Colin)
+
+- backstory & flavor (Both)
+- Boss (Both)
+  just another strong enemy
+- cool title screen? (unimportant)
