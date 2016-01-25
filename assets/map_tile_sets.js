@@ -2,7 +2,11 @@ Game.MapTileSets = {
   caves: {
     _width: 100,
     _height: 100,
-    getMapTiles: function () {
+    getMapTiles: function (small) {
+        if(small){
+       this._width = 50;
+       this._height = 50;
+   }
       var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
       var generator = new ROT.Map.Cellular(this._width, this._height);
       generator._options.connected = true;
@@ -31,7 +35,11 @@ Game.MapTileSets = {
     rogue: {
   _width: 100,
   _height: 100,
-  getMapTiles: function () {
+  getMapTiles: function (small) {
+          if(small){
+       this._width = 50;
+       this._height = 50;
+   }
     var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
     var generator = new ROT.Map.Rogue(this._width, this._height);
     // generator._options.connected = true;
@@ -59,7 +67,11 @@ Game.MapTileSets = {
     maze: {
   _width: 100,
   _height: 100,
-  getMapTiles: function () {
+  getMapTiles: function (small) {
+          if(small){
+       this._width = 50;
+       this._height = 50;
+   }
     var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
     var generator = new ROT.Map.DividedMaze(this._width, this._height);
     //generator._options.connected = true;
@@ -87,7 +99,11 @@ Game.MapTileSets = {
     digger: {
     _width: 100,
     _height: 100,
-    getMapTiles: function () {
+    getMapTiles: function (small) {
+            if(small){
+       this._width = 50;
+       this._height = 50;
+   }
       var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
       var generator = new ROT.Map.Digger(this._width, this._height);
 
