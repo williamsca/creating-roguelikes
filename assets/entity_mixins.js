@@ -395,6 +395,9 @@ Game.EntityMixin.MeleeAttacker = {
     stateModel: {
       attackHit: 1,
       attackDamage: 1,
+      rangedHit: 1,
+      broadHit: 1,
+      rapierHit: 2,
       attackActionDuration: 1000
     },
     init: function (template) {
@@ -409,6 +412,12 @@ Game.EntityMixin.MeleeAttacker = {
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
+          // insert logic here to determine what type of damage is being dealt, i.e.,
+          if (evtData.ranged) {
+
+          } else if (evtData.broad) {
+            
+          }
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
           evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
@@ -497,7 +506,7 @@ Game.EntityMixin.RangedAttacker = {
         }
 
         if (entityPresent) {
-          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent});
+          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent, ranged: true});
           return {enemyHit: true};
         }
         return {enemyHit: false};

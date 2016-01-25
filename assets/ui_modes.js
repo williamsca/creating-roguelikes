@@ -605,7 +605,7 @@ Game.UIMode.gamePlay = {
         } else if (actionBinding.actionKey == 'MOVE_DR') {
             tookTurn = this.moveAvatar(1  , 1);
 
-        } else if (actionBinding.actionKey == 'FIRE') {
+        } else if (actionBinding.actionKey == 'FIRE' && Game.UIMode.gameQuestions.attr.answers.equ == "range") {
             Game.addUiMode('LAYER_fireProjectile');
         } else if (actionBinding.actionKey == 'INVENTORY') {
             Game.addUiMode('LAYER_inventoryListing');
