@@ -23,6 +23,7 @@ Game.DISPLAYS.tsOptions = {
     "R" : [357, 153],
     "P" : [357, 136],
     "A" : [968, 263],
+    "S" : [204, 0]
   },
   width: 45,
   height: 22

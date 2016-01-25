@@ -1,13 +1,14 @@
 Game.DATASTORE.MAP = {};
 
-Game.map = function (mapTileSetName, presetId) {
+Game.map = function (mapTileSetName, small, presetId) {
   //console.log("setting up new map using "+mapTileSetName+" tile set");
 
-  this._tiles = Game.MapTileSets[mapTileSetName].getMapTiles();
+  this._tiles = Game.MapTileSets[mapTileSetName].getMapTiles(small);
 
   this.attr = {
     _id: presetId || Game.util.uniqueId(),
     _mapTileSetName: mapTileSetName,
+    _small: small || false,
     _width: this._tiles.length,
     _height: this._tiles[0].length,
     _entitiesByLocation: {},
@@ -55,6 +56,37 @@ Game.map.prototype.getTile = function (x_or_pos, y) {
     return Game.Tile.nullTile;
   }
   return this._tiles[useX][useY] || Game.Tile.nullTile;
+};
+
+Game.map.prototype.clearAround = function (x_or_pos, y){
+    var useX = x_or_pos, useY = y;
+  if( typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+
+  this.makeWalkable(useX-1, useY + 1);
+  this.makeWalkable(useX-1, useY);
+  this.makeWalkable(useX-1, useY - 1);
+  this.makeWalkable(useX, useY + 1);
+  this.makeWalkable(useX, useY - 1);
+  this.makeWalkable(useX+1, useY + 1);
+  this.makeWalkable(useX+1, useY);
+  this.makeWalkable(useX+1, useY - 1);
+
+}
+
+Game.map.prototype.makeWalkable = function (x_or_pos, y){
+    var useX = x_or_pos, useY = y;
+  if( typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+    if ((useX < 0) || (useX >= this.attr._width) || (useY < 0) || (useY >= this.attr._height)) {
+    return;
+  }
+  this._tiles[useX][useY] = Game.Tile.floorTile;
+  Game.UIMode.gamePlay.attr._changedTiles.push({x:useX, y:useY});
 };
 
 Game.map.prototype.addEntity = function (ent, pos) {
@@ -196,11 +228,12 @@ Game.map.prototype.getWalkablePosition = function() {
 };
 
 Game.map.prototype.rememberCoords = function (toRemember) {
-  for (var coord in toRemember) {
-    if ( toRemember.hasOwnProperty(coord)){
-      this.attr._rememberedCoords[coord] = true;
-    }
-  }
+
+        for (var coord in toRemember) {
+            if ( toRemember.hasOwnProperty(coord)){
+                this.attr._rememberedCoords[coord] = true;
+            }
+        }
 };
 
 Game.map.prototype.renderOn = function (display, camX, camY, renderOptions) {
@@ -241,7 +274,7 @@ Game.map.prototype.renderOn = function (display, camX, camY, renderOptions) {
 
       if (showVisibleTiles && visibleCells[mapCoord]){
         tile.draw(display,x,y, false);
-      }else if (showMaskedTiles && maskedCells[mapCoord]){
+    }else if (showMaskedTiles && maskedCells[mapCoord] ){
         tile.draw(display,x,y,true);
       }
 

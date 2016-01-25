@@ -109,7 +109,8 @@ Game.UIMode.gamePersistence = {
                     var mapAttr = JSON.parse(state_data.MAP[mapId]);
                     console.log("restoring map "+mapId+" with attributes:");
                     console.dir(mapAttr);
-                    Game.DATASTORE.MAP[mapId] = new Game.map(mapAttr._mapTileSetName, mapId);
+
+                    Game.DATASTORE.MAP[mapId] = new Game.map(mapAttr._mapTileSetName, mapAttr._small, mapId);
                     Game.DATASTORE.MAP[mapId].fromJSON(state_data.MAP[mapId]);
                 }
             }
@@ -140,6 +141,12 @@ Game.UIMode.gamePersistence = {
             Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
             Game.message.attr = state_data.MESSAGES;
             this._storedKeyBinding = state_data.KEY_BINDING_SET;
+
+            // Changed tiles
+            for (var i = 0; i < Game.UIMode.gamePlay.attr._changedTiles.length; i++) {
+                pos = Game.UIMode.gamePlay.attr._changedTiles[i];
+                Game.UIMode.gamePlay.getMap()._tiles[pos.x][pos.y] = Game.Tile.floorTile;
+            }
 
             // schedule
             Game.initializeTimingEngine();
@@ -232,12 +239,12 @@ Game.UIMode.gameWin = {
   enter: function () {
     console.log('game winning');
     Game.TimeEngine.lock();
-    Game.renderDisplayAvatar();
-    Game.renderDisplayMain();
+    Game.renderAll();
   },
   exit: function () {
   },
-  render: function (display) {
+  renderOnMain: function (display) {
+      display.clear();
     display.drawText(1,1,Game.UIMode.DEFAULT_COLOR_STR+"You WON!!!!");
   },
   handleInput: function (inputType,inputData) {
@@ -245,7 +252,7 @@ Game.UIMode.gameWin = {
     // console.dir(inputType);
     // console.log('gameStart inputData:');
     // console.dir(inputData);
-    Game.Message.clear();
+    Game.message.clearMessages();
   }
 };
 
@@ -256,12 +263,11 @@ Game.UIMode.gameLose = {
   enter: function () {
     console.log('game losing');
     Game.TimeEngine.lock();
-    Game.renderAvatarDisplay();
-    Game.renderMain();
+    Game.renderAll();
   },
   exit: function () {
   },
-  render: function (display) {
+  renderOnMain: function (display) {
     display.drawText(1,1,Game.UIMode.DEFAULT_COLOR_STR+"You lost :(");
   },
   handleInput: function (inputType,inputData) {
@@ -281,10 +287,6 @@ Game.UIMode.gameQuestions = {
     attr: {
         questionNum: 0,
         questions: [
-            {
-              q: "Which map do you want?",
-              a1: "caves", a2: "maze", a3: "digger", a4: "rogue"
-            },
             {
               q: "A mad philosopher has kidnapped five subjects and lashed them onto a \nrailroad track. " +
                  "The train is rapidly approaching, but there is no way \nit can be stopped in time. " +
@@ -334,27 +336,28 @@ Game.UIMode.gameQuestions = {
           break;
         case "1" :
           Game.message.sendMessage("ANSWER 1 SELECTED");
-          selectedAns = this.getQuestion().a1;
+          selectedAns = 1;
           break;
         case "2" :
           Game.message.sendMessage("ANSWER 2 SELECTED");
-          selectedAns = this.getQuestion().a2;
+          selectedAns = 2;
           break;
         case "3" :
           Game.message.sendMessage("ANSWER 3 SELECTED");
-          selectedAns = this.getQuestion().a3;
+          selectedAns = 3;
           break;
         case "4" :
           Game.message.sendMessage("ANSWER 4 SELECTED");
-          selectedAns = this.getQuestion().a4;
+          selectedAns = 4;
           break;
         case "N" : // To deal with leftover 'N' keypress
           break;
         case "0" : // Will need to randomly generate answers at some point
-          this.attr.answers.mapType = "caves";
-          Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
-          Game.switchUiMode('gamePlay');
-          return;
+          for (var i = 0; i < this.attr.questions.length; i++) {
+              selectedAns = Math.floor(Math.random()*4 + 1)
+              this.processAnswer(selectedAns);
+          }
+          selectedAns = 0;
         default :
           console.log(inputChar);
           Game.message.sendMessage("Please select a valid answer.");
@@ -370,22 +373,90 @@ Game.UIMode.gameQuestions = {
     processAnswer: function (ans) {
         switch(this.attr.questionNum){
           case 0:
-            this.attr.answers.mapType = ans;
+          //OBJECTIVE CHOICE
+            switch(ans){
+                case 1:
+                    this.attr.answers.objective = "escape";
+                    break;
+                case 2:
+                    this.attr.answers.objective = "killAll";
+                    break;
+                case 3:
+                    this.attr.answers.objective = "boss";
+                    break;
+                case 4:
+                    this.attr.answers.objective = "findKey";
+                    break;
+            }
             break;
           case 1:
-            // TODO
+          // MISC
+                switch(ans){
+                case 1:
+                    this.attr.answers.misc = "smallMap";
+                    break;
+                case 2:
+                    this.attr.answers.misc = "smallVision";
+                    break;
+                case 3:
+                    this.attr.answers.misc = "noMapMemory";
+                    break;
+                case 4:
+                    this.attr.answers.misc = "evilMonsters";
+                    break;
+            }
             break;
           case 2:
-            // TODO
+          // GRAPHICS
+                switch(ans){
+                case 1:
+                    this.attr.answers.graphics = "forest";
+                    break;
+                case 2:
+                    this.attr.answers.graphics = "beach";
+                    break;
+                case 3:
+                    this.attr.answers.graphics = "cave";
+                    break;
+                case 4:
+                    this.attr.answers.graphics = "ascii";
+                    break;
+
+            }
             break;
           case 3:
-            // TODO
+          // MAPTYPE
+                switch(ans){
+                case 1:
+                    this.attr.answers.mapType = "digger";
+                    break;
+                case 2:
+                    this.attr.answers.mapType = "maze";
+                    break;
+                case 3:
+                    this.attr.answers.mapType = "caves";
+                    break;
+                case 4:
+                    this.attr.answers.mapType = "rogue";
+                    break;
+            }
             break;
           case 4:
-            // TODO
-            break;
-          case 5:
-            // TODO
+          // EQUIPMENT
+                switch(ans){
+                case 1:
+                    this.attr.answers.equ = "range";
+                    break;
+                case 2:
+                    this.attr.answers.equ = "trap";
+                    break;
+                case 3:
+                    this.attr.answers.equ = "broad";
+                    break;
+                case 4:
+                    this.attr.answers.equ = "rapier";
+                    break;
+            }
             Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
             Game.switchUiMode('gamePlay');
             break;
@@ -427,6 +498,9 @@ Game.UIMode.gamePlay = {
         _avatarId: '',
         _cameraX: 100,
         _cameraY: 100,
+        _objective: false,
+        _bossKey: null,
+        _changedTiles : [],
         _answers: {
             mapType : null
         }
@@ -444,6 +518,12 @@ Game.UIMode.gamePlay = {
         }
         Game.TimeEngine.unlock();
         //Game.KeyBinding.informPlayer();
+        this.getAvatar().eatFood();
+        answers = this.attr._answers;
+        Game.message.clearMessages();
+        Game.message.sendMessage(answers.mapType + ", " + answers.objective + ", " + answers.misc);
+        Game.message.sendMessage(answers.graphics + ", " + answers.equ);
+        Game.renderMessage();
         Game.refresh();
     },
     exit: function() {
@@ -465,6 +545,34 @@ Game.UIMode.gamePlay = {
     },
     setAvatar: function(a) {
         this.attr._avatarId = a.getId();
+    },
+    checkObjective: function(){
+    switch(this.attr._answers.objective){
+        case "escape":
+        this.attr._objective = true;
+        break;
+        case "killAll":
+        this.attr._objective = this.countEntities() < 3;
+        break;
+        case "findKey":
+        break;
+        case "boss":
+        this.attr._objective = Game.DATASTORE.ENTITY[this.attr.bossKey];
+        break;
+        default:
+        this.attr._objective = true;
+        break;
+
+    }
+    return this.attr.objective;
+    },
+    countEntities: function(){
+        var count = 0;
+        for (var ent in Game.DATASTORE.ENTITY) {
+            count++;
+        }
+
+        return count;
     },
     handleInput: function (inputType, inputData){
 
@@ -609,9 +717,12 @@ Game.UIMode.gamePlay = {
         mapType = this.getMapType();
         console.log(mapType);
 
-
-        this.setMap(new Game.map(mapType));
+        var small = (this.attr._answers.misc == "smallMap");
+        this.setMap(new Game.map(mapType, small));
         this.setAvatar(Game.EntityGenerator.create('avatar'));
+        if(this.attr._answers.misc == "smallVision"){
+            this.getAvatar().attr._Sight_attr.sightRadius = 7;
+        }
 
         this.getMap().addEntity(this.getAvatar(),this.getMap().getWalkablePosition());
         this.setCameraToAvatar();
@@ -631,10 +742,24 @@ Game.UIMode.gamePlay = {
             //this.getMap().addItem(Game.ItemGenerator.create('apple'),itemPos);
 
         }
+        if(this.attr._answers.objective == "findKey"){
+        this.getMap().addItem(Game.ItemGenerator.create('key'), this.getMap().getWalkablePosition());
+        }
+        if(this.attr._answers.graphics == "beach"){
+        Game.Tile.wallTile.attr._transparent = true;
+        Game.Tile.wallTile.attr._opaque = false;
+        }
+
+        var stairPos = this.getMap().getWalkablePosition();
+        this.getMap().addEntity(Game.EntityGenerator.create('stairs'), stairPos);
+        this.getMap().clearAround(stairPos);
+
+
 
         for (var a = 0; a < 30; a++) {
             Game.getAvatar().addInventoryItems([Game.ItemGenerator.create('rock')]);
         }
+
 
     },
 
@@ -676,7 +801,7 @@ Game.UIMode.LAYER_fireProjectile = {
       //Game.message.ageMessages();
       Game.refresh();
     },
-  
+
     handleInput: function (inputType, inputData) {
       var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
       if (!actionBinding) { // gate here to catch weird 'f' keypress
