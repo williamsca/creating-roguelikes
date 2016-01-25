@@ -256,6 +256,15 @@ Game.EntityMixin.WalkerCorporeal = {
           map.updateEntityLocation(this);
         }
         return {madeAdjacentMove: true};
+      } else if (Game.UIMode.gamePlay.attr._answers.graphics == "beach"){
+        this.setPos(targetX, targetY);
+        this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
+        Game.message.sendMessage("You swim out into the water but start drowning!")
+        Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp -= 2;
+        if (map) {
+          map.updateEntityLocation(this);
+        }
+        return {madeAdjacentMove: true};
       } else {
         this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
       }
