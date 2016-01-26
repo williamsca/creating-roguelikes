@@ -726,6 +726,7 @@ Game.UIMode.gamePlay = {
 
         this.getMap().addEntity(this.getAvatar(),this.getMap().getWalkablePosition());
         this.setCameraToAvatar();
+        this.updateNames();
 
         var itemPos = '';
         for (var ecount = 0; ecount < 80; ecount++) {
@@ -763,6 +764,24 @@ Game.UIMode.gamePlay = {
         }
 
 
+    },
+    updateNames: function(){
+        // switch(this.attr._answers.graphics){
+        //     case "beach":
+                Game.EntityGenerator._templates["moss"].name = "vines";
+                Game.EntityGenerator._templates["angry squirrel"].name = "posion flower";
+                Game.EntityGenerator._templates["attack slug"].name = "snake";
+                Game.EntityGenerator._templates["newt"].name = "lizard";
+                Game.EntityGenerator._templates["stairs"].name = "your home";
+
+                Game.ItemGenerator._templates["apple"].name = "sunshine";
+                Game.ItemGenerator._templates["key"].name = "baby cactus";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+
+        //
+        //     default:
+        //     return;
+        // }
     },
 
     getMapType: function () {
