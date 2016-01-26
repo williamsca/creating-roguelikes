@@ -61,7 +61,11 @@ Game.Entity.prototype.draw = function (display, x, y, isMasked) {
     if (isMasked) {
     display.draw(x,y,"m");
     } else {
+      if(this.getMap().getTile(this.getPos()).isWalkable()){
     display.draw(x,y,[".",this.getChar()]);//, this.attr._fg, this.attr._bg);
+  }else{
+    display.draw(x,y,["#",this.getChar()]);//, this.attr._fg, this.attr._bg);
+    }
   }
 };
 Game.Entity.prototype.getPos = function () {
