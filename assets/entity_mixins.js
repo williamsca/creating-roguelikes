@@ -582,6 +582,7 @@ Game.EntityMixin.TrapAttacker = {
     stateNamespace: '_TrapAttacker_attr',
     stateModel: {
       trapDuration: 2
+    }
   },
   init: function() {
     this.attr._TrapAttacker_attr.trapDuration = template.trapDuration || 2;
