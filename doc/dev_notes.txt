@@ -14,10 +14,9 @@ Current work plan:
 - weapons maintenance (limited arrows/weapons rust/limited bombs) (Diego)
   monsters drop arrows/bombs, whetstone used to sharpen broadsword/rapier
 
-- rapier/combat extensions (Colin)
+- rapier/broadsword/bombs combat extensions (Colin)
   bow needs to take two turns
 - food kills too quickly, needs balancing (Colin)
-- set different monster names (Colin)
   monsters drop? or remove entirely?
 - music (Colin)
 - touch up monster AI (Colin)

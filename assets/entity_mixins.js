@@ -9,7 +9,7 @@ Game.EntityMixin.objectiveHandler = {
             Game.UIMode.gamePlay.attr._objective = evtData;
         }
     }
-}
+  }
 };
 
 Game.EntityMixin.Stairs = {
@@ -17,7 +17,8 @@ Game.EntityMixin.Stairs = {
         mixinName: 'Stairs',
         mixinGroup: 'Objective'
     }
-}
+};
+
 Game.EntityMixin.PlayerMessager = {
   META: {
     mixinName: 'PlayerMessager',
@@ -143,7 +144,7 @@ Game.EntityMixin.PlayerActor = {
   act: function() {
     if (this.isActing()) { return; } // a gate to deal with JS timing issues
     this.isActing(true);
-    // console.log('begin player acting');
+    console.log('begin player acting');
     //Game.refresh();
     Game.renderMain();
     Game.renderAvatarDisplay();
@@ -233,45 +234,97 @@ Game.EntityMixin.WalkerCorporeal = {
 
         // OTHER ENTITY
         if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
-            if(map.getEntity(targetX, targetY).hasMixin('Stairs')){
-                Game.UIMode.gamePlay.checkObjective();
-                if(Game.UIMode.gamePlay.attr._objective){
-                    Game.switchUiMode('gameWin');
-                }else{
-                    this.raiseSymbolActiveEvent('walkForbidden', {target:map.getEntity(targetX,targetY)});
-                    return {madeAdjacentMove: false};
-                }
-            }else{
-                this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+          if (map.getEntity(targetX, targetY).hasMixin('Stairs')) {
+            Game.UIMode.gamePlay.checkObjective();
+            if (Game.UIMode.gamePlay.attr._objective && this.hasMixin('PlayerActor')) {
+              Game.switchUiMode('gameWin');
+            } else {
+              this.raiseSymbolActiveEvent('walkForbidden', {target:map.getEntity(targetX,targetY)});
+              return {madeAdjacentMove: false};
             }
-        return {madeAdjacentMove: true};
-    }
+          } else { // a monster or the avatar
+            if (map.getEntity(targetX, targetY).hasMixin('PlayerActor')) { // avatar is the recipient
+              var weapon = '';
+            } else if (this.hasMixin('PlayerActor')) { // avatar is the actor
+              var weapon = Game.UIMode.gameQuestions.attr.answers.equ;
+            } else { // the avatar is not involved, suggesting that monsters are attacking each other. Do we want this?
+              return {madeAdjacentMove: false};
+            }
 
-      // TILE
-      var targetTile = map.getTile(targetX, targetY);
-      if (targetTile.isWalkable()) {
-        this.setPos(targetX, targetY);
-        this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
-        if (map) {
-          map.updateEntityLocation(this);
+            if (weapon == 'range') {
+              Game.message.sendMessage("You weakly punch the monster, dealing no damage. Try pressing 'f' to use your bow instead.");
+            } else if (weapon == 'trap') {
+              Game.message.sendMessage("You weakly punch the monster, dealing no damage. Try pressing 'f' to use your bombs instead.");
+            } else { // a melee weapon
+              this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)}); // always execute the basic attack
+              if (weapon == 'broad') {
+                if (Math.abs(dx) == Math.abs(dy)) { // diagonal attack
+                  if (map.getEntity(this.getX(), this.getY() + dy)) {
+                    //CONSIDER MOVING THE MESSAGES TO bumpEntity
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(this.getX(), this.getY() + dy), weapon: weapon});
+                  }
+                  if (map.getEntity(this.getX() + dx, this.getY())) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(this.getX() + dx, this.getY()), weapon: weapon});
+                  }
+                } else if (dy == 0) { // horizontal attack
+                  if (map.getEntity(targetX, targetY + 1)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY + 1), weapon: weapon});
+                  }
+                  if (map.getEntity(targetX, targetY - 1)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY - 1), weapon: weapon});
+                  }
+                } else { // vertical attack
+                  console.log('vertical');
+                  if (map.getEntity(targetX - 1, targetY)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX - 1, targetY), weapon: weapon});
+                  }
+                  if (map.getEntity(targetX + 1, targetY)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX + 1, targetY), weapon: weapon});
+                  }
+                }
+              }
+              if (weapon == 'rapier') {
+                if (map.getEntity(targetX + dx, targetY + dy)) {
+                  Game.message.sendMessage("Your rapier passes through the monster and strikes the one behind it as well.")
+                  this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX + dx, targetY + dy)});
+                }
+              }
+            }
+          }
+          return {madeAdjacentMove: true};
         }
-        return {madeAdjacentMove: true};
-      } else if (Game.UIMode.gamePlay.attr._answers.graphics == "beach" && this == Game.UIMode.gamePlay.getAvatar()){
-        this.setPos(targetX, targetY);
-        this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
-        Game.message.sendMessage("You swim out into the water but start drowning!")
-        Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp -= 2;
-        if (map) {
-          map.updateEntityLocation(this);
+
+        // TILE
+        var targetTile = map.getTile(targetX, targetY);
+        if (targetTile.isWalkable()) {
+          this.setPos(targetX, targetY);
+          this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
+          if (map) {
+            map.updateEntityLocation(this);
+          }
+          return {madeAdjacentMove: true};
+        } else if (Game.UIMode.gamePlay.attr._answers.graphics == "beach" && this == Game.UIMode.gamePlay.getAvatar()){
+          this.setPos(targetX, targetY);
+          this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
+          Game.message.sendMessage("You swim out into the water but start drowning!")
+          Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp -= 2;
+          if (map) {
+            map.updateEntityLocation(this);
+          }
+          return {madeAdjacentMove: true};
+        } else {
+          this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
+          return {madeAdjacentMove: false};
         }
-        return {madeAdjacentMove: true};
-      } else {
-        this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
       }
-      return {madeAdjacentMove: false};
     }
   }
-}
 };
 
 // CHRONICLE
@@ -436,6 +489,9 @@ Game.EntityMixin.MeleeAttacker = {
     stateModel: {
       attackHit: 1,
       attackDamage: 1,
+      rangedHit: 1,
+      broadHit: 1,
+      rapierHit: 2,
       attackActionDuration: 1000
     },
     init: function (template) {
@@ -445,11 +501,18 @@ Game.EntityMixin.MeleeAttacker = {
     listeners: {
       'bumpEntity': function(evtData) {
         console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
+        if (evtData.weapon == 'broad') { Game.message.sendMessage("The sweep of your broadsword catches an enemy on your flank."); }
         var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
+          // insert logic here to determine what type of damage is being dealt, i.e.,
+          if (evtData.ranged) {
+
+          } else if (evtData.broad) {
+
+          }
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
           evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
@@ -538,7 +601,7 @@ Game.EntityMixin.RangedAttacker = {
         }
 
         if (entityPresent) {
-          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent});
+          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent, ranged: true});
           return {enemyHit: true};
         }
         return {enemyHit: false};
@@ -549,6 +612,23 @@ Game.EntityMixin.RangedAttacker = {
     return this.attr._RangedAttacker_attr.attackRange;
   }
 };
+
+Game.EntityMixin.TrapAttacker = {
+  META: {
+    mixinName: 'TrapAttacker',
+    mixinGroup: 'Attacker',
+    stateNamespace: '_TrapAttacker_attr',
+    stateModel: {
+      trapDuration: 2
+    }
+  },
+  init: function() {
+    this.attr._TrapAttacker_attr.trapDuration = template.trapDuration || 2;
+  },
+  listeners: {
+
+  }
+}
 
 //Sight
 Game.EntityMixin.Sight = {
@@ -803,7 +883,7 @@ Game.EntityMixin.WanderActor = {
     return Game.util.positionsAdjacentTo({x:0, y:0}).random();
   },
   act: function() {
-    // console.log('wander for ' + this.getName());
+    console.log('wander for ' + this.getName());
     Game.TimeEngine.lock();
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove', {dx:moveDeltas.x, dy:moveDeltas.y});
@@ -881,10 +961,11 @@ Game.EntityMixin.WanderChaserActor = {
   },
   act: function () {
     Game.TimeEngine.lock();
-    // console.log("begin wander acting");
+    console.log("begin wander chaser acting");
     // console.log('wander for '+this.getName());
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove',{dx:moveDeltas.x,dy:moveDeltas.y});
+    console.log("wander chaser action duration: "+this.getCurrentActionDuration());
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration()+Game.util.randomInt(-10,10));
     this.raiseSymbolActiveEvent('actionDone');

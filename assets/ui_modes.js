@@ -282,7 +282,7 @@ Game.UIMode.gameLose = {
 //#############################################################################
 
 
-//QUESTIONS
+//Questions
 Game.UIMode.gameQuestions = {
     attr: {
         questionNum: 0,
@@ -552,7 +552,7 @@ Game.UIMode.gamePlay = {
         this.attr._objective = true;
         break;
         case "killAll":
-        this.attr._objective = this.countEntities() < 3;
+        this.attr._objective = this.countEntities() < 3; //the avatar, the exit, and???
         break;
         case "findKey":
         break;
@@ -575,7 +575,6 @@ Game.UIMode.gamePlay = {
         return count;
     },
     handleInput: function (inputType, inputData){
-
         var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
         // console.log('action binding is');
         // console.dir(actionBinding);
@@ -583,6 +582,7 @@ Game.UIMode.gamePlay = {
         if ((! actionBinding) || (actionBinding.actionKey == 'CANCEL')) {
             return false;
         }
+        console.dir(actionBinding);
         var tookTurn = false;
 
         if        (actionBinding.actionKey == 'MOVE_UL') {
@@ -605,7 +605,7 @@ Game.UIMode.gamePlay = {
         } else if (actionBinding.actionKey == 'MOVE_DR') {
             tookTurn = this.moveAvatar(1  , 1);
 
-        } else if (actionBinding.actionKey == 'FIRE') {
+        } else if (actionBinding.actionKey == 'FIRE' && Game.UIMode.gameQuestions.attr.answers.equ == "range") {
             Game.addUiMode('LAYER_fireProjectile');
         } else if (actionBinding.actionKey == 'INVENTORY') {
             Game.addUiMode('LAYER_inventoryListing');
@@ -740,10 +740,6 @@ Game.UIMode.gamePlay = {
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
-            // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
-            //this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
-            //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
-
             //itemPos = this.getMap().getWalkablePosition();
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
