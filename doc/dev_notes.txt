@@ -6,11 +6,11 @@ Eventual Feature List:
 Next Milestone(s):
 
 Current work plan:
-- fix tilesets (Diego)
+- fix tilesets (Diego)X
 - traps destroy walls (or add water) (Diego)
-- beach tileset has swimming feature (Diego)
+- beach tileset has swimming feature (Diego)X
 - special scenarios from a combination of current questions (Diego)
-- sight (Diego)
+- sight (Diego)X
 - weapons maintenance (limited arrows/weapons rust/limited bombs) (Diego)
   monsters drop arrows/bombs, whetstone used to sharpen broadsword/rapier
 

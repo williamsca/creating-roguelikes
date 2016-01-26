@@ -557,7 +557,7 @@ Game.UIMode.gamePlay = {
         case "findKey":
         break;
         case "boss":
-        this.attr._objective = Game.DATASTORE.ENTITY[this.attr.bossKey];
+        this.attr._objective = !(Game.DATASTORE.ENTITY[this.attr.bossKey]);
         break;
         default:
         this.attr._objective = true;
@@ -670,6 +670,8 @@ Game.UIMode.gamePlay = {
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"ATTACK");
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy: "+av.getAttackHit());
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power: "+av.getAttackDamage());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Weapon Uses: "+av.getCurAmmo() + "/" + av.getMaxAmmo());
+
         y++;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"DEFENSE");
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Dodging: "+av.getAttackAvoid());
@@ -733,7 +735,7 @@ Game.UIMode.gamePlay = {
         this.updateNames();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 20; ecount++) {
+        for (var ecount = 0; ecount < 5; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
@@ -1350,5 +1352,29 @@ Game.UIMode.LAYER_inventoryEat = new Game.UIMode.LAYER_itemListing({
   }
 });
 Game.UIMode.LAYER_inventoryEat.doSetup = function () {
+  this.setup({itemIdList: Game.getAvatar().getInventoryItemIds()});
+};
+
+//-------------------
+
+Game.UIMode.LAYER_inventoryReload = new Game.UIMode.LAYER_itemListing({
+  caption: 'Reload',
+  canSelect: true,
+  keyBindingName: 'LAYER_inventoryReload',
+  filterListedItemsOn: function(itemId) {
+    return  Game.DATASTORE.ITEM[itemId].hasMixin('Ammo');
+  },
+  processingFunction: function (selectedItemIds) {
+    if (selectedItemIds[0]) {
+      console.dir(selectedItemIds[0]);
+      var ammoItem = Game.getAvatar().extractInventoryItems([selectedItemIds[0]])[0];
+      Game.util.cdebug(foodItem);
+      Game.getAvatar().raiseSymbolActiveEvent({ammoValue: ammoItem.getAmmoValue() });
+      return true;
+    }
+    return false;
+  }
+});
+Game.UIMode.LAYER_inventoryReload.doSetup = function () {
   this.setup({itemIdList: Game.getAvatar().getInventoryItemIds()});
 };

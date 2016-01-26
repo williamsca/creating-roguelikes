@@ -6,12 +6,13 @@ Game.EntityGenerator.learn({
   chr: '@',
   fg: '#dda',
   maxHp: 100,
+  maxAmmo: 100,
   sightRadius: 20,
   attackAvoid: 1,
   attackDamage: 2,
   inventoryCapacity: 35,
   maxFood: 400,
-  mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
+  mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints", "AmmoPoints",
            "Chronicle", "MeleeAttacker", "objectiveHandler", "RangedAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
 });
 

@@ -336,6 +336,38 @@ Game.EntityMixin.Chronicle = {
   }
 };
 
+// AMMO POINTS
+Game.EntityMixin.AmmoPoints = {
+  META: {
+    mixinName: 'AmmoPoints',
+    mixinGroup: 'ammo',
+    stateNamespace: '_AmmoPoints_attr',
+    stateModel: {
+      maxAmmo: 1,
+      curAmmo: 1
+    },
+    init:function(template) {
+      // console.log(template.MaxHp);
+      this.attr._AmmoPoints_attr.maxAmmo = template.maxAmmo || 1;
+      this.attr._AmmoPoints_attr.curAmmo = template.curAmmo || this.attr._AmmoPoints_attr.maxAmmo;
+    },
+    listeners: {
+      'usedAmmo': function(evtData) {
+        this.attr._AmmoPoints_attr.curAmmo -= 1;
+      },
+      'reloaded': function(evtData) {
+        this.attr._AmmoPoints_attr.curAmmo = min(this.curAmmo + evtData.ammoValue, this.maxAmmo)
+      }
+    }
+  },
+    getCurAmmo: function(){
+      return this.attr._AmmoPoints_attr.curAmmo;
+    },
+    getMaxAmmo: function(){
+      return this.attr._AmmoPoints_attr.maxAmmo;
+    }
+  };
+
 // HIT POINTS
 Game.EntityMixin.HitPoints = {
   META: {

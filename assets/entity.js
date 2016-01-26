@@ -21,6 +21,19 @@ Game.Entity.extend(Game.SymbolActive);
 
 
 Game.Entity.prototype.destroy = function() {
+  var prob = Math.floor(Math.random()*10);
+  var item = null;
+  if(prob >= 8){
+    item = Game.ItemGenerator.create("apple");
+  }else if(prob >= 6){
+    item = Game.ItemGenerator.create("ammo");
+  }
+
+  if(item){
+    this.getMap().addItem(item, this.getPos());
+  }
+
+
   // remove from map
   this.getMap().extractEntity(this);
   // remove from DATASTORE
