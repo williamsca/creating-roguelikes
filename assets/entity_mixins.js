@@ -256,7 +256,7 @@ Game.EntityMixin.WalkerCorporeal = {
           map.updateEntityLocation(this);
         }
         return {madeAdjacentMove: true};
-      } else if (Game.UIMode.gamePlay.attr._answers.graphics == "beach"){
+      } else if (Game.UIMode.gamePlay.attr._answers.graphics == "beach" && this == Game.UIMode.gamePlay.getAvatar()){
         this.setPos(targetX, targetY);
         this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
         Game.message.sendMessage("You swim out into the water but start drowning!")
