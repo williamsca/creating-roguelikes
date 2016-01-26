@@ -226,6 +226,11 @@ Game.KeyBinding = {
        waxd  : {label:'E' ,inputMatch:ROT.VK_E ,inputType:'keydown' ,inputMetaShift:true  ,inputMetaCtrl:false},
        LAYER_inventoryListing: {label:'E' ,inputMatch:ROT.VK_E ,inputType:'keydown' ,inputMetaShift:true  ,inputMetaCtrl:false}
     },
+    RELOAD   : {action_group:'inventory' ,guid:Game.util.uniqueId() ,ordering:5.3 ,short:'reload' ,long :'consume ammo to reload weapon'         ,
+       numpad: {label:'R' ,inputMatch:ROT.VK_R ,inputType:'keydown' ,inputMetaShift:true  ,inputMetaCtrl:false} ,
+       waxd  : {label:'R' ,inputMatch:ROT.VK_R ,inputType:'keydown' ,inputMetaShift:true  ,inputMetaCtrl:false},
+       LAYER_inventoryListing: {label:'R' ,inputMatch:ROT.VK_R ,inputType:'keydown' ,inputMetaShift:true  ,inputMetaCtrl:false}
+    },
     EXAMINE : {action_group:'inventory' ,guid:Game.util.uniqueId() ,ordering:5.2 ,short:'examine' ,long :'get details about a carried item',
       numpad: {label:'x' ,inputMatch:ROT.VK_X ,inputType:'keydown' ,inputMetaShift:false  ,inputMetaCtrl:false} ,
       waxd  : {label:'X' ,inputMatch:ROT.VK_X ,inputType:'keydown' ,inputMetaShift:true  ,inputMetaCtrl:false},

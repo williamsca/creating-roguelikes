@@ -23,7 +23,7 @@ Game.ItemGenerator.learn({
   description: 'a nice juicy ammo - yum!',
   chr: 'a',
   fg:'#f32',
-  foodValue: 100,
+  ammoValue: 20,
   mixins: ['Ammo']
 });
 

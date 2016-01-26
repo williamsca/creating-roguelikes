@@ -61,6 +61,10 @@ Game.EntityMixin.PlayerMessager = {
         Game.message.sendMessage('your inventory is full');
         Game.renderMessage();
       },
+      'noAmmo': function(evtData){
+        Game.message.sendMessage('you have no ammo!');
+        Game.renderMessage();
+      },
       'inventoryEmpty': function(evtData) {
           Game.message.sendMessage('you are not carrying anything');
           Game.renderMessage();
@@ -255,7 +259,8 @@ Game.EntityMixin.WalkerCorporeal = {
               Game.message.sendMessage("You weakly punch the monster, dealing no damage. Try pressing 'f' to use your bow instead.");
             } else if (weapon == 'trap') {
               Game.message.sendMessage("You weakly punch the monster, dealing no damage. Try pressing 'f' to use your bombs instead.");
-            } else { // a melee weapon
+            } else if (Game.UIMode.gamePlay.getAvatar().getCurAmmo() > 0){ // a melee weapon
+              this.raiseSymbolActiveEvent('usedAmmo');
               this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)}); // always execute the basic attack
               if (weapon == 'broad') {
                 if (Math.abs(dx) == Math.abs(dy)) { // diagonal attack
@@ -295,6 +300,8 @@ Game.EntityMixin.WalkerCorporeal = {
                   this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX + dx, targetY + dy)});
                 }
               }
+            }else{
+              Game.message.sendMessage("Your weapon is dull and can't attack! Sharpen it with a stone!");
             }
           }
           return {madeAdjacentMove: true};
@@ -409,7 +416,7 @@ Game.EntityMixin.AmmoPoints = {
         this.attr._AmmoPoints_attr.curAmmo -= 1;
       },
       'reloaded': function(evtData) {
-        this.attr._AmmoPoints_attr.curAmmo = min(this.curAmmo + evtData.ammoValue, this.maxAmmo)
+        this.attr._AmmoPoints_attr.curAmmo = Math.min(this.attr._AmmoPoints_attr.curAmmo + evtData.ammoValue, this.attr._AmmoPoints_attr.maxAmmo)
       }
     }
   },
@@ -589,6 +596,7 @@ Game.EntityMixin.RangedAttacker = {
     listeners: {
       // Presently can fire through walls...
       'fireProjectile': function(evtData) {
+        if(this.getCurAmmo() > 0){
         // check for entities within attackRange of the avatar
         var map = this.getMap();
         for (var i = 1; i <= this.getAttackRange(); ++i) {
@@ -602,9 +610,14 @@ Game.EntityMixin.RangedAttacker = {
 
         if (entityPresent) {
           this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent, ranged: true});
+          this.raiseSymbolActiveEvent('usedAmmo');
           return {enemyHit: true};
         }
         return {enemyHit: false};
+      }else {
+        this.raiseSymbolActiveEvent('noAmmo');
+        return {enemyHit: false};
+      }
       }
     }
   },

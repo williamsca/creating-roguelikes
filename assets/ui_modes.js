@@ -518,7 +518,7 @@ Game.UIMode.gamePlay = {
         }
         Game.TimeEngine.unlock();
         //Game.KeyBinding.informPlayer();
-        this.getAvatar().eatFood();
+        //this.getAvatar().eatFood();
         answers = this.attr._answers;
         Game.message.clearMessages();
         Game.message.sendMessage(answers.mapType + ", " + answers.objective + ", " + answers.misc);
@@ -625,6 +625,9 @@ Game.UIMode.gamePlay = {
             Game.addUiMode('LAYER_inventoryDrop');
         } else if (actionBinding.actionKey == 'EAT') {
           Game.addUiMode('LAYER_inventoryEat');
+        } else if (actionBinding.actionKey == 'RELOAD') {
+          console.log("reloading");
+            Game.addUiMode('LAYER_inventoryReload');
         } else if (actionBinding.actionKey == 'EXAMINE') {
             Game.addUiMode('Layer_inventoryExamine');
         } else if (actionBinding.actionKey == 'CHANGE_BINDINGS') {
@@ -768,16 +771,18 @@ Game.UIMode.gamePlay = {
 
         var stairPos = this.getMap().getWalkablePosition();
         this.getMap().addEntity(Game.EntityGenerator.create('stairs'), stairPos);
-        this.getMa
         this.getMap().clearAround(stairPos);
-
-        for (var a = 0; a < 30; a++) {
-            Game.getAvatar().addInventoryItems([Game.ItemGenerator.create('rock')]);
-        }
 
 
     },
     updateNames: function(){
+        if(this.attr._answers.equ == "rapier" || this.attr._answers.equ == "broad"){
+          Game.ItemGenerator._templates["ammo"].name = "stone";
+          Game.ItemGenerator._templates["ammo"].chr = "R";
+        }else if (this.attr._answers.equ == "trap"){
+          Game.ItemGenerator._templates["ammo"].name = "extra bomb";
+          Game.ItemGenerator._templates["ammo"].chr = "b";
+        }
         switch(this.attr._answers.graphics){
             case "beach":
                 Game.EntityGenerator._templates["moss"].name = "vines";
@@ -1364,8 +1369,7 @@ Game.UIMode.LAYER_inventoryReload = new Game.UIMode.LAYER_itemListing({
     if (selectedItemIds[0]) {
       console.dir(selectedItemIds[0]);
       var ammoItem = Game.getAvatar().extractInventoryItems([selectedItemIds[0]])[0];
-      Game.util.cdebug(foodItem);
-      Game.getAvatar().raiseSymbolActiveEvent({ammoValue: ammoItem.getAmmoValue() });
+      Game.getAvatar().raiseSymbolActiveEvent("reloaded", {ammoValue: ammoItem.getAmmoValue() });
       return true;
     }
     return false;
