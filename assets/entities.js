@@ -55,6 +55,19 @@ Game.EntityGenerator.learn({
 });
 
 Game.EntityGenerator.learn({
+  name: 'boss',
+  description: '',
+  chr: 'B',
+  fg: '#ff9',
+  maxHp: 20,
+  sightRadius: 4,
+  attackPower: 3,
+  wanderChaserActionDuration: 2000,
+  attackActionDuration: 300,
+  mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
+});
+
+Game.EntityGenerator.learn({
 name: 'angry squirrel',
 description: '',
 chr: 'q',

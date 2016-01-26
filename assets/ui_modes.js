@@ -752,7 +752,11 @@ Game.UIMode.gamePlay = {
         }
         if(this.attr._answers.objective == "findKey"){
         this.getMap().addItem(Game.ItemGenerator.create('key'), this.getMap().getWalkablePosition());
-        }
+      }else if (this.attr._answers.objective == "boss"){
+        boss = Game.EntityGenerator.create('boss');
+        this.attr.bossKey = boss.getId();
+        this.getMap().addEntity(boss, this.getMap().getWalkablePosition());
+      }
         if(this.attr._answers.graphics == "beach"){
         Game.Tile.wallTile.attr._transparent = true;
         Game.Tile.wallTile.attr._opaque = false;
@@ -783,6 +787,7 @@ Game.UIMode.gamePlay = {
                 Game.EntityGenerator._templates["attack slug"].name = "snake";
                 Game.EntityGenerator._templates["newt"].name = "lizard";
                 Game.EntityGenerator._templates["stairs"].name = "your home";
+                Game.EntityGenerator._templates["boss"].name = "evil gardener";
 
                 Game.ItemGenerator._templates["apple"].name = "sunshine";
                 Game.ItemGenerator._templates["key"].name = "baby cactus";
@@ -795,6 +800,7 @@ Game.UIMode.gamePlay = {
                 Game.EntityGenerator._templates["attack slug"].name = "snake";
                 Game.EntityGenerator._templates["newt"].name = "dancing dog";
                 Game.EntityGenerator._templates["stairs"].name = "the chest";
+                Game.EntityGenerator._templates["boss"].name = "evil ghost";
 
                 Game.ItemGenerator._templates["apple"].name = "apple";
                 Game.ItemGenerator._templates["key"].name = "key";
@@ -807,6 +813,7 @@ Game.UIMode.gamePlay = {
                 Game.EntityGenerator._templates["attack slug"].name = "green slime";
                 Game.EntityGenerator._templates["newt"].name = "red slime";
                 Game.EntityGenerator._templates["stairs"].name = "the exit";
+                Game.EntityGenerator._templates["boss"].name = "king slime";
 
                 Game.ItemGenerator._templates["apple"].name = "bread";
                 Game.ItemGenerator._templates["key"].name = "key";
@@ -819,6 +826,8 @@ Game.UIMode.gamePlay = {
                 Game.EntityGenerator._templates["attack slug"].name = "doodle";
                 Game.EntityGenerator._templates["newt"].name = "angry face";
                 Game.EntityGenerator._templates["stairs"].name = "hole in the paper";
+                Game.EntityGenerator._templates["boss"].name = "incorrect math";
+
 
                 Game.ItemGenerator._templates["apple"].name = "food";
                 Game.ItemGenerator._templates["key"].name = "pencil";
