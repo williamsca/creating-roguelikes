@@ -1,22 +1,22 @@
 Game.EntityMixin = {};
 
 Game.EntityMixin.objectiveHandler = {
-    META: {
+  META: {
     mixinName: 'PlayerMessager',
     mixinGroup: 'PlayerMessager',
     listeners: {
-        'keyMoved' : function(evtData) {
-            Game.UIMode.gamePlay.attr._objective = evtData;
-        }
+      'keyMoved' : function(evtData) {
+        Game.UIMode.gamePlay.attr._objective = evtData;
+      }
     }
   }
 };
 
 Game.EntityMixin.Stairs = {
-    META: {
-        mixinName: 'Stairs',
-        mixinGroup: 'Objective'
-    }
+  META: {
+      mixinName: 'Stairs',
+      mixinGroup: 'Objective'
+  }
 };
 
 Game.EntityMixin.PlayerMessager = {
@@ -144,7 +144,7 @@ Game.EntityMixin.PlayerActor = {
   act: function() {
     if (this.isActing()) { return; } // a gate to deal with JS timing issues
     this.isActing(true);
-    console.log('begin player acting');
+    // console.log('begin player acting');
     //Game.refresh();
     Game.renderMain();
     Game.renderAvatarDisplay();
@@ -246,7 +246,7 @@ Game.EntityMixin.WalkerCorporeal = {
             if (map.getEntity(targetX, targetY).hasMixin('PlayerActor')) { // avatar is the recipient
               var weapon = '';
             } else if (this.hasMixin('PlayerActor')) { // avatar is the actor
-              var weapon = Game.UIMode.gameQuestions.attr.answers.equ;
+              var weapon = Game.UIMode.gamePlay.attr._answers.equ;
             } else { // the avatar is not involved, suggesting that monsters are attacking each other. Do we want this?
               return {madeAdjacentMove: false};
             }
@@ -581,22 +581,102 @@ Game.EntityMixin.RangedAttacker = {
   }
 };
 
-Game.EntityMixin.TrapAttacker = {
+Game.EntityMixin.BombAttacker = {
   META: {
-    mixinName: 'TrapAttacker',
+    mixinName: 'BombAttacker',
     mixinGroup: 'Attacker',
-    stateNamespace: '_TrapAttacker_attr',
+    stateNamespace: '_BombAttacker_attr',
     stateModel: {
-      trapDuration: 2
+      bombX: 0,
+      bombY: 0,
+      bombPlaced: false
+    },
+    init: function(template) {
+      this.attr._BombAttacker_attr.bombX = template.bombX || 0;
+      this.attr._BombAttacker_attr.bombY = template.bombY || 0;
+      this.attr._BombAttacker_attr.bombPlaced = template.bombPlaced || false;
+    },
+    listeners: {
+      'placeBomb': function(evtData) {
+        var map = this.getMap();
+        var targetX = this.getX() + evtData.xLoc;
+        var targetY = this.getY() + evtData.yLoc;
+        // can't put bombs on an entity
+        if (map.getEntity(targetX, targetY)) {
+          console.log("ding");
+          return {bombPlaced: false};
+        }
+        // can't put bombs off edge of map
+        if ((targetX < 0) || (targetX >= map.getWidth()) || (targetY < 0) || (targetY >= map.getHeight())) {
+          return {bombPlaced: false};
+        }
+        map.addEntity(Game.EntityGenerator.create("bomb"), {x: targetX, y: targetY});
+        console.log("bomb placed at : " + targetX + ", " + targetY);
+
+        this.setBombX(targetX);
+        console.log(this.getBombX());
+        this.setBombY(targetY);
+        console.log(this.getBombY());
+        this.setBombPlaced(true);
+        return {bombPlaced: true};
+      },
+      'triggerBomb': function(evtData) {
+        var map = this.getMap();
+        console.log("bomb triggered at: " + this.getBombX() + ", " + this.getBombY());
+        var nearEntities = map.getEntitiesAround(this.getBombX(), this.getBombY());
+        if (nearEntities && nearEntities.length > 0) {
+          Game.util.cdebug(nearEntities);
+          for (var i = 0; i < nearEntities.length; i++) {
+            if(nearEntities[i]){
+              Game.util.cdebug(nearEntities[i]);
+              this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:nearEntities[i], bomb: true});
+            }
+          }
+        }
+        bomb = map.getEntity(this.getBombX(), this.getBombY());
+        bomb.raiseSymbolActiveEvent("triggerBomb", evtData);
+        this.setBombPlaced(false);
+      }
     }
   },
-  init: function() {
-    this.attr._TrapAttacker_attr.trapDuration = template.trapDuration || 2;
+  setBombX: function(x) {
+    this.attr._BombAttacker_attr.bombX = x;
   },
-  listeners: {
-
+  getBombX: function() {
+    return this.attr._BombAttacker_attr.bombX;
+  },
+  setBombY: function(y) {
+    this.attr._BombAttacker_attr.bombY = y;
+  },
+  getBombY: function() {
+    return this.attr._BombAttacker_attr.bombY;
+  },
+  setBombPlaced: function(placed) {
+    this.attr._BombAttacker_attr.bombPlaced = placed;
+  },
+  getBombPlaced: function() {
+    return this.attr._BombAttacker_attr.bombPlaced;
   }
-}
+};
+
+Game.EntityMixin.Bomb = {
+  META: {
+    mixinName: 'Bomb',
+    mixinGroup: 'Trap',
+    stateNamespace: '_Bomb_attr',
+    stateModel: {
+      bombDuration: 2
+    },
+    listeners: {
+      'triggerBomb': function(evtData) {
+        console.log("bomb clear around");
+        map = this.getMap();
+        map.detonate(this.getX(), this.getY()); // destroy nearby tiles
+        this.destroy();
+      }
+    }
+  }
+};
 
 //Sight
 Game.EntityMixin.Sight = {
@@ -851,15 +931,10 @@ Game.EntityMixin.WanderActor = {
     return Game.util.positionsAdjacentTo({x:0, y:0}).random();
   },
   act: function() {
-    console.log('wander for ' + this.getName());
+    // console.log('wander for ' + this.getName());
     Game.TimeEngine.lock();
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove', {dx:moveDeltas.x, dy:moveDeltas.y});
-    /*if (this.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
-    //   console.log('trying to walk to ' + moveDeltas.x + ' , ' + moveDeltas.y);
-
-      this.tryWalk(this.getMap(), moveDeltas.x, moveDeltas.y);
-    }*/
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-1, 10));
     this.raiseSymbolActiveEvent('actionDone');
@@ -929,11 +1004,10 @@ Game.EntityMixin.WanderChaserActor = {
   },
   act: function () {
     Game.TimeEngine.lock();
-    console.log("begin wander chaser acting");
+    // console.log("begin wander chaser acting");
     // console.log('wander for '+this.getName());
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove',{dx:moveDeltas.x,dy:moveDeltas.y});
-    console.log("wander chaser action duration: "+this.getCurrentActionDuration());
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration()+Game.util.randomInt(-10,10));
     this.raiseSymbolActiveEvent('actionDone');

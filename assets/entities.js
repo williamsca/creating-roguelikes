@@ -12,7 +12,8 @@ Game.EntityGenerator.learn({
   inventoryCapacity: 35,
   maxFood: 400,
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight","MapMemory", "HitPoints",
-           "Chronicle", "MeleeAttacker", "objectiveHandler", "RangedAttacker", "MeleeDefender", "InventoryHolder", "FoodConsumer"]
+           "Chronicle", "MeleeAttacker", "objectiveHandler", "RangedAttacker", "MeleeDefender",
+           "BombAttacker", "InventoryHolder", "FoodConsumer"]
 });
 
 Game.EntityGenerator.learn({
@@ -68,13 +69,21 @@ Game.EntityGenerator.learn({
 });
 
 Game.EntityGenerator.learn({
-name: 'angry squirrel',
-description: '',
-chr: 'q',
-fg: '#aaa',
-maxHp: 3,
-attackPower: 1,
-attackAvoid: 2,
-damageMitigation: 1,
-mixins: ["HitPoints", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker", "MeleeDefender"]
+  name: 'angry squirrel',
+  description: '',
+  chr: 'q',
+  fg: '#aaa',
+  maxHp: 3,
+  attackPower: 1,
+  attackAvoid: 2,
+  damageMitigation: 1,
+  mixins: ["HitPoints", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker", "MeleeDefender"]
 });
+
+Game.EntityGenerator.learn( {
+  name: 'bomb',
+  description: 'where\'d you find one of those?',
+  chr: 'b',
+  fg: '#aaa',
+  mixins: ["Bomb"]
+})
