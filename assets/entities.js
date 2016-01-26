@@ -50,7 +50,7 @@ Game.EntityGenerator.learn({
   sightRadius: 4,
   attackPower: 1,
   wanderChaserActionDuration: 1200,
-  attackActionDuration: 300,
+  attackActionDuration: 3000,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
 });
 

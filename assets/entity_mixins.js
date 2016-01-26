@@ -144,7 +144,7 @@ Game.EntityMixin.PlayerActor = {
   act: function() {
     if (this.isActing()) { return; } // a gate to deal with JS timing issues
     this.isActing(true);
-    // console.log('begin player acting');
+    console.log('begin player acting');
     //Game.refresh();
     Game.renderMain();
     Game.renderAvatarDisplay();
@@ -851,7 +851,7 @@ Game.EntityMixin.WanderActor = {
     return Game.util.positionsAdjacentTo({x:0, y:0}).random();
   },
   act: function() {
-    // console.log('wander for ' + this.getName());
+    console.log('wander for ' + this.getName());
     Game.TimeEngine.lock();
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove', {dx:moveDeltas.x, dy:moveDeltas.y});
@@ -929,10 +929,11 @@ Game.EntityMixin.WanderChaserActor = {
   },
   act: function () {
     Game.TimeEngine.lock();
-    // console.log("begin wander acting");
+    console.log("begin wander chaser acting");
     // console.log('wander for '+this.getName());
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove',{dx:moveDeltas.x,dy:moveDeltas.y});
+    console.log("wander chaser action duration: "+this.getCurrentActionDuration());
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration()+Game.util.randomInt(-10,10));
     this.raiseSymbolActiveEvent('actionDone');

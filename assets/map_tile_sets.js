@@ -22,8 +22,8 @@ Game.MapTileSets = {
         return mapTiles;
     },
   caves: {
-    _width: 100,
-    _height: 100,
+    _width: 20,
+    _height: 20,
     getMapTiles: function (small) {
         if(small){
        this._width = 50;
@@ -58,8 +58,8 @@ Game.MapTileSets = {
 },
 
     rogue: {
-  _width: 100,
-  _height: 100,
+  _width: 20,
+  _height: 20,
   getMapTiles: function (small) {
           if(small){
        this._width = 50;
@@ -92,8 +92,8 @@ Game.MapTileSets = {
 },
 
     maze: {
-  _width: 100,
-  _height: 100,
+  _width: 20,
+  _height: 20,
   getMapTiles: function (small) {
           if(small){
        this._width = 50;
@@ -127,8 +127,8 @@ Game.MapTileSets = {
 },
 
     digger: {
-    _width: 100,
-    _height: 100,
+    _width: 20,
+    _height: 20,
     getMapTiles: function (small) {
             if(small){
        this._width = 50;

@@ -575,7 +575,6 @@ Game.UIMode.gamePlay = {
         return count;
     },
     handleInput: function (inputType, inputData){
-
         var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
         // console.log('action binding is');
         // console.dir(actionBinding);
@@ -583,6 +582,7 @@ Game.UIMode.gamePlay = {
         if ((! actionBinding) || (actionBinding.actionKey == 'CANCEL')) {
             return false;
         }
+        console.dir(actionBinding);
         var tookTurn = false;
 
         if        (actionBinding.actionKey == 'MOVE_UL') {
@@ -733,13 +733,13 @@ Game.UIMode.gamePlay = {
         this.updateNames();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 20; ecount++) {
-            this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
-            this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
-            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
-            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
+        for (var ecount = 0; ecount < 1; ecount++) {
+            //this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
             // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
-            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
+            //this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
 
             //itemPos = this.getMap().getWalkablePosition();
