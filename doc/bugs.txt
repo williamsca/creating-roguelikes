@@ -14,11 +14,13 @@ TODO
 - questions should have effects [X]
 - pressing '0' in questions
   should really be random       [X]
-- 
+-
 
 
-
-
+- Large numbers of messages
+  get buried quickly            []
+- Ask Chris about monsters
+  hitting multiple times        []
 - Food is present but invisible []
 - impossible load message?      []
 - after saving, the game should
