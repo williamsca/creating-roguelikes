@@ -776,8 +776,8 @@ Game.UIMode.gamePlay = {
 
     },
     updateNames: function(){
-        // switch(this.attr._answers.graphics){
-        //     case "beach":
+        switch(this.attr._answers.graphics){
+            case "beach":
                 Game.EntityGenerator._templates["moss"].name = "vines";
                 Game.EntityGenerator._templates["angry squirrel"].name = "posion flower";
                 Game.EntityGenerator._templates["attack slug"].name = "snake";
@@ -787,11 +787,47 @@ Game.UIMode.gamePlay = {
                 Game.ItemGenerator._templates["apple"].name = "sunshine";
                 Game.ItemGenerator._templates["key"].name = "baby cactus";
                 Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
 
-        //
-        //     default:
-        //     return;
-        // }
+            case "forest":
+                Game.EntityGenerator._templates["moss"].name = "bush";
+                Game.EntityGenerator._templates["angry squirrel"].name = "angry tree";
+                Game.EntityGenerator._templates["attack slug"].name = "snake";
+                Game.EntityGenerator._templates["newt"].name = "dancing dog";
+                Game.EntityGenerator._templates["stairs"].name = "the chest";
+
+                Game.ItemGenerator._templates["apple"].name = "apple";
+                Game.ItemGenerator._templates["key"].name = "key";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            case "cave":
+                Game.EntityGenerator._templates["moss"].name = "spikes";
+                Game.EntityGenerator._templates["angry squirrel"].name = "yellow slime";
+                Game.EntityGenerator._templates["attack slug"].name = "green slime";
+                Game.EntityGenerator._templates["newt"].name = "red slime";
+                Game.EntityGenerator._templates["stairs"].name = "the exit";
+
+                Game.ItemGenerator._templates["apple"].name = "bread";
+                Game.ItemGenerator._templates["key"].name = "key";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            case "doodle":
+                Game.EntityGenerator._templates["moss"].name = "scribble";
+                Game.EntityGenerator._templates["angry squirrel"].name = "tongue face";
+                Game.EntityGenerator._templates["attack slug"].name = "doodle";
+                Game.EntityGenerator._templates["newt"].name = "angry face";
+                Game.EntityGenerator._templates["stairs"].name = "hole in the paper";
+
+                Game.ItemGenerator._templates["apple"].name = "food";
+                Game.ItemGenerator._templates["key"].name = "pencil";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            default:
+                return;
+        }
     },
 
     getMapType: function () {
