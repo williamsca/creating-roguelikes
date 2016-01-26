@@ -730,6 +730,9 @@ Game.UIMode.gamePlay = {
         var itemPos = '';
         for (var ecount = 0; ecount < 80; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
             // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             //this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
             //this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
@@ -752,6 +755,7 @@ Game.UIMode.gamePlay = {
 
         var stairPos = this.getMap().getWalkablePosition();
         this.getMap().addEntity(Game.EntityGenerator.create('stairs'), stairPos);
+        this.getMa
         this.getMap().clearAround(stairPos);
 
         for (var a = 0; a < 30; a++) {

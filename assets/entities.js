@@ -18,7 +18,7 @@ Game.EntityGenerator.learn({
 Game.EntityGenerator.learn({
   name: 'moss',
   description: '',
-  chr: '%',
+  chr: 'M',
   fg: '#6b6',
   maxHp: 1,
   mixins: ["HitPoints"]
@@ -35,7 +35,7 @@ Game.EntityGenerator.learn({
 Game.EntityGenerator.learn({
   name: 'newt',
   description: '',
-  chr: '~',
+  chr: 'n',
   fg: '#98',
   maxHp: 2,
   mixins: ["HitPoints", "WanderActor", "WalkerCorporeal"]
@@ -44,7 +44,7 @@ Game.EntityGenerator.learn({
 Game.EntityGenerator.learn({
   name: 'attack slug',
   description: '',
-  chr: '~',
+  chr: 's',
   fg: '#ff9',
   maxHp: 4,
   sightRadius: 4,
@@ -57,7 +57,7 @@ Game.EntityGenerator.learn({
 Game.EntityGenerator.learn({
 name: 'angry squirrel',
 description: '',
-chr: '&',
+chr: 'q',
 fg: '#aaa',
 maxHp: 3,
 attackPower: 1,

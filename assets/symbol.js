@@ -18,6 +18,10 @@ Game.Symbol.prototype.getBg = function () {
    return this.attr._bg;
 };
 
+Game.Symbol.prototype.setName = function (newName) {
+    this.attr.name = newName;
+}
+
 Game.Symbol.prototype.getRepresentation = function() {
     return '%c{' + this.attr._fg + '}%b{' + this.attr._bg + '}' + this.attr._char;
 };
@@ -26,13 +30,7 @@ Game.Symbol.prototype.draw = function (display, x, y, isMasked) {
     try{
     if (isMasked) {
     // TODO add transparent thing!! Make it a filter not a opaque block
-      if (this.getName() == "wall"){
-        display.draw(x,y,"$");
-    }else if (this.getName() == 'floor'){
-        display.draw(x,y,"*");
-    }else {
-        display.draw(x,y,"?");
-    }
+    display.draw(x,y,[this.getChar(), "m"]);
 
     } else {
     display.draw(x,y,[".",this.getChar()]);//, this.attr._fg, this.attr._bg);

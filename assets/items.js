@@ -21,7 +21,7 @@ Game.ItemGenerator.learn({
 Game.ItemGenerator.learn({
   name: 'key',
   description: 'This seems like it can get you out of here!',
-  chr: '?',
+  chr: 'K',
   fg:'#f32',
   mixins: ['Key']
 });
