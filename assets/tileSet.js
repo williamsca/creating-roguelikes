@@ -1,5 +1,17 @@
-var tileSet = document.createElement("img");
-tileSet.src = "assets/beachTileSet.png"
+Game.TILESETS = {}
+
+Game.TILESETS.beach = document.createElement("img");
+Game.TILESETS.beach.src = "assets/beachTileSet.png"
+
+Game.TILESETS.cave = document.createElement("img");
+Game.TILESETS.cave.src = "assets/caveTileSet.png"
+
+Game.TILESETS.forest = document.createElement("img");
+Game.TILESETS.forest.src = "assets/forestTileSet.png"
+
+Game.TILESETS.doodle = document.createElement("img");
+Game.TILESETS.doodle.src = "assets/doodleTileSet.png"
+
 
 //Tile set options
 Game.DISPLAYS.tsOptions = {
@@ -7,7 +19,7 @@ Game.DISPLAYS.tsOptions = {
   bg: "transparent",
   tileWidth: 32,
   tileHeight: 32,
-  tileSet: tileSet,
+  tileSet: Game.TILESETS.doodle,
   tileMap: {
     "@" : [0, 68],
     "#" : [0,0],
@@ -28,7 +40,8 @@ Game.DISPLAYS.tsOptions = {
     "s" : [34, 102],
     "n" : [68, 102],
     "q" : [102, 102],
-    "B" : [136, 102]
+    "B" : [136, 102],
+    "?" : [0, 135]
 
 
   },

@@ -35,4 +35,8 @@ Game.Tile.prototype.getName = function() {
 
  Game.Tile.nullTile = new Game.Tile({name: 'nullTile'});
  Game.Tile.floorTile = new Game.Tile({name: 'floor', chr: '.', walkable: true, transparent:true});
+ Game.Tile.floorTile2 = new Game.Tile({name: 'floor', chr: '*', walkable: true, transparent:true});
  Game.Tile.wallTile = new Game.Tile({name: 'wall', chr: '#', transparent:false});
+ Game.Tile.wallTile2 = new Game.Tile({name: 'wall', chr: '$', transparent:false});
+ Game.Tile.wallTile3 = new Game.Tile({name: 'wall', chr: '&', transparent:false});
+ Game.Tile.wallTile4 = new Game.Tile({name: 'wall', chr: '%', transparent:false});

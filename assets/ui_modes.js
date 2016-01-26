@@ -419,7 +419,7 @@ Game.UIMode.gameQuestions = {
                     this.attr.answers.graphics = "cave";
                     break;
                 case 4:
-                    this.attr.answers.graphics = "ascii";
+                    this.attr.answers.graphics = "doodle";
                     break;
 
             }
@@ -717,6 +717,10 @@ Game.UIMode.gamePlay = {
         mapType = this.getMapType();
         console.log(mapType);
 
+        Game.DISPLAYS.tsOptions.tileSet = Game.TILESETS[answers.graphics];
+
+
+
         var small = (this.attr._answers.misc == "smallMap");
         this.setMap(new Game.map(mapType, small));
         this.setAvatar(Game.EntityGenerator.create('avatar'));
@@ -729,7 +733,7 @@ Game.UIMode.gamePlay = {
         this.updateNames();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 80; ecount++) {
+        for (var ecount = 0; ecount < 20; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
@@ -752,6 +756,12 @@ Game.UIMode.gamePlay = {
         if(this.attr._answers.graphics == "beach"){
         Game.Tile.wallTile.attr._transparent = true;
         Game.Tile.wallTile.attr._opaque = false;
+        Game.Tile.wallTile2.attr._transparent = true;
+        Game.Tile.wallTile2.attr._opaque = false;
+        Game.Tile.wallTile3.attr._transparent = true;
+        Game.Tile.wallTile3.attr._opaque = false;
+        Game.Tile.wallTile4.attr._transparent = true;
+        Game.Tile.wallTile4.attr._opaque = false;
         }
 
         var stairPos = this.getMap().getWalkablePosition();

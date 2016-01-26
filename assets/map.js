@@ -263,7 +263,7 @@ Game.map.prototype.renderOn = function (display, camX, camY, renderOptions) {
        var mapCoord = mapPos.x+','+mapPos.y;
 
         if ( ! (( checkCellsVisible && visibleCells[mapCoord]) || (checkCellsMasked && maskedCells[mapCoord]))){
-          display.draw(x,y,["m","m","m"]);
+          display.draw(x,y,["?"]);
           continue;
         }
 
