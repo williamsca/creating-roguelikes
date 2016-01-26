@@ -25,3 +25,10 @@ Current work plan:
 - Boss (Both)
   just another strong enemy
 - cool title screen? (unimportant)
+
+Presentation Notes:
+- Gaming background
+- Inspiration for design choices
+  + limited personal attachment to roguelike avatars
+  + play-styles
+-

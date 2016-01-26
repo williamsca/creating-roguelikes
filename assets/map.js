@@ -59,7 +59,7 @@ Game.map.prototype.getTile = function (x_or_pos, y) {
 };
 
 Game.map.prototype.clearAround = function (x_or_pos, y){
-    var useX = x_or_pos, useY = y;
+  var useX = x_or_pos, useY = y;
   if( typeof x_or_pos == 'object'){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
@@ -76,8 +76,19 @@ Game.map.prototype.clearAround = function (x_or_pos, y){
 
 }
 
+Game.map.prototype.detonate = function(x_or_pos, y){
+  var useX = x_or_pos, useY = y;
+  if( typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+
+  this.makeWalkable(useX, useY);
+  this.clearAround(useX, useY);
+}
+
 Game.map.prototype.makeWalkable = function (x_or_pos, y){
-    var useX = x_or_pos, useY = y;
+  var useX = x_or_pos, useY = y;
   if( typeof x_or_pos == 'object'){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
@@ -136,7 +147,25 @@ Game.map.prototype.getItems = function (x_or_pos, y){
     return [];
 };
 
-
+Game.map.prototype.getEntitiesAround = function (x_or_pos, y){
+  var useX = x_or_pos, useY = y;
+  if (typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+  foundEnts = [];
+  for (var i = (useX - 1); i <= (useX + 1); i++) {
+    for (var j = (useY - 1); j <= (useY + 1); j++) {
+      if( i != useX || j != useY){
+        ent = this.getEntity(i, j);
+        if(ent){
+          foundEnts.push(ent);
+        }
+      }
+    }
+  }
+  return foundEnts;
+};
 Game.map.prototype.getEntitiesNearby = function (radius, x_or_pos, y){
   var useX = x_or_pos, useY = y;
   if (typeof x_or_pos == 'object'){

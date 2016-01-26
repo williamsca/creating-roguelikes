@@ -552,7 +552,7 @@ Game.UIMode.gamePlay = {
         this.attr._objective = true;
         break;
         case "killAll":
-        this.attr._objective = this.countEntities() < 3; //the avatar, the exit, and???
+        this.attr._objective = (this.countEntities() <= 2); //the avatar, the exit, and???
         break;
         case "findKey":
         break;
@@ -569,7 +569,10 @@ Game.UIMode.gamePlay = {
     countEntities: function(){
         var count = 0;
         for (var ent in Game.DATASTORE.ENTITY) {
+          Game.util.cdebug(ent);
+          if(Game.DATASTORE.ENTITY[ent] != undefined){
             count++;
+          }
         }
 
         return count;
@@ -582,7 +585,6 @@ Game.UIMode.gamePlay = {
         if ((! actionBinding) || (actionBinding.actionKey == 'CANCEL')) {
             return false;
         }
-        console.dir(actionBinding);
         var tookTurn = false;
 
         if        (actionBinding.actionKey == 'MOVE_UL') {
@@ -605,8 +607,13 @@ Game.UIMode.gamePlay = {
         } else if (actionBinding.actionKey == 'MOVE_DR') {
             tookTurn = this.moveAvatar(1  , 1);
 
-        } else if (actionBinding.actionKey == 'FIRE' && Game.UIMode.gameQuestions.attr.answers.equ == "range") {
+        } else if (actionBinding.actionKey == 'FIRE') {
+          if (Game.UIMode.gamePlay.attr._answers.equ == "range") {
             Game.addUiMode('LAYER_fireProjectile');
+          } else if (Game.UIMode.gamePlay.attr._answers.equ == "trap") {
+            Game.addUiMode('LAYER_useBombs');
+          }
+
         } else if (actionBinding.actionKey == 'INVENTORY') {
             Game.addUiMode('LAYER_inventoryListing');
         } else if (actionBinding.actionKey == 'PICKUP') {
@@ -924,6 +931,73 @@ Game.UIMode.LAYER_fireProjectile = {
     Game.message.sendMessage("There is nothing to shoot at.");
     Game.removeUiMode();
     return false;
+    }
+};
+
+// HOW I CAME TO LOVE THE BOMB
+Game.UIMode.LAYER_useBombs = {
+    enter: function() {
+      Game.message.sendMessage("Choose a direction to place a bomb, press any key to detonate a bomb, or press 'esc' to exit.");
+      // Game.refresh();
+    },
+    exit: function() {
+      //console.log("aging messages");
+      //Game.message.ageMessages();
+      Game.refresh();
+    },
+
+    handleInput: function (inputType, inputData) {
+      var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
+      if (!actionBinding) { // gate here to catch weird 'f' keypress
+        Game.message.ageMessages();
+        console.log("aging messages");
+        Game.message.sendMessage("You ready the fuse.");
+        return false;
+      }
+      if ((actionBinding.actionKey == 'CANCEL')) {
+        Game.removeUiMode();
+        return false;
+      }
+
+      // no bomb is currently placed on map
+      if (! Game.getAvatar().getBombPlaced()) {
+        var bombResp = false;
+        if      (actionBinding.actionKey == 'MOVE_UL') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:-1, yLoc:-1});
+        } else if (actionBinding.actionKey == 'MOVE_U') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:0, yLoc:-1});
+        } else if (actionBinding.actionKey == 'MOVE_UR') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:1, yLoc:-1});
+        } else if (actionBinding.actionKey == 'MOVE_L') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:-1, yLoc:0});
+        } else if (actionBinding.actionKey == 'MOVE_WAIT') {
+          // something special?
+        } else if (actionBinding.actionKey == 'MOVE_R') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:1, yLoc:0});
+        } else if (actionBinding.actionKey == 'MOVE_DL') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:-1, yLoc:1});
+        } else if (actionBinding.actionKey == 'MOVE_D') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:0, yLoc:1});
+        } else if (actionBinding.actionKey == 'MOVE_DR') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:1, yLoc:1});
+        }
+
+        if (bombResp.bombPlaced && bombResp.bombPlaced[0]) {
+          Game.getAvatar().raiseSymbolActiveEvent('actionDone');
+          Game.message.sendMessage("You placed a bomb.");
+          Game.removeUiMode(); //sure we want this?
+          return true;
+        }
+
+        Game.message.sendMessage("A bomb could not be placed there.");
+        Game.removeUiMode();
+        return false;
+      } else {
+        Game.message.sendMessage("You detonate the bomb.");
+        Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('triggerBomb');
+        Game.getAvatar().raiseSymbolActiveEvent('actionDone');
+        Game.removeUiMode(); //sure we want this?
+      }
     }
 };
 
