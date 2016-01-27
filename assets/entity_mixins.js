@@ -513,13 +513,17 @@ Game.EntityMixin.MeleeAttacker = {
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
-        if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
+        var entDead = false;
+
+        if ((evtData.bomb && Game.UIMode.gamePlay.attr._answers.graphics == "beach") && (evtData.recipient != Game.UIMode.gamePlay.getAvatar() && evtData.recipient.getName() != "your home")) {
+            Game.message.sendMessage(evtData.recipient.getName() + " drowned!");
+            evtData.recipient.destroy(true);
+            entDead = true;
+         }
+
+        if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal || (evtData.bomb && !entDead)) {
           // insert logic here to determine what type of damage is being dealt, i.e.,
-          if (evtData.ranged) {
 
-          } else if (evtData.broad) {
-
-          }
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
           evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
@@ -662,19 +666,28 @@ Game.EntityMixin.BombAttacker = {
         console.log(this.getBombX());
         this.setBombY(targetY);
         console.log(this.getBombY());
+        this.raiseSymbolActiveEvent("usedAmmo");
         this.setBombPlaced(true);
         return {bombPlaced: true};
       },
       'triggerBomb': function(evtData) {
         var map = this.getMap();
         console.log("bomb triggered at: " + this.getBombX() + ", " + this.getBombY());
+
+        if(Game.UIMode.gamePlay.attr._answers.graphics == "beach"){
+        var nearItems = map.getItemsAround(this.getBombX(), this.getBombY());
+        for (var i = 0; i < nearItems.length; i++) {
+            nearItems[i].attr.background = "#";
+        }
+        }
+
         var nearEntities = map.getEntitiesAround(this.getBombX(), this.getBombY());
         if (nearEntities && nearEntities.length > 0) {
           Game.util.cdebug(nearEntities);
           for (var i = 0; i < nearEntities.length; i++) {
             if(nearEntities[i]){
-              Game.util.cdebug(nearEntities[i]);
-              this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:nearEntities[i], bomb: true});
+
+                this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:nearEntities[i], bomb: true});
             }
           }
         }
@@ -717,7 +730,7 @@ Game.EntityMixin.Bomb = {
         console.log("bomb clear around");
         map = this.getMap();
         map.detonate(this.getX(), this.getY()); // destroy nearby tiles
-        this.destroy();
+        this.destroy(true);
       }
     }
   }
@@ -929,6 +942,11 @@ Game.EntityMixin.InventoryHolder = {
             this.raiseSymbolActiveEvent('keyMoved', false);
         }
         lastItemDropped = itemsToDrop[i];
+        if(this.getMap().getTile(this.getPos()).isWalkable()){
+            itemsToDrop[i].attr.background = ".";
+        }else{
+            itemsToDrop[i].attr.background = "#";
+        }
         this.getMap().addItem(itemsToDrop[i],this.getPos());
         dropResult.numItemsDropped++;
       }

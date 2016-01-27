@@ -58,21 +58,21 @@ Game.map.prototype.getTile = function (x_or_pos, y) {
   return this._tiles[useX][useY] || Game.Tile.nullTile;
 };
 
-Game.map.prototype.clearAround = function (x_or_pos, y){
+Game.map.prototype.clearAround = function (x_or_pos, y, beach){
   var useX = x_or_pos, useY = y;
   if( typeof x_or_pos == 'object'){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
   }
 
-  this.makeWalkable(useX-1, useY + 1);
-  this.makeWalkable(useX-1, useY);
-  this.makeWalkable(useX-1, useY - 1);
-  this.makeWalkable(useX, useY + 1);
-  this.makeWalkable(useX, useY - 1);
-  this.makeWalkable(useX+1, useY + 1);
-  this.makeWalkable(useX+1, useY);
-  this.makeWalkable(useX+1, useY - 1);
+  this.makeWalkable(useX-1, useY + 1, beach);
+  this.makeWalkable(useX-1, useY, beach);
+  this.makeWalkable(useX-1, useY - 1, beach);
+  this.makeWalkable(useX, useY + 1, beach);
+  this.makeWalkable(useX, useY - 1, beach);
+  this.makeWalkable(useX+1, useY + 1, beach);
+  this.makeWalkable(useX+1, useY, beach);
+  this.makeWalkable(useX+1, useY - 1, beach);
 
 }
 
@@ -82,22 +82,28 @@ Game.map.prototype.detonate = function(x_or_pos, y){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
   }
-
-  this.makeWalkable(useX, useY);
-  this.clearAround(useX, useY);
+  if( Game.UIMode.gamePlay.attr._answers.graphics != "beach"){
+  this.makeWalkable(useX, useY,false);
+  this.clearAround(useX, useY, false);
+  }else{
+  this.makeWalkable(useX, useY,true);
+  this.clearAround(useX, useY, true);
+  }
 }
 
-Game.map.prototype.makeWalkable = function (x_or_pos, y){
+Game.map.prototype.makeWalkable = function (x_or_pos, y, beach){
   var useX = x_or_pos, useY = y;
   if( typeof x_or_pos == 'object'){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
   }
+    newTile = (beach ? Game.Tile.wallTile : Game.Tile.floorTile)
+
     if ((useX < 0) || (useX >= this.attr._width) || (useY < 0) || (useY >= this.attr._height)) {
     return;
   }
-  this._tiles[useX][useY] = Game.Tile.floorTile;
-  Game.UIMode.gamePlay.attr._changedTiles.push({x:useX, y:useY});
+  this._tiles[useX][useY] = newTile;
+  Game.UIMode.gamePlay.attr._changedTiles.push({x:useX, y:useY, wall:beach});
 };
 
 Game.map.prototype.addEntity = function (ent, pos) {
@@ -166,6 +172,26 @@ Game.map.prototype.getEntitiesAround = function (x_or_pos, y){
   }
   return foundEnts;
 };
+
+Game.map.prototype.getItemsAround = function (x_or_pos, y){
+  var useX = x_or_pos, useY = y;
+  if (typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+  foundItems = [];
+  for (var i = (useX - 1); i <= (useX + 1); i++) {
+    for (var j = (useY - 1); j <= (useY + 1); j++) {
+        items = this.getItems(i, j);
+        for (var k = 0; k < items.length; k++) {
+            foundItems.push(items[k])
+        }
+
+    }
+  }
+  return foundItems;
+};
+
 Game.map.prototype.getEntitiesNearby = function (radius, x_or_pos, y){
   var useX = x_or_pos, useY = y;
   if (typeof x_or_pos == 'object'){

@@ -145,7 +145,24 @@ Game.UIMode.gamePersistence = {
             // Changed tiles
             for (var i = 0; i < Game.UIMode.gamePlay.attr._changedTiles.length; i++) {
                 pos = Game.UIMode.gamePlay.attr._changedTiles[i];
+                if (pos.wall){
+                Game.UIMode.gamePlay.getMap()._tiles[pos.x][pos.y] = Game.Tile.wallTile;
+                }else{
                 Game.UIMode.gamePlay.getMap()._tiles[pos.x][pos.y] = Game.Tile.floorTile;
+                }
+            }
+
+            Game.DISPLAYS.tsOptions.tileSet = Game.TILESETS[Game.UIMode.gamePlay.attr._answers.graphics];
+
+            if(Game.UIMode.gamePlay.attr._answers.graphics == "beach"){
+                Game.Tile.wallTile.attr._transparent = true;
+                Game.Tile.wallTile.attr._opaque = false;
+                Game.Tile.wallTile2.attr._transparent = true;
+                Game.Tile.wallTile2.attr._opaque = false;
+                Game.Tile.wallTile3.attr._transparent = true;
+                Game.Tile.wallTile3.attr._opaque = false;
+                Game.Tile.wallTile4.attr._transparent = true;
+                Game.Tile.wallTile4.attr._opaque = false;
             }
 
             // schedule
@@ -268,6 +285,7 @@ Game.UIMode.gameLose = {
   exit: function () {
   },
   renderOnMain: function (display) {
+    display.clear();
     display.drawText(1,1,Game.UIMode.DEFAULT_COLOR_STR+"You lost :(");
   },
   handleInput: function (inputType,inputData) {
@@ -778,7 +796,7 @@ Game.UIMode.gamePlay = {
 
         var stairPos = this.getMap().getWalkablePosition();
         this.getMap().addEntity(Game.EntityGenerator.create('stairs'), stairPos);
-        this.getMap().clearAround(stairPos);
+        this.getMap().clearAround(stairPos, false);
 
 
     },

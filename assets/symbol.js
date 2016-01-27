@@ -4,6 +4,7 @@ Game.Symbol = function (template) {
   this.attr._char = template.chr || ' ';
   this.attr._fg = template.fg || Game.UIMode.DEFAULT_COLOR_FG;
   this.attr._bg = template.bg || Game.UIMode.DEFAULT_COLOR_BG;
+  this.attr.background = ".";
 };
 
 Game.Symbol.prototype.getChar = function () {
@@ -33,7 +34,7 @@ Game.Symbol.prototype.draw = function (display, x, y, isMasked) {
     display.draw(x,y,[this.getChar(), "m"]);
 
     } else {
-    display.draw(x,y,[".",this.getChar()]);//, this.attr._fg, this.attr._bg);
+    display.draw(x,y,[this.attr.background,this.getChar()]);//, this.attr._fg, this.attr._bg);
   }
   }catch(e){
       display.draw(x,y,"?");
