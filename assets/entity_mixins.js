@@ -1042,7 +1042,7 @@ Game.EntityMixin.WanderChaserActor = {
     var avatar = Game.getAvatar();
     var senseResp = this.raiseSymbolActiveEvent('senseForEntity',{senseForEntity:avatar});
     if (Game.util.compactBooleanArray_or(senseResp.entitySensed)) {
-
+      console.log("DING");
       // build a path instance for the avatar
       var source = this;
       var map = this.getMap();

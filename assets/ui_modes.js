@@ -13,7 +13,7 @@ Game.UIMode.DEFAULT_COLOR_STR = '%c{' + Game.UIMode.DEFAULT_COLOR_FG +
 Game.UIMode.gameStart = {
     enter: function() {
         // console.log("INITIALIZING GAME. PREPARE YO SELF.");
-        Game.message.clearMessages();
+        // Game.message.clearMessages();
     },
     exit: function() {
         // console.log("Game.UIMode.gameStart exit");
@@ -202,6 +202,7 @@ saveGame: function() {
 
         window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
         Game.switchUiMode('gameStart');
+        Game.message.clearMessages();
         Game.message.sendMessage("Your game has been saved.");
     }
 },
@@ -501,9 +502,9 @@ Game.UIMode.gameQuestions = {
         display.clear();
         var question = this.getQuestion();
 
-        display.drawText(4,2,question.q, fg, bg);
-        display.drawText(4,8,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
-        display.drawText(4,10,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
+        display.drawText(4,1,question.q, fg, bg);
+        display.drawText(4,7,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
+        display.drawText(4,9,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
     },
 };
 
@@ -541,7 +542,7 @@ Game.UIMode.backStory = {
             case "cave":
             switch(Game.UIMode.gamePlay.attr._answers.objective){
                 case "findKey":
-                backStory += "You are Frogimus Rex, indomitable hopper. An overwrought princess, upset you weren’t a prince, has thrown you in her underground dungeon filled with slime monsters. To escape, you must find the key to the exit.";
+                backStory += "You are Frogimus Rex, indomitable hopper. An overwrought princess, upset you weren\’t a prince, has thrown you in her underground dungeon filled with slime monsters. To escape, you must find the key to the exit.";
                 break;
 
                 case "boss":
@@ -623,19 +624,19 @@ Game.UIMode.backStory = {
                 break;
 
                 case "escape":
-                backStory += "You are Bill. Just Bill. Tales have reached your ears of a rip in the fabric of reality. Around the drawing board, you’re famed as an adventurer who will go anywhere. Find the hole, and jump in!";
+                backStory += "You are Bill. Just Bill. Tales have reached your ears of a rip in the fabric of reality. Around the drawing board, you\’re famed as an adventurer who will go anywhere. Find the hole, and jump in!";
                 break;
             }
             backStory += "\n";
 
-            backStory += "\nEat Food, kindly labeled 'FOOD', to nourish yourself. Do this by pressing E"
+            backStory += "\nEat Food, kindly labeled \'FOOD\', to nourish yourself. Do this by pressing E"
             break;
         }
         backStory += "\n";
 
         switch(Game.UIMode.gamePlay.attr._answers.equ){
             case "range":
-            backStory += "\nYour weapon of choice is a yew bow. Wielding it has required many moons of training. You can attack by pressing ‘f’ and a direction to fire. Don’t fire indiscriminately, since your ammo is limited.";
+            backStory += "\nYour weapon of choice is a yew bow. Wielding it has required many moons of training. You can attack by pressing \‘f\’ and a direction to fire. Don\’t fire indiscriminately, since your ammo is limited.";
             break;
             case "broad":
             backStory += "\nYour weapon of choice is the broad sword. It will strike enemies on either side of the one in front of you. Constant use will dull your blade; be sure to find stones to sharpen it anew.";
@@ -644,7 +645,7 @@ Game.UIMode.backStory = {
             backStory += "\nYour weapon of choice is the rapier. It will strike one enemy behind the one in front of you. Constant use will dull your blade; be sure to find stones to sharpen it anew.";
             break;
             case "trap":
-            backStory += "\nYou are a fiend for explosives. Instead of a traditional weapon, you place bombs which destroy all its surroundings. Make sure to pick up more bombs that monsters drop.";
+            backStory += "\nYou are a fiend for explosives. Instead of a traditional weapon, you place bombs which destroy all their surroundings. Make sure to pick up more bombs that monsters drop.";
             break;
         }
         backStory += "\nReload your weapon uses by pressing R and selecting your ammo (Arrows, Bombs, Stones)";
@@ -657,7 +658,7 @@ Game.UIMode.backStory = {
             backStory += "\nEverything in this place seems to be out to get you.";
             break;
             case "noMapMemory":
-            backStory += "\nYou are very forgetful. In fact, you can’t remember where you just were.";
+            backStory += "\nYou are very forgetful. In fact, you can\'t remember where you just were.";
             break;
             case "smallVision":
             backStory += "\nYou dropped your glasses on the way here. But you can still see (a little).";
@@ -666,8 +667,8 @@ Game.UIMode.backStory = {
             backStory += "\nYou feel as if the question gods have granted you a smaller task than usual...";
             break;
         }
-            backStory += "\n\nYou can pick up objects by press g, you can open your inventory by pressing i, and you can open the save/load/new game menu by pressing =\n";
-        backStory += "You can press ? to look at the controls at anytime.\n\nSo be off! Your Adventure Begins!"
+            backStory += "\n\nYou can pick up objects by press g, you can open your inventory by pressing \'i\', and you can open the save/load/new game menu by pressing \'=\'\n";
+        backStory += "You can press \'?\' to look at the controls at anytime.\n\nSo be off! Your Adventure Begins!"
 
 
         return backStory;
@@ -999,7 +1000,7 @@ Game.UIMode.gamePlay = {
         this.updateNames();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 5; ecount++) {
+        for (var ecount = 0; ecount < 7; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
