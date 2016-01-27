@@ -50,7 +50,7 @@ Game.EntityGenerator.learn({
   fg: '#ff9',
   maxHp: 4,
   sightRadius: 4,
-  attackPower: 1,
+  attackPower: 4,
   wanderChaserActionDuration: 1200,
   attackActionDuration: 1500,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
@@ -63,7 +63,7 @@ Game.EntityGenerator.learn({
   fg: '#ff9',
   maxHp: 20,
   sightRadius: 4,
-  attackPower: 3,
+  attackPower: 6,
   wanderChaserActionDuration: 2000,
   attackActionDuration: 300,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
@@ -75,7 +75,7 @@ Game.EntityGenerator.learn({
   chr: 'q',
   fg: '#aaa',
   maxHp: 3,
-  attackPower: 1,
+  attackPower: 2,
   attackAvoid: 2,
   damageMitigation: 1,
   mixins: ["HitPoints", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker", "MeleeDefender"]
