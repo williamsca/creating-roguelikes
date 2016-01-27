@@ -198,7 +198,7 @@ Game.EntityMixin.FoodConsumer = {
   },
   eatFood: function (foodAmt) {
     this.attr._FoodConsumer_attr.currentFood += foodAmt;
-    this.attr._HitPoints_attr.curHp += 4;
+    this.attr._HitPoints_attr.curHp += 10;
     this.attr._HitPoints_attr.curHp = Math.min(this.attr._HitPoints_attr.curHp, this.attr._HitPoints_attr.maxHp );
     if (this.attr._FoodConsumer_attr.currentFood > this.attr._FoodConsumer_attr.maxFood) {this.attr._FoodConsumer_attr.currentFood = this.attr._FoodConsumer_attr.maxFood;}
   },
@@ -1042,7 +1042,6 @@ Game.EntityMixin.WanderChaserActor = {
     var avatar = Game.getAvatar();
     var senseResp = this.raiseSymbolActiveEvent('senseForEntity',{senseForEntity:avatar});
     if (Game.util.compactBooleanArray_or(senseResp.entitySensed)) {
-
       // build a path instance for the avatar
       var source = this;
       var map = this.getMap();

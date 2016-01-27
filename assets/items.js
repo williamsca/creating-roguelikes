@@ -14,7 +14,7 @@ Game.ItemGenerator.learn({
   description: 'a nice juicy apple - yum!',
   chr: 'A',
   fg:'#f32',
-  foodValue: 100,
+  foodValue: 250,
   mixins: ['Food']
 });
 
