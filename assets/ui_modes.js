@@ -999,7 +999,7 @@ Game.UIMode.gamePlay = {
         this.updateNames();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 5; ecount++) {
+        for (var ecount = 0; ecount < 8; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());

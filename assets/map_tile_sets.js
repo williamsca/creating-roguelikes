@@ -92,12 +92,12 @@ Game.MapTileSets = {
 },
 
     maze: {
-  _width: 100,
-  _height: 100,
+  _width: 50,
+  _height: 50,
   getMapTiles: function (small) {
           if(small){
-       this._width = 50;
-       this._height = 50;
+       this._width = 20;
+       this._height = 20;
    }
     var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
     var generator = new ROT.Map.DividedMaze(this._width, this._height);
@@ -127,12 +127,12 @@ Game.MapTileSets = {
 },
 
     digger: {
-    _width: 100,
-    _height: 100,
+    _width: 60,
+    _height: 60,
     getMapTiles: function (small) {
             if(small){
-       this._width = 50;
-       this._height = 50;
+       this._width = 30;
+       this._height = 30;
    }
       var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
       var generator = new ROT.Map.Digger(this._width, this._height);

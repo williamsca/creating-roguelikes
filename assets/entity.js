@@ -26,9 +26,9 @@ Game.Entity.prototype.destroy = function(drowning) {
       prob = 0;
   }
   var item = null;
-  if(prob >= 8){
+  if(prob >= 6){
     item = Game.ItemGenerator.create("apple");
-  }else if(prob >= 6){
+}else if(prob >= 2){
     item = Game.ItemGenerator.create("ammo");
   }
 
