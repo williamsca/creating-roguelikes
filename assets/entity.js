@@ -22,6 +22,9 @@ Game.Entity.extend(Game.SymbolActive);
 
 Game.Entity.prototype.destroy = function(drowning) {
   var prob = Math.floor(Math.random()*10);
+  if(drowning){
+      prob = 0;
+  }
   var item = null;
   if(prob >= 8){
     item = Game.ItemGenerator.create("apple");

@@ -344,7 +344,7 @@ Game.UIMode.gameQuestions = {
     exit: function() {
 
     },
-    // DIEGO: I did this without the new keybinding stuff, so it will need updated
+    // DIEGO: I did this without the new keybinding stuff, so it will need updated..nah
     handleInput: function (inputType, inputData){
       if (inputType == 'keypress') { var inputChar = String.fromCharCode(inputData.charCode); }
       var selectedAns = null;
@@ -476,7 +476,7 @@ Game.UIMode.gameQuestions = {
                     break;
             }
             Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
-            Game.switchUiMode('gamePlay');
+            Game.switchUiMode('backStory');
             break;
           default:
           console.log("Invalid question number, should not be possible");
@@ -506,6 +506,38 @@ Game.UIMode.gameQuestions = {
     }
 };
 
+//#####################################################################
+//#####################################################################
+
+//Backstory
+
+
+Game.UIMode.backStory = {
+    JSON_KEY : 'uiMode_backStory',
+    attr: {
+        backStory: ""
+    },
+    enter: function () {
+        this.attr.backStory = this.makeBackStory();
+    },
+    exit: function () {
+
+    },
+    renderOnMain : function (display){
+        display.clear();
+        display.drawText(2,2, this.attr.backStory);
+    },
+    renderAvatarInfo: function (display){
+        display.clear();
+        display.drawText(1,1, "Press any Key to Continue");
+    },
+    handleInput: function (){
+        Game.switchUiMode("gamePlay");
+    },
+    makeBackStory: function(){
+        return "Once there was an ugly barnacle, he was so ugly that everyone died.\n The End.";
+    }
+}
 //#####################################################################
 //#####################################################################
 
@@ -662,6 +694,8 @@ Game.UIMode.gamePlay = {
         } else if (actionBinding.actionKey == 'HELP') {
             Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
             Game.addUiMode('LAYER_textReading');
+        } else if (actionBinding.actionKey == 'BACKSTORY'){
+            Game.switchUiMode('backStory');
         }
 
         if (tookTurn) {
@@ -689,12 +723,78 @@ Game.UIMode.gamePlay = {
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
+        var objective = "";
+        var curObjective = Game.UIMode.gamePlay.attr._answers.objective;
+        Game.UIMode.gamePlay.checkObjective();
+        if (Game.UIMode.gamePlay.attr._objective){
+            curObjective = "escape";
+        }
+        switch(curObjective){
+            case "killAll":
+            objective = "Kill all the enemies!";
+            break;
+            case "boss":
+            switch(Game.UIMode.gamePlay.attr._answers.graphics){
+                case "beach":
+                objective = "Kill the Evil Garderner!";
+                break;
+                case "forest":
+                objective = "Kill the Evil Ghost!";
+                break;
+                case "doodle":
+                objective = "Kill the Incorrect Math!";
+                break;
+                case "cave":
+                objective = "Kill the King Slime!";
+                break;
+            }
+
+            break;
+            case "findKey":
+                switch(Game.UIMode.gamePlay.attr._answers.graphics){
+                case "beach":
+                objective = "Find your cactus child!";
+                break;
+                case "forest":
+                objective = "Find the key!";
+                break;
+                case "doodle":
+                objective = "Find the pencil!";
+                break;
+                case "cave":
+                objective = "Find the key!";
+                break;
+            }
+            break;
+            case "escape":
+            switch(Game.UIMode.gamePlay.attr._answers.graphics){
+                case "beach":
+                objective = "Get back to your Home!";
+                break;
+                case "forest":
+                objective = "Find and open the chest!";
+                break;
+                case "doodle":
+                objective = "Escape through the hole in the paper!";
+                break;
+                case "cave":
+                objective = "Find the exit and Escape!";
+                break;
+            }
+            break;
+        }
         display.drawText(1, 1, Game.UIMode.DEFAULT_COLOR_STR + "AVATAR STATUS", fg, bg);
         display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
         display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
         // feels like this should be encapsulated somewhere else, but I don't really know where - perhaps in the PlayerActor mixin?
         var av = this.getAvatar();
         var y = 5;
+
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"OBJECTIVE");
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+objective);
+
+        y++
+
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"ATTACK");
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy: "+av.getAttackHit());
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power: "+av.getAttackDamage());
@@ -756,6 +856,8 @@ Game.UIMode.gamePlay = {
         this.setAvatar(Game.EntityGenerator.create('avatar'));
         if(this.attr._answers.misc == "smallVision"){
             this.getAvatar().attr._Sight_attr.sightRadius = 7;
+        }else if(this.attr._answers.misc == "evilMonsters"){
+            this.makeEvilMonsters();
         }
 
         this.getMap().addEntity(this.getAvatar(),this.getMap().getWalkablePosition());
@@ -798,6 +900,17 @@ Game.UIMode.gamePlay = {
         this.getMap().addEntity(Game.EntityGenerator.create('stairs'), stairPos);
         this.getMap().clearAround(stairPos, false);
 
+
+    },
+    makeEvilMonsters: function (){
+        Game.EntityGenerator._templates["moss"].mixins.push("WalkerCorporeal");
+        Game.EntityGenerator._templates["moss"].mixins.push("Sight");
+        Game.EntityGenerator._templates["moss"].mixins.push("MeleeAttacker");
+        Game.EntityGenerator._templates["moss"].mixins.push("WanderChaserActor");
+
+        Game.EntityGenerator._templates["newt"].mixins[1] = "WanderChaserActor"
+        Game.EntityGenerator._templates["newt"].mixins.push("Sight");
+        Game.EntityGenerator._templates["newt"].mixins.push("MeleeAttacker");
 
     },
     updateNames: function(){
