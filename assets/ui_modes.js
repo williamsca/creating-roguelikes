@@ -352,12 +352,13 @@ Game.UIMode.gameQuestions = {
           break;
         case "N" : // To deal with leftover 'N' keypress
           break;
-        case "0" : // Will need to randomly generate answers at some point
+        case "0" :
           for (var i = 0; i < this.attr.questions.length; i++) {
               selectedAns = Math.floor(Math.random()*4 + 1)
               this.processAnswer(selectedAns);
           }
           selectedAns = 0;
+          break;
         default :
           console.log(inputChar);
           Game.message.sendMessage("Please select a valid answer.");
@@ -485,7 +486,7 @@ Game.UIMode.gameQuestions = {
         display.drawText(4,2,question.q, fg, bg);
         display.drawText(4,8,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
         display.drawText(4,10,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
-    }
+    },
 };
 
 //#####################################################################
@@ -501,9 +502,11 @@ Game.UIMode.gamePlay = {
         _objective: false,
         _bossKey: null,
         _changedTiles : [],
+        _totalMonsters: null,
         _answers: {
             mapType : null
         }
+
     },
     JSON_KEY: 'uiMode_gamePlay',
     enter: function() {
@@ -552,7 +555,7 @@ Game.UIMode.gamePlay = {
         this.attr._objective = true;
         break;
         case "killAll":
-        this.attr._objective = (this.countEntities() <= 2); //the avatar, the exit, and???
+        this.attr._objective = (this.countEntities() <= 2); //the avatar and the exit
         break;
         case "findKey":
         break;
@@ -562,7 +565,6 @@ Game.UIMode.gamePlay = {
         default:
         this.attr._objective = true;
         break;
-
     }
     return this.attr.objective;
     },
@@ -671,28 +673,26 @@ Game.UIMode.gamePlay = {
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
-        display.drawText(1, 1, Game.UIMode.DEFAULT_COLOR_STR + "AVATAR STATUS", fg, bg);
-        display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
-        display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
+        //display.drawText(1, 1, Game.UIMode.DEFAULT_COLOR_STR + "AVATAR STATUS", fg, bg);
+        //display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
+        //display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
         // feels like this should be encapsulated somewhere else, but I don't really know where - perhaps in the PlayerActor mixin?
         var av = this.getAvatar();
-        var y = 5;
+        var y = 3;
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"LIFE: "+av.getCurHp()+"/"+av.getMaxHp());
+        y += display.drawText(1, y, Game.UIMode.DEFAULT_COLOR_STR + av.getHungerStateDescr());
+        y++;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"ATTACK");
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy: "+av.getAttackHit());
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power: "+av.getAttackDamage());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy:  "+av.getAttackHit());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power:     "+av.getAttackDamage());
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Weapon Uses: "+av.getCurAmmo() + "/" + av.getMaxAmmo());
-
         y++;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"DEFENSE");
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Dodging: "+av.getAttackAvoid());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Dodging:   "+av.getAttackAvoid());
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Toughness: "+av.getDamageMitigation());
         y++;
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"LIFE: "+av.getCurHp()+"/"+av.getMaxHp());
-        y++;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"MOVES: "+av.getTurns());
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"KILLS: "+av.getTotalKills());
-        y++;
-        y += display.drawText(1, y, Game.UIMode.DEFAULT_COLOR_STR + av.getHungerStateDescr());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"KILLS: "+av.getTotalKills() + "/" + this.attr._totalMonsters);
     },
 
     moveAvatar: function(pdx, pdy){
@@ -750,6 +750,7 @@ Game.UIMode.gamePlay = {
             this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
+            this.attr._totalMonsters += 4;
             //itemPos = this.getMap().getWalkablePosition();
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);

@@ -1,13 +1,10 @@
 Current work plan:
 MUST FINISH:
-- bomb maintenance
-- objective in avatar screen (+monster kill count if kill all monsters)
 - backstory & flavor
-- aggro monsters
 - touch up monster AI
-- traps add water
-- reduce sight radius
+- reduce sight radius (DIEGO)
 - in help menu: how weapon works/status effects?
+- bombs do more damage
 
 MAYBE FINISH?
 - cool title screen

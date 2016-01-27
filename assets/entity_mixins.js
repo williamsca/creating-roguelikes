@@ -497,8 +497,6 @@ Game.EntityMixin.MeleeAttacker = {
       attackHit: 1,
       attackDamage: 1,
       rangedHit: 1,
-      broadHit: 1,
-      rapierHit: 2,
       attackActionDuration: 1000
     },
     init: function (template) {
@@ -513,13 +511,8 @@ Game.EntityMixin.MeleeAttacker = {
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
+        if (evtData.bomb) { avoidVal = 0; } // bombs always hit
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
-          // insert logic here to determine what type of damage is being dealt, i.e.,
-          if (evtData.ranged) {
-
-          } else if (evtData.broad) {
-
-          }
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
           evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
@@ -656,24 +649,18 @@ Game.EntityMixin.BombAttacker = {
           return {bombPlaced: false};
         }
         map.addEntity(Game.EntityGenerator.create("bomb"), {x: targetX, y: targetY});
-        console.log("bomb placed at : " + targetX + ", " + targetY);
 
         this.setBombX(targetX);
-        console.log(this.getBombX());
         this.setBombY(targetY);
-        console.log(this.getBombY());
         this.setBombPlaced(true);
         return {bombPlaced: true};
       },
       'triggerBomb': function(evtData) {
         var map = this.getMap();
-        console.log("bomb triggered at: " + this.getBombX() + ", " + this.getBombY());
         var nearEntities = map.getEntitiesAround(this.getBombX(), this.getBombY());
         if (nearEntities && nearEntities.length > 0) {
-          Game.util.cdebug(nearEntities);
           for (var i = 0; i < nearEntities.length; i++) {
             if(nearEntities[i]){
-              Game.util.cdebug(nearEntities[i]);
               this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:nearEntities[i], bomb: true});
             }
           }
@@ -714,7 +701,6 @@ Game.EntityMixin.Bomb = {
     },
     listeners: {
       'triggerBomb': function(evtData) {
-        console.log("bomb clear around");
         map = this.getMap();
         map.detonate(this.getX(), this.getY()); // destroy nearby tiles
         this.destroy();
