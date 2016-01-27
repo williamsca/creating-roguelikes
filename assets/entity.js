@@ -20,8 +20,11 @@ Game.Entity = function(template) {
 Game.Entity.extend(Game.SymbolActive);
 
 
-Game.Entity.prototype.destroy = function() {
+Game.Entity.prototype.destroy = function(drowning) {
   var prob = Math.floor(Math.random()*10);
+  if(drowning){
+      prob = 0;
+  }
   var item = null;
   if(prob >= 8){
     item = Game.ItemGenerator.create("apple");
@@ -30,6 +33,9 @@ Game.Entity.prototype.destroy = function() {
   }
 
   if(item){
+      if(drowning){
+          item.attr.background = "#";
+      }
     this.getMap().addItem(item, this.getPos());
   }
 
