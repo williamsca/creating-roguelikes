@@ -198,6 +198,8 @@ Game.EntityMixin.FoodConsumer = {
   },
   eatFood: function (foodAmt) {
     this.attr._FoodConsumer_attr.currentFood += foodAmt;
+    this.attr._HitPoints_attr.curHp += 10;
+    this.attr._HitPoints_attr.curHp = Math.min(this.attr._HitPoints_attr.curHp, this.attr._HitPoints_attr.maxHp );
     if (this.attr._FoodConsumer_attr.currentFood > this.attr._FoodConsumer_attr.maxFood) {this.attr._FoodConsumer_attr.currentFood = this.attr._FoodConsumer_attr.maxFood;}
   },
   getHungrierBy: function (foodAmt) {
@@ -321,6 +323,9 @@ Game.EntityMixin.WalkerCorporeal = {
           this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
           Game.message.sendMessage("You swim out into the water but start drowning!")
           Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp -= 2;
+          if( Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp <= 0){
+              Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('killed');
+          }
           if (map) {
             map.updateEntityLocation(this);
           }
@@ -516,9 +521,11 @@ Game.EntityMixin.MeleeAttacker = {
 
         if ((evtData.bomb && Game.UIMode.gamePlay.attr._answers.graphics == "beach") && (evtData.recipient != Game.UIMode.gamePlay.getAvatar() && evtData.recipient.getName() != "your home")) {
             Game.message.sendMessage(evtData.recipient.getName() + " drowned!");
+            Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('madeKill', {entKilled: evtData.recipient});
             evtData.recipient.destroy(true);
             entDead = true;
          }
+
 
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal || (evtData.bomb && !entDead)) {
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
@@ -530,7 +537,8 @@ Game.EntityMixin.MeleeAttacker = {
           }
           console.dir(damage);
           evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:damage});
-        } else {
+        } else if (!evtData.bomb){
+
           evtData.recipient.raiseSymbolActiveEvent('attackAvoided',{attacker:evtData.actor,recipient:evtData.recipient});
           evtData.actor.raiseSymbolActiveEvent('attackMissed',{attacker:evtData.actor,recipient:evtData.recipient});
         }
