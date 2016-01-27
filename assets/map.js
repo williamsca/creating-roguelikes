@@ -277,9 +277,9 @@ Game.map.prototype.getRandomPosition = function(filter_func) {
 
 // tile is walkable and unoccupied
 Game.map.prototype.getWalkablePosition = function() {
-  return this.getRandomPosition(function(t){ return t.isWalkable(); });
-  /*var map = this;
-  return this.getRandomLocation(function(t, tX, tY) { return t.isWalkable() && !map.getEntity(tX, tY)); });*/
+  //return this.getRandomPosition(function(t){ return t.isWalkable(); });
+  var map = this;
+  return this.getRandomPosition(function(t, tX, tY) { return t.isWalkable() && !map.getEntity(tX, tY); });
 };
 
 Game.map.prototype.rememberCoords = function (toRemember) {

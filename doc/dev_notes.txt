@@ -1,10 +1,10 @@
 Current work plan:
 MUST FINISH:
 - backstory & flavor
-- touch up monster AI
-- reduce sight radius (DIEGO)
-- in help menu: how weapon works/status effects?
+- reduce sight radius
 - bombs do more damage
+- food increases health
+- fix not drowning
 
 MAYBE FINISH?
 - cool title screen
@@ -12,6 +12,8 @@ MAYBE FINISH?
 - music
 - special scenarios from a combination of current questions
 - fix doodle tileset
+- touch up monster AI
+- in help menu: how weapon works/status effects?
 
 
 Presentation Notes:
