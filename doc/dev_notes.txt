@@ -1,30 +1,21 @@
-Eventual Feature List:
-  tutorial
-  tileset
-
-
-Next Milestone(s):
-
 Current work plan:
-- fix tilesets (Diego)X
-- traps destroy walls (or add water) (Diego)
-- beach tileset has swimming feature (Diego)X
-- special scenarios from a combination of current questions (Diego)
-- sight (Diego)X
-- weapons maintenance (limited arrows/weapons rust/limited bombs) (Diego)
-  monsters drop arrows/bombs, whetstone used to sharpen broadsword/rapier
+MUST FINISH:
+- bomb maintenance
+- objective in avatar screen (+monster kill count if kill all monsters)
+- backstory & flavor
+- aggro monsters
+- touch up monster AI
+- traps add water
+- reduce sight radius
+- in help menu: how weapon works/status effects?
 
-- rapier/broadsword/bombs combat extensions (Colin)
-  bow needs to take two turns
-- food kills too quickly, needs balancing (Colin)
-  monsters drop? or remove entirely?
-- music (Colin)
-- touch up monster AI (Colin)
+MAYBE FINISH?
+- cool title screen
+- bow needs to take two turns
+- music
+- special scenarios from a combination of current questions
+- fix doodle tileset
 
-- backstory & flavor (Both)
-- Boss (Both)
-  just another strong enemy
-- cool title screen? (unimportant)
 
 Presentation Notes:
 - Gaming background
