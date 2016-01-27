@@ -19,9 +19,18 @@ Game.ItemGenerator.learn({
 });
 
 Game.ItemGenerator.learn({
+  name: 'ammo',
+  description: 'a nice juicy ammo - yum!',
+  chr: 'a',
+  fg:'#f32',
+  ammoValue: 20,
+  mixins: ['Ammo']
+});
+
+Game.ItemGenerator.learn({
   name: 'key',
   description: 'This seems like it can get you out of here!',
-  chr: '?',
+  chr: 'K',
   fg:'#f32',
   mixins: ['Key']
 });

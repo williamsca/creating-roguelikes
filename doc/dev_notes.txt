@@ -1,12 +1,24 @@
-Eventual Feature List:
-  tutorial
-  tileset
-
-
-Next Milestone(s):
-  entities-everywhere
-
 Current work plan:
-  Combat
-  Active monsters
-  key-bidings(?)
+MUST FINISH:
+- backstory & flavor
+- reduce sight radius
+- bombs do more damage
+- food increases health
+- fix not drowning
+
+MAYBE FINISH?
+- cool title screen
+- bow needs to take two turns
+- music
+- special scenarios from a combination of current questions
+- fix doodle tileset
+- touch up monster AI
+- in help menu: how weapon works/status effects?
+
+
+Presentation Notes:
+- Gaming background
+- Inspiration for design choices
+  + limited personal attachment to roguelike avatars
+  + play-styles
+-

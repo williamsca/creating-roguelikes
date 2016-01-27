@@ -58,35 +58,52 @@ Game.map.prototype.getTile = function (x_or_pos, y) {
   return this._tiles[useX][useY] || Game.Tile.nullTile;
 };
 
-Game.map.prototype.clearAround = function (x_or_pos, y){
-    var useX = x_or_pos, useY = y;
+Game.map.prototype.clearAround = function (x_or_pos, y, beach){
+  var useX = x_or_pos, useY = y;
   if( typeof x_or_pos == 'object'){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
   }
 
-  this.makeWalkable(useX-1, useY + 1);
-  this.makeWalkable(useX-1, useY);
-  this.makeWalkable(useX-1, useY - 1);
-  this.makeWalkable(useX, useY + 1);
-  this.makeWalkable(useX, useY - 1);
-  this.makeWalkable(useX+1, useY + 1);
-  this.makeWalkable(useX+1, useY);
-  this.makeWalkable(useX+1, useY - 1);
+  this.makeWalkable(useX-1, useY + 1, beach);
+  this.makeWalkable(useX-1, useY, beach);
+  this.makeWalkable(useX-1, useY - 1, beach);
+  this.makeWalkable(useX, useY + 1, beach);
+  this.makeWalkable(useX, useY - 1, beach);
+  this.makeWalkable(useX+1, useY + 1, beach);
+  this.makeWalkable(useX+1, useY, beach);
+  this.makeWalkable(useX+1, useY - 1, beach);
 
 }
 
-Game.map.prototype.makeWalkable = function (x_or_pos, y){
-    var useX = x_or_pos, useY = y;
+Game.map.prototype.detonate = function(x_or_pos, y){
+  var useX = x_or_pos, useY = y;
   if( typeof x_or_pos == 'object'){
     useX = x_or_pos.x;
     useY = x_or_pos.y;
   }
+  if( Game.UIMode.gamePlay.attr._answers.graphics != "beach"){
+  this.makeWalkable(useX, useY,false);
+  this.clearAround(useX, useY, false);
+  }else{
+  this.makeWalkable(useX, useY,true);
+  this.clearAround(useX, useY, true);
+  }
+}
+
+Game.map.prototype.makeWalkable = function (x_or_pos, y, beach){
+  var useX = x_or_pos, useY = y;
+  if( typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+    newTile = (beach ? Game.Tile.wallTile : Game.Tile.floorTile)
+
     if ((useX < 0) || (useX >= this.attr._width) || (useY < 0) || (useY >= this.attr._height)) {
     return;
   }
-  this._tiles[useX][useY] = Game.Tile.floorTile;
-  Game.UIMode.gamePlay.attr._changedTiles.push({x:useX, y:useY});
+  this._tiles[useX][useY] = newTile;
+  Game.UIMode.gamePlay.attr._changedTiles.push({x:useX, y:useY, wall:beach});
 };
 
 Game.map.prototype.addEntity = function (ent, pos) {
@@ -136,6 +153,44 @@ Game.map.prototype.getItems = function (x_or_pos, y){
     return [];
 };
 
+Game.map.prototype.getEntitiesAround = function (x_or_pos, y){
+  var useX = x_or_pos, useY = y;
+  if (typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+  foundEnts = [];
+  for (var i = (useX - 1); i <= (useX + 1); i++) {
+    for (var j = (useY - 1); j <= (useY + 1); j++) {
+      if( i != useX || j != useY){
+        ent = this.getEntity(i, j);
+        if(ent){
+          foundEnts.push(ent);
+        }
+      }
+    }
+  }
+  return foundEnts;
+};
+
+Game.map.prototype.getItemsAround = function (x_or_pos, y){
+  var useX = x_or_pos, useY = y;
+  if (typeof x_or_pos == 'object'){
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+  foundItems = [];
+  for (var i = (useX - 1); i <= (useX + 1); i++) {
+    for (var j = (useY - 1); j <= (useY + 1); j++) {
+        items = this.getItems(i, j);
+        for (var k = 0; k < items.length; k++) {
+            foundItems.push(items[k])
+        }
+
+    }
+  }
+  return foundItems;
+};
 
 Game.map.prototype.getEntitiesNearby = function (radius, x_or_pos, y){
   var useX = x_or_pos, useY = y;
@@ -222,9 +277,9 @@ Game.map.prototype.getRandomPosition = function(filter_func) {
 
 // tile is walkable and unoccupied
 Game.map.prototype.getWalkablePosition = function() {
-  return this.getRandomPosition(function(t){ return t.isWalkable(); });
-  /*var map = this;
-  return this.getRandomLocation(function(t, tX, tY) { return t.isWalkable() && !map.getEntity(tX, tY)); });*/
+  //return this.getRandomPosition(function(t){ return t.isWalkable(); });
+  var map = this;
+  return this.getRandomPosition(function(t, tX, tY) { return t.isWalkable() && !map.getEntity(tX, tY); });
 };
 
 Game.map.prototype.rememberCoords = function (toRemember) {
@@ -263,7 +318,7 @@ Game.map.prototype.renderOn = function (display, camX, camY, renderOptions) {
        var mapCoord = mapPos.x+','+mapPos.y;
 
         if ( ! (( checkCellsVisible && visibleCells[mapCoord]) || (checkCellsMasked && maskedCells[mapCoord]))){
-          display.draw(x,y,"m");
+          display.draw(x,y,["?"]);
           continue;
         }
 

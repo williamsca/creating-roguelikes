@@ -1,23 +1,24 @@
 Game.EntityMixin = {};
 
 Game.EntityMixin.objectiveHandler = {
-    META: {
+  META: {
     mixinName: 'PlayerMessager',
     mixinGroup: 'PlayerMessager',
     listeners: {
-        'keyMoved' : function(evtData) {
-            Game.UIMode.gamePlay.attr._objective = evtData;
-        }
+      'keyMoved' : function(evtData) {
+        Game.UIMode.gamePlay.attr._objective = evtData;
+      }
     }
-}
+  }
 };
 
 Game.EntityMixin.Stairs = {
-    META: {
-        mixinName: 'Stairs',
-        mixinGroup: 'Objective'
-    }
-}
+  META: {
+      mixinName: 'Stairs',
+      mixinGroup: 'Objective'
+  }
+};
+
 Game.EntityMixin.PlayerMessager = {
   META: {
     mixinName: 'PlayerMessager',
@@ -58,6 +59,10 @@ Game.EntityMixin.PlayerMessager = {
       },
       'inventoryFull': function(evtData) {
         Game.message.sendMessage('your inventory is full');
+        Game.renderMessage();
+      },
+      'noAmmo': function(evtData){
+        Game.message.sendMessage('you have no ammo!');
         Game.renderMessage();
       },
       'inventoryEmpty': function(evtData) {
@@ -193,6 +198,8 @@ Game.EntityMixin.FoodConsumer = {
   },
   eatFood: function (foodAmt) {
     this.attr._FoodConsumer_attr.currentFood += foodAmt;
+    this.attr._HitPoints_attr.curHp += 10;
+    this.attr._HitPoints_attr.curHp = Math.min(this.attr._HitPoints_attr.curHp, this.attr._HitPoints_attr.maxHp );
     if (this.attr._FoodConsumer_attr.currentFood > this.attr._FoodConsumer_attr.maxFood) {this.attr._FoodConsumer_attr.currentFood = this.attr._FoodConsumer_attr.maxFood;}
   },
   getHungrierBy: function (foodAmt) {
@@ -233,36 +240,103 @@ Game.EntityMixin.WalkerCorporeal = {
 
         // OTHER ENTITY
         if (map.getEntity(targetX, targetY)) { // can't walk into spaces occupied by other entities
-            if(map.getEntity(targetX, targetY).hasMixin('Stairs')){
-                Game.UIMode.gamePlay.checkObjective();
-                if(Game.UIMode.gamePlay.attr._objective){
-                    Game.switchUiMode('gameWin');
-                }else{
-                    this.raiseSymbolActiveEvent('walkForbidden', {target:map.getEntity(targetX,targetY)});
-                    return {madeAdjacentMove: false};
-                }
-            }else{
-                this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)});
+          if (map.getEntity(targetX, targetY).hasMixin('Stairs')) {
+            Game.UIMode.gamePlay.checkObjective();
+            if (Game.UIMode.gamePlay.attr._objective && this.hasMixin('PlayerActor')) {
+              Game.switchUiMode('gameWin');
+            } else {
+              this.raiseSymbolActiveEvent('walkForbidden', {target:map.getEntity(targetX,targetY)});
+              return {madeAdjacentMove: false};
             }
-        return {madeAdjacentMove: true};
-    }
+          } else { // a monster or the avatar
+            if (map.getEntity(targetX, targetY).hasMixin('PlayerActor')) { // avatar is the recipient
+              var weapon = '';
+            } else if (this.hasMixin('PlayerActor')) { // avatar is the actor
+              var weapon = Game.UIMode.gamePlay.attr._answers.equ;
+            } else { // the avatar is not involved, suggesting that monsters are attacking each other. Do we want this?
+              return {madeAdjacentMove: false};
+            }
 
-      // TILE
-      var targetTile = map.getTile(targetX, targetY);
-      if (targetTile.isWalkable()) {
-        this.setPos(targetX, targetY);
-        this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
-        if (map) {
-          map.updateEntityLocation(this);
+            if (weapon == 'range') {
+              Game.message.sendMessage("You weakly punch the monster, dealing no damage. Try pressing 'f' to use your bow instead.");
+            } else if (weapon == 'trap') {
+              Game.message.sendMessage("You weakly punch the monster, dealing no damage. Try pressing 'f' to use your bombs instead.");
+            } else if (Game.UIMode.gamePlay.getAvatar().getCurAmmo() > 0){ // a melee weapon
+              this.raiseSymbolActiveEvent('usedAmmo');
+              this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY)}); // always execute the basic attack
+              if (weapon == 'broad') {
+                if (Math.abs(dx) == Math.abs(dy)) { // diagonal attack
+                  if (map.getEntity(this.getX(), this.getY() + dy)) {
+                    //CONSIDER MOVING THE MESSAGES TO bumpEntity
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(this.getX(), this.getY() + dy), weapon: weapon});
+                  }
+                  if (map.getEntity(this.getX() + dx, this.getY())) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(this.getX() + dx, this.getY()), weapon: weapon});
+                  }
+                } else if (dy == 0) { // horizontal attack
+                  if (map.getEntity(targetX, targetY + 1)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY + 1), weapon: weapon});
+                  }
+                  if (map.getEntity(targetX, targetY - 1)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX, targetY - 1), weapon: weapon});
+                  }
+                } else { // vertical attack
+                  console.log('vertical');
+                  if (map.getEntity(targetX - 1, targetY)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX - 1, targetY), weapon: weapon});
+                  }
+                  if (map.getEntity(targetX + 1, targetY)) {
+                    //Game.message.sendMessage("The sweep of your broadsword catches a monster on your flank.");
+                    this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX + 1, targetY), weapon: weapon});
+                  }
+                }
+              }
+              if (weapon == 'rapier') {
+                if (map.getEntity(targetX + dx, targetY + dy)) {
+                  Game.message.sendMessage("Your rapier passes through the monster and strikes the one behind it as well.")
+                  this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:map.getEntity(targetX + dx, targetY + dy)});
+                }
+              }
+            }else{
+              Game.message.sendMessage("Your weapon is dull and can't attack! Sharpen it with a stone!");
+            }
+          }
+          return {madeAdjacentMove: true};
         }
-        return {madeAdjacentMove: true};
-      } else {
-        this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
+
+        // TILE
+        var targetTile = map.getTile(targetX, targetY);
+        if (targetTile.isWalkable()) {
+          this.setPos(targetX, targetY);
+          this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
+          if (map) {
+            map.updateEntityLocation(this);
+          }
+          return {madeAdjacentMove: true};
+        } else if (Game.UIMode.gamePlay.attr._answers.graphics == "beach" && this == Game.UIMode.gamePlay.getAvatar()){
+          this.setPos(targetX, targetY);
+          this.raiseSymbolActiveEvent('walkAllowed', {target:targetTile});
+          Game.message.sendMessage("You swim out into the water but start drowning!")
+          Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp -= 2;
+          if( Game.UIMode.gamePlay.getAvatar().attr._HitPoints_attr.curHp <= 0){
+              Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('killed');
+          }
+          if (map) {
+            map.updateEntityLocation(this);
+          }
+          return {madeAdjacentMove: true};
+        } else {
+          this.raiseSymbolActiveEvent('walkForbidden', {target:targetTile});
+          return {madeAdjacentMove: false};
+        }
       }
-      return {madeAdjacentMove: false};
     }
   }
-}
 };
 
 // CHRONICLE
@@ -326,6 +400,38 @@ Game.EntityMixin.Chronicle = {
     this.attr._Chronicle_attr.killCount++;
   }
 };
+
+// AMMO POINTS
+Game.EntityMixin.AmmoPoints = {
+  META: {
+    mixinName: 'AmmoPoints',
+    mixinGroup: 'ammo',
+    stateNamespace: '_AmmoPoints_attr',
+    stateModel: {
+      maxAmmo: 1,
+      curAmmo: 1
+    },
+    init:function(template) {
+      // console.log(template.MaxHp);
+      this.attr._AmmoPoints_attr.maxAmmo = template.maxAmmo || 1;
+      this.attr._AmmoPoints_attr.curAmmo = template.curAmmo || this.attr._AmmoPoints_attr.maxAmmo;
+    },
+    listeners: {
+      'usedAmmo': function(evtData) {
+        this.attr._AmmoPoints_attr.curAmmo -= 1;
+      },
+      'reloaded': function(evtData) {
+        this.attr._AmmoPoints_attr.curAmmo = Math.min(this.attr._AmmoPoints_attr.curAmmo + evtData.ammoValue, this.attr._AmmoPoints_attr.maxAmmo)
+      }
+    }
+  },
+    getCurAmmo: function(){
+      return this.attr._AmmoPoints_attr.curAmmo;
+    },
+    getMaxAmmo: function(){
+      return this.attr._AmmoPoints_attr.maxAmmo;
+    }
+  };
 
 // HIT POINTS
 Game.EntityMixin.HitPoints = {
@@ -395,6 +501,7 @@ Game.EntityMixin.MeleeAttacker = {
     stateModel: {
       attackHit: 1,
       attackDamage: 1,
+      rangedHit: 1,
       attackActionDuration: 1000
     },
     init: function (template) {
@@ -404,15 +511,34 @@ Game.EntityMixin.MeleeAttacker = {
     listeners: {
       'bumpEntity': function(evtData) {
         console.log(evtData.actor.getName() + " bumped " + evtData.recipient.getName());
+        if (evtData.weapon == 'broad') { Game.message.sendMessage("The sweep of your broadsword catches an enemy on your flank."); }
         var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
-        if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
+
+        var entDead = false;
+
+        if ((evtData.bomb && Game.UIMode.gamePlay.attr._answers.graphics == "beach") && (evtData.recipient != Game.UIMode.gamePlay.getAvatar() && evtData.recipient.getName() != "your home")) {
+            Game.message.sendMessage(evtData.recipient.getName() + " drowned!");
+            Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('madeKill', {entKilled: evtData.recipient});
+            evtData.recipient.destroy(true);
+            entDead = true;
+         }
+
+
+        if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal || (evtData.bomb && !entDead)) {
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
-          evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
-        } else {
+          if (evtData.bomb) { // bombs do bonus damage and ignore resistances
+            var damage = hitDamageResp.attackDamage * 2;
+          } else {
+            var damage= Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)
+          }
+          console.dir(damage);
+          evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:damage});
+        } else if (!evtData.bomb){
+
           evtData.recipient.raiseSymbolActiveEvent('attackAvoided',{attacker:evtData.actor,recipient:evtData.recipient});
           evtData.actor.raiseSymbolActiveEvent('attackMissed',{attacker:evtData.actor,recipient:evtData.recipient});
         }
@@ -485,6 +611,7 @@ Game.EntityMixin.RangedAttacker = {
     listeners: {
       // Presently can fire through walls...
       'fireProjectile': function(evtData) {
+        if(this.getCurAmmo() > 0){
         // check for entities within attackRange of the avatar
         var map = this.getMap();
         for (var i = 1; i <= this.getAttackRange(); ++i) {
@@ -497,15 +624,120 @@ Game.EntityMixin.RangedAttacker = {
         }
 
         if (entityPresent) {
-          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent});
+          this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:entityPresent, ranged: true});
+          this.raiseSymbolActiveEvent('usedAmmo');
           return {enemyHit: true};
         }
         return {enemyHit: false};
+      }else {
+        this.raiseSymbolActiveEvent('noAmmo');
+        return {enemyHit: false};
+      }
       }
     }
   },
   getAttackRange: function () {
     return this.attr._RangedAttacker_attr.attackRange;
+  }
+};
+
+Game.EntityMixin.BombAttacker = {
+  META: {
+    mixinName: 'BombAttacker',
+    mixinGroup: 'Attacker',
+    stateNamespace: '_BombAttacker_attr',
+    stateModel: {
+      bombX: 0,
+      bombY: 0,
+      bombPlaced: false
+    },
+    init: function(template) {
+      this.attr._BombAttacker_attr.bombX = template.bombX || 0;
+      this.attr._BombAttacker_attr.bombY = template.bombY || 0;
+      this.attr._BombAttacker_attr.bombPlaced = template.bombPlaced || false;
+    },
+    listeners: {
+      'placeBomb': function(evtData) {
+        var map = this.getMap();
+        var targetX = this.getX() + evtData.xLoc;
+        var targetY = this.getY() + evtData.yLoc;
+        // can't put bombs on an entity
+        if (map.getEntity(targetX, targetY)) {
+          console.log("ding");
+          return {bombPlaced: false};
+        }
+        // can't put bombs off edge of map
+        if ((targetX < 0) || (targetX >= map.getWidth()) || (targetY < 0) || (targetY >= map.getHeight())) {
+          return {bombPlaced: false};
+        }
+        map.addEntity(Game.EntityGenerator.create("bomb"), {x: targetX, y: targetY});
+
+        this.setBombX(targetX);
+        this.setBombY(targetY);
+        console.log(this.getBombY());
+        this.raiseSymbolActiveEvent("usedAmmo");
+        this.setBombPlaced(true);
+        return {bombPlaced: true};
+      },
+      'triggerBomb': function(evtData) {
+        var map = this.getMap();
+        console.log("bomb triggered at: " + this.getBombX() + ", " + this.getBombY());
+
+        if(Game.UIMode.gamePlay.attr._answers.graphics == "beach"){
+        var nearItems = map.getItemsAround(this.getBombX(), this.getBombY());
+        for (var i = 0; i < nearItems.length; i++) {
+            nearItems[i].attr.background = "#";
+        }
+        }
+        var nearEntities = map.getEntitiesAround(this.getBombX(), this.getBombY());
+        if (nearEntities && nearEntities.length > 0) {
+          for (var i = 0; i < nearEntities.length; i++) {
+            if(nearEntities[i]){
+              this.raiseSymbolActiveEvent('bumpEntity', {actor:this, recipient:nearEntities[i], bomb: true});
+            }
+          }
+        }
+        bomb = map.getEntity(this.getBombX(), this.getBombY());
+        bomb.raiseSymbolActiveEvent("triggerBomb", evtData);
+        this.setBombPlaced(false);
+      }
+    }
+  },
+  setBombX: function(x) {
+    this.attr._BombAttacker_attr.bombX = x;
+  },
+  getBombX: function() {
+    return this.attr._BombAttacker_attr.bombX;
+  },
+  setBombY: function(y) {
+    this.attr._BombAttacker_attr.bombY = y;
+  },
+  getBombY: function() {
+    return this.attr._BombAttacker_attr.bombY;
+  },
+  setBombPlaced: function(placed) {
+    this.attr._BombAttacker_attr.bombPlaced = placed;
+  },
+  getBombPlaced: function() {
+    return this.attr._BombAttacker_attr.bombPlaced;
+  }
+};
+
+Game.EntityMixin.Bomb = {
+  META: {
+    mixinName: 'Bomb',
+    mixinGroup: 'Trap',
+    stateNamespace: '_Bomb_attr',
+    stateModel: {
+      bombDuration: 2
+    },
+    listeners: {
+      'triggerBomb': function(evtData) {
+        map = this.getMap();
+        map.detonate(this.getX(), this.getY()); // destroy nearby tiles
+        this.destroy(true);
+      }
+    }
   }
 };
 
@@ -715,6 +947,11 @@ Game.EntityMixin.InventoryHolder = {
             this.raiseSymbolActiveEvent('keyMoved', false);
         }
         lastItemDropped = itemsToDrop[i];
+        if(this.getMap().getTile(this.getPos()).isWalkable()){
+            itemsToDrop[i].attr.background = ".";
+        }else{
+            itemsToDrop[i].attr.background = "#";
+        }
         this.getMap().addItem(itemsToDrop[i],this.getPos());
         dropResult.numItemsDropped++;
       }
@@ -766,11 +1003,6 @@ Game.EntityMixin.WanderActor = {
     Game.TimeEngine.lock();
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove', {dx:moveDeltas.x, dy:moveDeltas.y});
-    /*if (this.hasMixin('Walker')) { // NOTE: this pattern suggets that maybe tryWalk should be converted to an event
-    //   console.log('trying to walk to ' + moveDeltas.x + ' , ' + moveDeltas.y);
-
-      this.tryWalk(this.getMap(), moveDeltas.x, moveDeltas.y);
-    }*/
     Game.Scheduler.setDuration(this.getCurrentActionDuration());
     this.setCurrentActionDuration(this.getBaseActionDuration() + Game.util.randomInt(-1, 10));
     this.raiseSymbolActiveEvent('actionDone');
@@ -840,7 +1072,7 @@ Game.EntityMixin.WanderChaserActor = {
   },
   act: function () {
     Game.TimeEngine.lock();
-    // console.log("begin wander acting");
+    // console.log("begin wander chaser acting");
     // console.log('wander for '+this.getName());
     var moveDeltas = this.getMoveDeltas();
     this.raiseSymbolActiveEvent('adjacentMove',{dx:moveDeltas.x,dy:moveDeltas.y});

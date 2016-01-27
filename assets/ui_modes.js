@@ -145,7 +145,24 @@ Game.UIMode.gamePersistence = {
             // Changed tiles
             for (var i = 0; i < Game.UIMode.gamePlay.attr._changedTiles.length; i++) {
                 pos = Game.UIMode.gamePlay.attr._changedTiles[i];
+                if (pos.wall){
+                Game.UIMode.gamePlay.getMap()._tiles[pos.x][pos.y] = Game.Tile.wallTile;
+                }else{
                 Game.UIMode.gamePlay.getMap()._tiles[pos.x][pos.y] = Game.Tile.floorTile;
+                }
+            }
+
+            Game.DISPLAYS.tsOptions.tileSet = Game.TILESETS[Game.UIMode.gamePlay.attr._answers.graphics];
+
+            if(Game.UIMode.gamePlay.attr._answers.graphics == "beach"){
+                Game.Tile.wallTile.attr._transparent = true;
+                Game.Tile.wallTile.attr._opaque = false;
+                Game.Tile.wallTile2.attr._transparent = true;
+                Game.Tile.wallTile2.attr._opaque = false;
+                Game.Tile.wallTile3.attr._transparent = true;
+                Game.Tile.wallTile3.attr._opaque = false;
+                Game.Tile.wallTile4.attr._transparent = true;
+                Game.Tile.wallTile4.attr._opaque = false;
             }
 
             // schedule
@@ -268,6 +285,7 @@ Game.UIMode.gameLose = {
   exit: function () {
   },
   renderOnMain: function (display) {
+    display.clear();
     display.drawText(1,1,Game.UIMode.DEFAULT_COLOR_STR+"You lost :(");
   },
   handleInput: function (inputType,inputData) {
@@ -282,7 +300,7 @@ Game.UIMode.gameLose = {
 //#############################################################################
 
 
-//QUESTIONS
+//Questions
 Game.UIMode.gameQuestions = {
     attr: {
         questionNum: 0,
@@ -297,7 +315,7 @@ Game.UIMode.gameQuestions = {
             },
             {
               q: "Which of the following do you fear the most?",
-              a1: "Confined spaces.", a2: "Darkness.", a3: "Betrayal.", a4: "Fear is for the weak."
+              a1: "Confined spaces.", a2: "Darkness.", a3: "The past.", a4: "Fear is for the weak."
             },
             {
               q: "You're in an art gallery. You see four paintings. \nWhich you you look at first?",
@@ -326,7 +344,7 @@ Game.UIMode.gameQuestions = {
     exit: function() {
 
     },
-    // DIEGO: I did this without the new keybinding stuff, so it will need updated
+    // DIEGO: I did this without the new keybinding stuff, so it will need updated..nah
     handleInput: function (inputType, inputData){
       if (inputType == 'keypress') { var inputChar = String.fromCharCode(inputData.charCode); }
       var selectedAns = null;
@@ -352,12 +370,13 @@ Game.UIMode.gameQuestions = {
           break;
         case "N" : // To deal with leftover 'N' keypress
           break;
-        case "0" : // Will need to randomly generate answers at some point
+        case "0" :
           for (var i = 0; i < this.attr.questions.length; i++) {
               selectedAns = Math.floor(Math.random()*4 + 1)
               this.processAnswer(selectedAns);
           }
           selectedAns = 0;
+          break;
         default :
           console.log(inputChar);
           Game.message.sendMessage("Please select a valid answer.");
@@ -419,7 +438,7 @@ Game.UIMode.gameQuestions = {
                     this.attr.answers.graphics = "cave";
                     break;
                 case 4:
-                    this.attr.answers.graphics = "ascii";
+                    this.attr.answers.graphics = "doodle";
                     break;
 
             }
@@ -458,7 +477,7 @@ Game.UIMode.gameQuestions = {
                     break;
             }
             Game.UIMode.gamePlay.setupNewGame(this.attr.answers);
-            Game.switchUiMode('gamePlay');
+            Game.switchUiMode('backStory');
             break;
           default:
           console.log("Invalid question number, should not be possible");
@@ -485,9 +504,176 @@ Game.UIMode.gameQuestions = {
         display.drawText(4,2,question.q, fg, bg);
         display.drawText(4,8,"1 - " + question.a1 + "\n2 - " + question.a2, fg, bg);
         display.drawText(4,10,"3 - " + question.a3 + "\n4 - " + question.a4, fg, bg);
-    }
+    },
 };
 
+//#####################################################################
+//#####################################################################
+
+//Backstory
+
+
+Game.UIMode.backStory = {
+    JSON_KEY : 'uiMode_backStory',
+    attr: {
+        backStory: ""
+    },
+    enter: function () {
+        this.attr.backStory = this.makeBackStory();
+    },
+    exit: function () {
+
+    },
+    renderOnMain : function (display){
+        display.clear();
+        display.drawText(2,2, this.attr.backStory);
+    },
+    renderAvatarInfo: function (display){
+        display.clear();
+        display.drawText(1,1, "Press any Key to Continue\n\n Press b to return to this screen");
+    },
+    handleInput: function (){
+        Game.switchUiMode("gamePlay");
+    },
+    makeBackStory: function(){
+        var backStory = "";
+        switch(Game.UIMode.gamePlay.attr._answers.graphics){
+            case "cave":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Frogimus Rex, indomitable hopper. An overwrought princess, upset you weren’t a prince, has thrown you in her underground dungeon filled with slime monsters. To escape, you must find the key to the exit.";
+                break;
+
+                case "boss":
+                backStory += "You are Fred the Philanthropist. Your altruism has drawn the favor of the Slime Queen, but her husband is furious at this. He hopes to trap you in his dungeon. Kill the King Slime, and escape the dungeon to your love!";
+                break;
+
+                case "killAll":
+                backStory += "You are Gerald Stonesmith, a proud working frogman. Slimes have overrun the mithril mining operation in the nearby mountain. To free the frog miners and maintain the production quota, defeat all the intruders.";
+                break;
+
+                case "escape":
+                backStory += "You are Bobby Froglegs, a young teen-tadpole. You’ve fallen down a snake hole and landed in a cavern filled with slimes. Find the exit and hop back to the surface.";
+                break;
+                backStory += "\n";
+
+                backStory += "\nKeep your stomach from rumbling by eating pieces of bread that you can find around the cave. Do this by pressing E"
+            }
+            break;
+
+            case "beach":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Bob the cactus. A huge wave has just struck your home, separating you and your child. You wake up, water in your ears, on a cold beach, surrounded by hostile creatures. Find your child, and return home!";
+                break;
+
+                case "killAll":
+                backStory += "You are Carl the cactus. You have just realized that competition for the precious sunlight is growing fierce on your beach. Determined not to be left in the shadows, you decide to crush the competition with your spiky fury. Kill all hostile beach goers, and return home to enjoy the spoils of destruction!";
+                break;
+
+                case "boss":
+                backStory += " You are Frank the cactus. A few days ago, and evil gardener descended on your peaceful beach with an army of evil monsters. Restore order by defeating the gardener, leaving his army of monsters leaderless and inept.";
+                break;
+
+                case "escape":
+                backStory += "You are Stuart the cactus. Coming home one day from your favorite cactus bar, you black out. Hours, (or days?) later, you wake up on an unfamiliar beach with a massive hangover. It seems to be inhabited by hostile teetotalers. Find your way home, and finally get some peace and quiet!";
+                break;
+            }
+            backStory += "\n";
+
+            backStory += "\nSustain yourself on the beach by drinking little drops of sunshine, which are occasionally left by defeated enemies. Press E to do this";
+            backStory += "\nYou can swim, but cacti do not thrive in wet environments. Be careful.";
+            break;
+
+            case "forest":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Cynthia, an intrepid adventurer. After hearing rumors of an abandoned treasure chest in the forest, you have decided to search for it. Most accounts report that the chest is locked, and you will probably need a key. Retrieve the treasure, Cynthia!";
+                break;
+
+                case "boss":
+                backStory += " You are Shelby, a dauntless heroine. A weeping spirit has taken your favorite jewelry box and hidden it in the forest. No one touches your favorite jewelry box but you! Seek out the spirit and show it who’s boss! Then go and reclaim what is yours.";
+                break;
+
+                case "killAll":
+                backStory += "You are Talia, a vengeful survivor. Your family has been murdered by monsters from the neighboring woods, who also stole your family heirloom. While you are unsure which monster is responsible, you feel that they all must pay for the crime. Slay all the monsters and recover the heirloom!";
+                break;
+
+                case "escape":
+                backStory += "You are Clarisse, a mighty baker. On your way back from Grandma\’s house, you realize you dropped your chest of fresh apple pies. When you returned to search for it, the previously empty woods were chock-full of monsters! Find your apple pies, and avoid death.";
+                break;
+            }
+            backStory += "\n";
+
+            backStory += "\nNourish yourself in the forest by eating apples, which will be dropped by your foes. Press E to do this";
+            break;
+
+            case "doodle":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Frank Duddles, keeper of the piece (of paper). You wake up one morning at the sound of the all-powerful pencil crashing somewhere into your paper town. Usings the pencil’s powers for evil, illustrators have created untold numbers of doodle and scribble monsters. Find the pencil before it’s used for further evil and cast it into the void.";
+                break;
+
+                case "killAll":
+                backStory += "You are Benjamin Incera, a man without a plan! Badly drawn scribbles and doodles have erupted into existence. Erase them before they erase you! Then flee before more appear.";
+                break;
+
+                case "boss":
+                backStory += "You are Ted Krosby, doodle extrodinair. Mathematical tremors shake the crumped surface of your world. An anomaly has descended, one that inspires fear and hatred from all numberphiles. Show this mathematical ignoramus the errors of its calculating ways, and escape the world before it collapses in upon itself.";
+                break;
+
+                case "escape":
+                backStory += "You are Bill. Just Bill. Tales have reached your ears of a rip in the fabric of reality. Around the drawing board, you’re famed as an adventurer who will go anywhere. Find the hole, and jump in!";
+                break;
+            }
+            backStory += "\n";
+
+            backStory += "\nEat Food, kindly labeled 'FOOD', to nourish yourself. Do this by pressing E"
+            break;
+        }
+        backStory += "\n";
+
+        switch(Game.UIMode.gamePlay.attr._answers.equ){
+            case "range":
+            backStory += "\nYour weapon of choice is a yew bow. Wielding it has required many moons of training. You can attack by pressing ‘f’ and a direction to fire. Don’t fire indiscriminately, since your ammo is limited.";
+            break;
+            case "broad":
+            backStory += "\nYour weapon of choice is the broad sword. It will strike enemies on either side of the one in front of you. Constant use will dull your blade; be sure to find stones to sharpen it anew.";
+            break;
+            case "rapier":
+            backStory += "\nYour weapon of choice is the rapier. It will strike one enemy behind the one in front of you. Constant use will dull your blade; be sure to find stones to sharpen it anew.";
+            break;
+            case "trap":
+            backStory += "\nYou are a fiend for explosives. Instead of a traditional weapon, you place bombs which destroy all its surroundings. Make sure to pick up more bombs that monsters drop.";
+            break;
+        }
+        backStory += "\nReload your weapon uses by pressing R and selecting your ammo (Arrows, Bombs, Stones)";
+
+        backStory += "\n";
+
+
+        switch(Game.UIMode.gamePlay.attr._answers.misc){
+            case "evilMonsters":
+            backStory += "\nEverything in this place seems to be out to get you.";
+            break;
+            case "noMapMemory":
+            backStory += "\nYou are very forgetful. In fact, you can’t remember where you just were.";
+            break;
+            case "smallVision":
+            backStory += "\nYou dropped your glasses on the way here. But you can still see (a little).";
+            break;
+            case "smallMap":
+            backStory += "\nYou feel as if the question gods have granted you a smaller task than usual...";
+            break;
+        }
+            backStory += "\n\nYou can pick up objects by press g, you can open your inventory by pressing i, and you can open the save/load/new game menu by pressing =\n";
+        backStory += "You can press ? to look at the controls at anytime.\n\nSo be off! Your Adventure Begins!"
+
+
+        return backStory;
+
+    }
+}
 //#####################################################################
 //#####################################################################
 
@@ -501,9 +687,11 @@ Game.UIMode.gamePlay = {
         _objective: false,
         _bossKey: null,
         _changedTiles : [],
+        _totalMonsters: null,
         _answers: {
             mapType : null
         }
+
     },
     JSON_KEY: 'uiMode_gamePlay',
     enter: function() {
@@ -518,7 +706,7 @@ Game.UIMode.gamePlay = {
         }
         Game.TimeEngine.unlock();
         //Game.KeyBinding.informPlayer();
-        this.getAvatar().eatFood();
+        //this.getAvatar().eatFood();
         answers = this.attr._answers;
         Game.message.clearMessages();
         Game.message.sendMessage(answers.mapType + ", " + answers.objective + ", " + answers.misc);
@@ -552,30 +740,31 @@ Game.UIMode.gamePlay = {
         this.attr._objective = true;
         break;
         case "killAll":
-        this.attr._objective = this.countEntities() < 3;
+        this.attr._objective = (this.countEntities() <= 2); //the avatar and the exit
         break;
         case "findKey":
         break;
         case "boss":
-        this.attr._objective = Game.DATASTORE.ENTITY[this.attr.bossKey];
+        this.attr._objective = !(Game.DATASTORE.ENTITY[this.attr.bossKey]);
         break;
         default:
         this.attr._objective = true;
         break;
-
     }
     return this.attr.objective;
     },
     countEntities: function(){
         var count = 0;
         for (var ent in Game.DATASTORE.ENTITY) {
+          Game.util.cdebug(ent);
+          if(Game.DATASTORE.ENTITY[ent] != undefined){
             count++;
+          }
         }
 
         return count;
     },
     handleInput: function (inputType, inputData){
-
         var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
         // console.log('action binding is');
         // console.dir(actionBinding);
@@ -606,7 +795,12 @@ Game.UIMode.gamePlay = {
             tookTurn = this.moveAvatar(1  , 1);
 
         } else if (actionBinding.actionKey == 'FIRE') {
+          if (Game.UIMode.gamePlay.attr._answers.equ == "range") {
             Game.addUiMode('LAYER_fireProjectile');
+          } else if (Game.UIMode.gamePlay.attr._answers.equ == "trap") {
+            Game.addUiMode('LAYER_useBombs');
+          }
+
         } else if (actionBinding.actionKey == 'INVENTORY') {
             Game.addUiMode('LAYER_inventoryListing');
         } else if (actionBinding.actionKey == 'PICKUP') {
@@ -625,6 +819,9 @@ Game.UIMode.gamePlay = {
             Game.addUiMode('LAYER_inventoryDrop');
         } else if (actionBinding.actionKey == 'EAT') {
           Game.addUiMode('LAYER_inventoryEat');
+        } else if (actionBinding.actionKey == 'RELOAD') {
+          console.log("reloading");
+            Game.addUiMode('LAYER_inventoryReload');
         } else if (actionBinding.actionKey == 'EXAMINE') {
             Game.addUiMode('Layer_inventoryExamine');
         } else if (actionBinding.actionKey == 'CHANGE_BINDINGS') {
@@ -634,6 +831,8 @@ Game.UIMode.gamePlay = {
         } else if (actionBinding.actionKey == 'HELP') {
             Game.UIMode.LAYER_textReading.setText(Game.KeyBinding.getBindingHelpText());
             Game.addUiMode('LAYER_textReading');
+        } else if (actionBinding.actionKey == 'BACKSTORY'){
+            Game.switchUiMode('backStory');
         }
 
         if (tookTurn) {
@@ -661,26 +860,91 @@ Game.UIMode.gamePlay = {
     renderAvatarInfo: function (display) {
         var fg = Game.UIMode.DEFAULT_COLOR_FG;
         var bg = Game.UIMode.DEFAULT_COLOR_BG;
-        display.drawText(1, 1, Game.UIMode.DEFAULT_COLOR_STR + "AVATAR STATUS", fg, bg);
-        display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
-        display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
+        //display.drawText(1, 1, Game.UIMode.DEFAULT_COLOR_STR + "AVATAR STATUS", fg, bg);
+        //display.drawText(1, 2, Game.UIMode.DEFAULT_COLOR_STR+"Avatar x: " + this.getAvatar().getX(), fg, bg);
+        //display.drawText(1, 3, Game.UIMode.DEFAULT_COLOR_STR+"Avatar y: " + this.getAvatar().getY(), fg, bg);
         // feels like this should be encapsulated somewhere else, but I don't really know where - perhaps in the PlayerActor mixin?
         var av = this.getAvatar();
-        var y = 5;
+        var y = 1;
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"LIFE: "+av.getCurHp()+"/"+av.getMaxHp());
+        y += display.drawText(1, y, Game.UIMode.DEFAULT_COLOR_STR + av.getHungerStateDescr());
+        y++;
+
+        var objective = "";
+        var curObjective = Game.UIMode.gamePlay.attr._answers.objective;
+        Game.UIMode.gamePlay.checkObjective();
+        if (Game.UIMode.gamePlay.attr._objective){
+            curObjective = "escape";
+        }
+        switch(curObjective){
+            case "killAll":
+            objective = "Kill all the enemies!";
+            break;
+            case "boss":
+            switch(Game.UIMode.gamePlay.attr._answers.graphics){
+                case "beach":
+                objective = "Kill the Evil Garderner!";
+                break;
+                case "forest":
+                objective = "Kill the Evil Ghost!";
+                break;
+                case "doodle":
+                objective = "Kill the Incorrect Math!";
+                break;
+                case "cave":
+                objective = "Kill the King Slime!";
+                break;
+            }
+
+            break;
+            case "findKey":
+                switch(Game.UIMode.gamePlay.attr._answers.graphics){
+                case "beach":
+                objective = "Find your cactus child!";
+                break;
+                case "forest":
+                objective = "Find the key!";
+                break;
+                case "doodle":
+                objective = "Find the pencil!";
+                break;
+                case "cave":
+                objective = "Find the key!";
+                break;
+            }
+            break;
+            case "escape":
+            switch(Game.UIMode.gamePlay.attr._answers.graphics){
+                case "beach":
+                objective = "Get back to your Home!";
+                break;
+                case "forest":
+                objective = "Find and open the chest!";
+                break;
+                case "doodle":
+                objective = "Escape through the hole in the paper!";
+                break;
+                case "cave":
+                objective = "Find the exit and Escape!";
+                break;
+            }
+            break;
+        }
+        // feels like this should be encapsulated somewhere else, but I don't really know where - perhaps in the PlayerActor mixin?
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"OBJECTIVE");
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+objective);
+        y++
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"ATTACK");
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy: "+av.getAttackHit());
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power: "+av.getAttackDamage());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Accuracy:  "+av.getAttackHit());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Power:     "+av.getAttackDamage());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Weapon Uses: "+av.getCurAmmo() + "/" + av.getMaxAmmo());
         y++;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"DEFENSE");
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Dodging: "+av.getAttackAvoid());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Dodging:   "+av.getAttackAvoid());
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"Toughness: "+av.getDamageMitigation());
         y++;
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"LIFE: "+av.getCurHp()+"/"+av.getMaxHp());
-        y++;
         y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"MOVES: "+av.getTurns());
-        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"KILLS: "+av.getTotalKills());
-        y++;
-        y += display.drawText(1, y, Game.UIMode.DEFAULT_COLOR_STR + av.getHungerStateDescr());
+        y += display.drawText(1,y,Game.UIMode.DEFAULT_COLOR_STR+"KILLS: "+av.getTotalKills() + "/" + this.attr._totalMonsters);
     },
 
     moveAvatar: function(pdx, pdy){
@@ -717,23 +981,30 @@ Game.UIMode.gamePlay = {
         mapType = this.getMapType();
         console.log(mapType);
 
+        Game.DISPLAYS.tsOptions.tileSet = Game.TILESETS[answers.graphics];
+
+
+
         var small = (this.attr._answers.misc == "smallMap");
         this.setMap(new Game.map(mapType, small));
         this.setAvatar(Game.EntityGenerator.create('avatar'));
         if(this.attr._answers.misc == "smallVision"){
-            this.getAvatar().attr._Sight_attr.sightRadius = 7;
+            this.getAvatar().attr._Sight_attr.sightRadius = 5;
+        }else if(this.attr._answers.misc == "evilMonsters"){
+            this.makeEvilMonsters();
         }
 
         this.getMap().addEntity(this.getAvatar(),this.getMap().getWalkablePosition());
         this.setCameraToAvatar();
+        this.updateNames();
 
         var itemPos = '';
-        for (var ecount = 0; ecount < 30; ecount++) {
+        for (var ecount = 0; ecount < 5; ecount++) {
             this.getMap().addEntity(Game.EntityGenerator.create('moss'), this.getMap().getWalkablePosition());
-            // this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
+            this.getMap().addEntity(Game.EntityGenerator.create('newt'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'), this.getMap().getWalkablePosition());
             this.getMap().addEntity(Game.EntityGenerator.create('attack slug'), this.getMap().getWalkablePosition());
-
+            this.attr._totalMonsters += 4;
             //itemPos = this.getMap().getWalkablePosition();
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
             //this.getMap().addItem(Game.ItemGenerator.create('rock'), itemPos);
@@ -744,24 +1015,104 @@ Game.UIMode.gamePlay = {
         }
         if(this.attr._answers.objective == "findKey"){
         this.getMap().addItem(Game.ItemGenerator.create('key'), this.getMap().getWalkablePosition());
-        }
+      }else if (this.attr._answers.objective == "boss"){
+        boss = Game.EntityGenerator.create('boss');
+        this.attr.bossKey = boss.getId();
+        this.getMap().addEntity(boss, this.getMap().getWalkablePosition());
+      }
         if(this.attr._answers.graphics == "beach"){
         Game.Tile.wallTile.attr._transparent = true;
         Game.Tile.wallTile.attr._opaque = false;
+        Game.Tile.wallTile2.attr._transparent = true;
+        Game.Tile.wallTile2.attr._opaque = false;
+        Game.Tile.wallTile3.attr._transparent = true;
+        Game.Tile.wallTile3.attr._opaque = false;
+        Game.Tile.wallTile4.attr._transparent = true;
+        Game.Tile.wallTile4.attr._opaque = false;
         }
 
         var stairPos = this.getMap().getWalkablePosition();
         this.getMap().addEntity(Game.EntityGenerator.create('stairs'), stairPos);
-        this.getMap().clearAround(stairPos);
+        this.getMap().clearAround(stairPos, false);
 
 
+    },
+    makeEvilMonsters: function (){
+        Game.EntityGenerator._templates["moss"].mixins.push("WalkerCorporeal");
+        Game.EntityGenerator._templates["moss"].mixins.push("Sight");
+        Game.EntityGenerator._templates["moss"].mixins.push("MeleeAttacker");
+        Game.EntityGenerator._templates["moss"].mixins.push("WanderChaserActor");
 
+        Game.EntityGenerator._templates["newt"].mixins[1] = "WanderChaserActor"
+        Game.EntityGenerator._templates["newt"].mixins.push("Sight");
+        Game.EntityGenerator._templates["newt"].mixins.push("MeleeAttacker");
 
-        for (var a = 0; a < 30; a++) {
-            Game.getAvatar().addInventoryItems([Game.ItemGenerator.create('rock')]);
+    },
+    updateNames: function(){
+        if(this.attr._answers.equ == "rapier" || this.attr._answers.equ == "broad"){
+          Game.ItemGenerator._templates["ammo"].name = "stone";
+          Game.ItemGenerator._templates["ammo"].chr = "R";
+        }else if (this.attr._answers.equ == "trap"){
+          Game.ItemGenerator._templates["ammo"].name = "extra bomb";
+          Game.ItemGenerator._templates["ammo"].chr = "b";
         }
+        switch(this.attr._answers.graphics){
+            case "beach":
+                Game.EntityGenerator._templates["moss"].name = "vines";
+                Game.EntityGenerator._templates["angry squirrel"].name = "posion flower";
+                Game.EntityGenerator._templates["attack slug"].name = "snake";
+                Game.EntityGenerator._templates["newt"].name = "lizard";
+                Game.EntityGenerator._templates["stairs"].name = "your home";
+                Game.EntityGenerator._templates["boss"].name = "evil gardener";
+
+                Game.ItemGenerator._templates["apple"].name = "sunshine";
+                Game.ItemGenerator._templates["key"].name = "baby cactus";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            case "forest":
+                Game.EntityGenerator._templates["moss"].name = "bush";
+                Game.EntityGenerator._templates["angry squirrel"].name = "angry tree";
+                Game.EntityGenerator._templates["attack slug"].name = "snake";
+                Game.EntityGenerator._templates["newt"].name = "dancing dog";
+                Game.EntityGenerator._templates["stairs"].name = "the chest";
+                Game.EntityGenerator._templates["boss"].name = "evil ghost";
+
+                Game.ItemGenerator._templates["apple"].name = "apple";
+                Game.ItemGenerator._templates["key"].name = "key";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            case "cave":
+                Game.EntityGenerator._templates["moss"].name = "spikes";
+                Game.EntityGenerator._templates["angry squirrel"].name = "yellow slime";
+                Game.EntityGenerator._templates["attack slug"].name = "green slime";
+                Game.EntityGenerator._templates["newt"].name = "red slime";
+                Game.EntityGenerator._templates["stairs"].name = "the exit";
+                Game.EntityGenerator._templates["boss"].name = "king slime";
+
+                Game.ItemGenerator._templates["apple"].name = "bread";
+                Game.ItemGenerator._templates["key"].name = "key";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            case "doodle":
+                Game.EntityGenerator._templates["moss"].name = "scribble";
+                Game.EntityGenerator._templates["angry squirrel"].name = "tongue face";
+                Game.EntityGenerator._templates["attack slug"].name = "doodle";
+                Game.EntityGenerator._templates["newt"].name = "angry face";
+                Game.EntityGenerator._templates["stairs"].name = "hole in the paper";
+                Game.EntityGenerator._templates["boss"].name = "incorrect math";
 
 
+                Game.ItemGenerator._templates["apple"].name = "food";
+                Game.ItemGenerator._templates["key"].name = "pencil";
+                Game.ItemGenerator._templates["rock"].name = "rock";
+                return;
+
+            default:
+                return;
+        }
     },
 
     getMapType: function () {
@@ -844,7 +1195,75 @@ Game.UIMode.LAYER_fireProjectile = {
       return true;
     }
     Game.message.sendMessage("There is nothing to shoot at.");
+    Game.removeUiMode();
     return false;
+    }
+};
+
+// HOW I CAME TO LOVE THE BOMB
+Game.UIMode.LAYER_useBombs = {
+    enter: function() {
+      Game.message.sendMessage("Choose a direction to place a bomb, press any key to detonate a bomb, or press 'esc' to exit.");
+      // Game.refresh();
+    },
+    exit: function() {
+      //console.log("aging messages");
+      //Game.message.ageMessages();
+      Game.refresh();
+    },
+
+    handleInput: function (inputType, inputData) {
+      var actionBinding = Game.KeyBinding.getInputBinding(inputType,inputData);
+      if (!actionBinding) { // gate here to catch weird 'f' keypress
+        Game.message.ageMessages();
+        console.log("aging messages");
+        Game.message.sendMessage("You ready the fuse.");
+        return false;
+      }
+      if ((actionBinding.actionKey == 'CANCEL')) {
+        Game.removeUiMode();
+        return false;
+      }
+
+      // no bomb is currently placed on map
+      if (! Game.getAvatar().getBombPlaced()) {
+        var bombResp = false;
+        if      (actionBinding.actionKey == 'MOVE_UL') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:-1, yLoc:-1});
+        } else if (actionBinding.actionKey == 'MOVE_U') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:0, yLoc:-1});
+        } else if (actionBinding.actionKey == 'MOVE_UR') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:1, yLoc:-1});
+        } else if (actionBinding.actionKey == 'MOVE_L') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:-1, yLoc:0});
+        } else if (actionBinding.actionKey == 'MOVE_WAIT') {
+          // something special?
+        } else if (actionBinding.actionKey == 'MOVE_R') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:1, yLoc:0});
+        } else if (actionBinding.actionKey == 'MOVE_DL') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:-1, yLoc:1});
+        } else if (actionBinding.actionKey == 'MOVE_D') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:0, yLoc:1});
+        } else if (actionBinding.actionKey == 'MOVE_DR') {
+          bombResp = Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('placeBomb', {xLoc:1, yLoc:1});
+        }
+
+        if (bombResp.bombPlaced && bombResp.bombPlaced[0]) {
+          Game.getAvatar().raiseSymbolActiveEvent('actionDone');
+          Game.message.sendMessage("You placed a bomb.");
+          Game.removeUiMode(); //sure we want this?
+          return true;
+        }
+
+        Game.message.sendMessage("A bomb could not be placed there.");
+        Game.removeUiMode();
+        return false;
+      } else {
+        Game.message.sendMessage("You detonate the bomb.");
+        Game.UIMode.gamePlay.getAvatar().raiseSymbolActiveEvent('triggerBomb');
+        Game.getAvatar().raiseSymbolActiveEvent('actionDone');
+        Game.removeUiMode(); //sure we want this?
+      }
     }
 };
 
@@ -1274,5 +1693,28 @@ Game.UIMode.LAYER_inventoryEat = new Game.UIMode.LAYER_itemListing({
   }
 });
 Game.UIMode.LAYER_inventoryEat.doSetup = function () {
+  this.setup({itemIdList: Game.getAvatar().getInventoryItemIds()});
+};
+
+//-------------------
+
+Game.UIMode.LAYER_inventoryReload = new Game.UIMode.LAYER_itemListing({
+  caption: 'Reload',
+  canSelect: true,
+  keyBindingName: 'LAYER_inventoryReload',
+  filterListedItemsOn: function(itemId) {
+    return  Game.DATASTORE.ITEM[itemId].hasMixin('Ammo');
+  },
+  processingFunction: function (selectedItemIds) {
+    if (selectedItemIds[0]) {
+      console.dir(selectedItemIds[0]);
+      var ammoItem = Game.getAvatar().extractInventoryItems([selectedItemIds[0]])[0];
+      Game.getAvatar().raiseSymbolActiveEvent("reloaded", {ammoValue: ammoItem.getAmmoValue() });
+      return true;
+    }
+    return false;
+  }
+});
+Game.UIMode.LAYER_inventoryReload.doSetup = function () {
   this.setup({itemIdList: Game.getAvatar().getInventoryItemIds()});
 };

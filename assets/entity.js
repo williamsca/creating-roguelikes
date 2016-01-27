@@ -20,7 +20,26 @@ Game.Entity = function(template) {
 Game.Entity.extend(Game.SymbolActive);
 
 
-Game.Entity.prototype.destroy = function() {
+Game.Entity.prototype.destroy = function(drowning) {
+  var prob = Math.floor(Math.random()*10);
+  if(drowning){
+      prob = 0;
+  }
+  var item = null;
+  if(prob >= 8){
+    item = Game.ItemGenerator.create("apple");
+  }else if(prob >= 6){
+    item = Game.ItemGenerator.create("ammo");
+  }
+
+  if(item){
+      if(drowning){
+          item.attr.background = "#";
+      }
+    this.getMap().addItem(item, this.getPos());
+  }
+
+
   // remove from map
   this.getMap().extractEntity(this);
   // remove from DATASTORE
@@ -61,7 +80,11 @@ Game.Entity.prototype.draw = function (display, x, y, isMasked) {
     if (isMasked) {
     display.draw(x,y,"m");
     } else {
+      if(this.getMap().getTile(this.getPos()).isWalkable()){
     display.draw(x,y,[".",this.getChar()]);//, this.attr._fg, this.attr._bg);
+  }else{
+    display.draw(x,y,["#",this.getChar()]);//, this.attr._fg, this.attr._bg);
+    }
   }
 };
 Game.Entity.prototype.getPos = function () {

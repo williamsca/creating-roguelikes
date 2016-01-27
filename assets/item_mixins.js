@@ -25,6 +25,31 @@ Game.ItemMixin.Food = {
   }
 };
 
+Game.ItemMixin.Ammo = {
+  META: {
+    mixinName: 'Ammo',
+    mixinGroup: 'Ammo',
+    stateNamespace: '_Ammo_attr',
+    stateModel:  {
+      ammoValue: 500
+    },
+    init: function (template) {
+      this.attr._Ammo_attr.ammoValue = template.ammoValue || 500;
+    },
+    listeners: {
+      'getStatsForDisplay': function(evtData) {
+        return {'ammo ammount':this.getAmmoValue()};
+      }
+    }
+  },
+  getAmmoValue: function () {
+    return this.attr._Ammo_attr.ammoValue;
+  },
+  setAmmoValue: function (v) {
+    this.attr._Ammo_attr.ammoValue = v;
+  }
+};
+
 Game.ItemMixin.Key = {
     META: {
         mixinName: 'Key',
