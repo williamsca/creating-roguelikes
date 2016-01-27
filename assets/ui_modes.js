@@ -530,13 +530,148 @@ Game.UIMode.backStory = {
     },
     renderAvatarInfo: function (display){
         display.clear();
-        display.drawText(1,1, "Press any Key to Continue");
+        display.drawText(1,1, "Press any Key to Continue\n\n Press b to return to this screen");
     },
     handleInput: function (){
         Game.switchUiMode("gamePlay");
     },
     makeBackStory: function(){
-        return "Once there was an ugly barnacle, he was so ugly that everyone died.\n The End.";
+        var backStory = "";
+        switch(Game.UIMode.gamePlay.attr._answers.graphics){
+            case "cave":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Frogimus Rex, indomitable hopper. An overwrought princess, upset you weren’t a prince, has thrown you in her underground dungeon filled with slime monsters. To escape, you must find the key to the exit.";
+                break;
+
+                case "boss":
+                backStory += "You are Fred the Philanthropist. Your altruism has drawn the favor of the Slime Queen, but her husband is furious at this. He hopes to trap you in his dungeon. Kill the King Slime, and escape the dungeon to your love!";
+                break;
+
+                case "killAll":
+                backStory += "You are Gerald Stonesmith, a proud working frogman. Slimes have overrun the mithril mining operation in the nearby mountain. To free the frog miners and maintain the production quota, defeat all the intruders.";
+                break;
+
+                case "escape":
+                backStory += "You are Bobby Froglegs, a young teen-tadpole. You’ve fallen down a snake hole and landed in a cavern filled with slimes. Find the exit and hop back to the surface.";
+                break;
+                backStory += "\n";
+
+                backStory += "\nKeep your stomach from rumbling by eating pieces of bread that you can find around the cave. Do this by pressing E"
+            }
+            break;
+
+            case "beach":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Bob the cactus. A huge wave has just struck your home, separating you and your child. You wake up, water in your ears, on a cold beach, surrounded by hostile creatures. Find your child, and return home!";
+                break;
+
+                case "killAll":
+                backStory += "You are Carl the cactus. You have just realized that competition for the precious sunlight is growing fierce on your beach. Determined not to be left in the shadows, you decide to crush the competition with your spiky fury. Kill all hostile beach goers, and return home to enjoy the spoils of destruction!";
+                break;
+
+                case "boss":
+                backStory += " You are Frank the cactus. A few days ago, and evil gardener descended on your peaceful beach with an army of evil monsters. Restore order by defeating the gardener, leaving his army of monsters leaderless and inept.";
+                break;
+
+                case "escape":
+                backStory += "You are Stuart the cactus. Coming home one day from your favorite cactus bar, you black out. Hours, (or days?) later, you wake up on an unfamiliar beach with a massive hangover. It seems to be inhabited by hostile teetotalers. Find your way home, and finally get some peace and quiet!";
+                break;
+            }
+            backStory += "\n";
+
+            backStory += "\nSustain yourself on the beach by drinking little drops of sunshine, which are occasionally left by defeated enemies. Press E to do this";
+            backStory += "\nYou can swim, but cacti do not thrive in wet environments. Be careful.";
+            break;
+
+            case "forest":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Cynthia, an intrepid adventurer. After hearing rumors of an abandoned treasure chest in the forest, you have decided to search for it. Most accounts report that the chest is locked, and you will probably need a key. Retrieve the treasure, Cynthia!";
+                break;
+
+                case "boss":
+                backStory += " You are Shelby, a dauntless heroine. A weeping spirit has taken your favorite jewelry box and hidden it in the forest. No one touches your favorite jewelry box but you! Seek out the spirit and show it who’s boss! Then go and reclaim what is yours.";
+                break;
+
+                case "killAll":
+                backStory += "You are Talia, a vengeful survivor. Your family has been murdered by monsters from the neighboring woods, who also stole your family heirloom. While you are unsure which monster is responsible, you feel that they all must pay for the crime. Slay all the monsters and recover the heirloom!";
+                break;
+
+                case "escape":
+                backStory += "You are Clarisse, a mighty baker. On your way back from Grandma\’s house, you realize you dropped your chest of fresh apple pies. When you returned to search for it, the previously empty woods were chock-full of monsters! Find your apple pies, and avoid death.";
+                break;
+            }
+            backStory += "\n";
+
+            backStory += "\nNourish yourself in the forest by eating apples, which will be dropped by your foes. Press E to do this";
+            break;
+
+            case "doodle":
+            switch(Game.UIMode.gamePlay.attr._answers.objective){
+                case "findKey":
+                backStory += "You are Frank Duddles, keeper of the piece (of paper). You wake up one morning at the sound of the all-powerful pencil crashing somewhere into your paper town. Usings the pencil’s powers for evil, illustrators have created untold numbers of doodle and scribble monsters. Find the pencil before it’s used for further evil and cast it into the void.";
+                break;
+
+                case "killAll":
+                backStory += "You are Benjamin Incera, a man without a plan! Badly drawn scribbles and doodles have erupted into existence. Erase them before they erase you! Then flee before more appear.";
+                break;
+
+                case "boss":
+                backStory += "You are Ted Krosby, doodle extrodinair. Mathematical tremors shake the crumped surface of your world. An anomaly has descended, one that inspires fear and hatred from all numberphiles. Show this mathematical ignoramus the errors of its calculating ways, and escape the world before it collapses in upon itself.";
+                break;
+
+                case "escape":
+                backStory += "You are Bill. Just Bill. Tales have reached your ears of a rip in the fabric of reality. Around the drawing board, you’re famed as an adventurer who will go anywhere. Find the hole, and jump in!";
+                break;
+            }
+            backStory += "\n";
+
+            backStory += "\nEat Food, kindly labeled 'FOOD', to nourish yourself. Do this by pressing E"
+            break;
+        }
+        backStory += "\n";
+
+        switch(Game.UIMode.gamePlay.attr._answers.equ){
+            case "range":
+            backStory += "\nYour weapon of choice is a yew bow. Wielding it has required many moons of training. You can attack by pressing ‘f’ and a direction to fire. Don’t fire indiscriminately, since your ammo is limited.";
+            break;
+            case "broad":
+            backStory += "\nYour weapon of choice is the broad sword. It will strike enemies on either side of the one in front of you. Constant use will dull your blade; be sure to find stones to sharpen it anew.";
+            break;
+            case "rapier":
+            backStory += "\nYour weapon of choice is the rapier. It will strike one enemy behind the one in front of you. Constant use will dull your blade; be sure to find stones to sharpen it anew.";
+            break;
+            case "trap":
+            backStory += "\nYou are a fiend for explosives. Instead of a traditional weapon, you place bombs which destroy all its surroundings. Make sure to pick up more bombs that monsters drop.";
+            break;
+        }
+        backStory += "\nReload your weapon uses by pressing R and selecting your ammo (Arrows, Bombs, Stones)";
+
+        backStory += "\n";
+
+
+        switch(Game.UIMode.gamePlay.attr._answers.misc){
+            case "evilMonsters":
+            backStory += "\nEverything in this place seems to be out to get you.";
+            break;
+            case "noMapMemory":
+            backStory += "\nYou are very forgetful. In fact, you can’t remember where you just were.";
+            break;
+            case "smallVision":
+            backStory += "\nYou dropped your glasses on the way here. But you can still see (a little).";
+            break;
+            case "smallMap":
+            backStory += "\nYou feel as if the question gods have granted you a smaller task than usual...";
+            break;
+        }
+            backStory += "\n\nYou can pick up objects by press g, you can open your inventory by pressing i, and you can open the save/load/new game menu by pressing =\n";
+        backStory += "You can press ? to look at the controls at anytime.\n\nSo be off! Your Adventure Begins!"
+
+
+        return backStory;
+
     }
 }
 //#####################################################################
@@ -854,7 +989,7 @@ Game.UIMode.gamePlay = {
         this.setMap(new Game.map(mapType, small));
         this.setAvatar(Game.EntityGenerator.create('avatar'));
         if(this.attr._answers.misc == "smallVision"){
-            this.getAvatar().attr._Sight_attr.sightRadius = 7;
+            this.getAvatar().attr._Sight_attr.sightRadius = 5;
         }else if(this.attr._answers.misc == "evilMonsters"){
             this.makeEvilMonsters();
         }
