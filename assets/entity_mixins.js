@@ -521,10 +521,15 @@ Game.EntityMixin.MeleeAttacker = {
          }
 
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal || (evtData.bomb && !entDead)) {
-          // insert logic here to determine what type of damage is being dealt, i.e.,
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
-          evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
+          if (evtData.bomb) { // bombs do bonus damage and ignore resistances
+            var damage = hitDamageResp.attackDamage * 2;
+          } else {
+            var damage= Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)
+          }
+          console.dir(damage);
+          evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:damage});
         } else {
           evtData.recipient.raiseSymbolActiveEvent('attackAvoided',{attacker:evtData.actor,recipient:evtData.recipient});
           evtData.actor.raiseSymbolActiveEvent('attackMissed',{attacker:evtData.actor,recipient:evtData.recipient});
